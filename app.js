@@ -5,10 +5,10 @@
   const DB_VERSION = 1;
   const STORE = 'kv';
   const USER_KEY = 'appState';
-  const CATALOG_KEY = 'enrichedCatalogV8';
-  const LEGACY_CATALOG_KEYS = ['enrichedCatalogV7', 'enrichedCatalogV6', 'enrichedCatalogV5', 'enrichedCatalogV4'];
+  const CATALOG_KEY = 'enrichedCatalogV8_3';
+  const LEGACY_CATALOG_KEYS = ['enrichedCatalogV8', 'enrichedCatalogV7', 'enrichedCatalogV6', 'enrichedCatalogV5', 'enrichedCatalogV4'];
   const LEGACY_USER_KEYS = ['user-state', 'userState', 'state'];
-  const APP_VERSION = 8.2;
+  const APP_VERSION = 8.3;
   const DEFAULT_STREAMING_SERVICE = 'spotify';
   const META_URL = 'https://dreimetadaten.de/data/Serie.json';
   const META_MAX_AGE = 1000 * 60 * 60 * 24 * 30;
@@ -727,14 +727,15 @@
 
   function moodMatch(episode, mood = state.mood) {
     if (mood === 'any') return true;
-    const source = episode._search?.all || '';
-    if (mood === 'klassiker') return episode.nr <= 40;
-    if (mood === 'grusel') return episode.tags.some((tag) => ['Grusel', 'Mystery'].includes(tag));
-    if (mood === 'familie') return source.includes('tante mathilda') || source.includes('onkel titus') || source.includes('ben peck') || episode.tags.includes('Familie');
+    const source = episode?._search?.all || episode?.searchText || buildSearchText(episode || {});
+    const tags = Array.isArray(episode?.tags) ? episode.tags : [];
+    if (mood === 'klassiker') return Number(episode?.nr) <= 40;
+    if (mood === 'grusel') return tags.some((tag) => ['Grusel', 'Mystery'].includes(tag));
+    if (mood === 'familie') return source.includes('tante mathilda') || source.includes('onkel titus') || source.includes('ben peck') || tags.includes('Familie');
     if (mood === 'skinny') return source.includes('skinny norris');
     if (mood === 'hugenay') return source.includes('hugenay');
-    if (mood === 'meer') return episode.tags.includes('Meer & Insel');
-    if (mood === 'kunst') return episode.tags.includes('Kunst');
+    if (mood === 'meer') return tags.includes('Meer & Insel');
+    if (mood === 'kunst') return tags.includes('Kunst');
     return true;
   }
 
@@ -1123,7 +1124,8 @@
   }
 
   function curatedCardMarkup(definition) {
-    const episodes = curatedEpisodes(definition);
+    let episodes = [];
+    try { episodes = curatedEpisodes(definition); } catch (error) { console.warn('Kuratierte Liste konnte nicht berechnet werden:', definition.id, error); }
     return `<button class="curated-card ${definition.sequence ? 'sequence' : ''}" data-curated-open="${definition.id}">
       <div class="curated-card-head"><div><h3>${esc(definition.title)}</h3><p>${esc(definition.description)}</p></div><span class="playlist-icon">${definition.icon}</span></div>
       <div class="playlist-meta"><span>${episodes.length} Folgen</span><span>${fmtDuration(episodes.reduce((sum,e)=>sum+(e.durationMin||0),0))}</span>${definition.sequence ? '<span>Reihenfolge</span>' : ''}</div>
@@ -1135,7 +1137,9 @@
     $('userPlaylists').innerHTML = playlists.length
       ? playlists.slice().sort((a,b)=>new Date(b.updatedAt)-new Date(a.updatedAt)).map(playlistCardMarkup).join('')
       : '<div class="empty-playlists">Noch keine eigene Playlist. Erstelle eine freie Liste oder speichere einen Smart-Plan.</div>';
-    $('curatedPlaylists').innerHTML = CURATED_PLAYLISTS.map(curatedCardMarkup).join('');
+    const curatedRoot = $('curatedPlaylists');
+    curatedRoot.innerHTML = CURATED_PLAYLISTS.map((definition) => curatedCardMarkup(definition)).join('');
+    if (!curatedRoot.children.length) curatedRoot.innerHTML = '<div class="empty-playlists">Sammlungen werden gerade vorbereitet. Öffne den Reiter bitte erneut.</div>';
     markRendered('playlists');
   }
 
@@ -1207,8 +1211,38 @@
   }
 
   function playlistAddResultMarkup(episode, playlist) {
-    const meta = [fmtDuration(episode.durationMin), episode.heard ? 'gehört' : 'offen', episode.rockyRanking != null ? `Rocky ${Number(episode.rockyRanking).toFixed(2)}` : ''].filter(Boolean).join(' · ');
-    return `<button class="playlist-add-row" data-playlist-quick-add="${playlist.id}:${episode.nr}"><span><strong>${episode.nr}. ${esc(episode.titel)}</strong><small>${esc(meta)}</small></span><b>＋</b></button>`;
+    const meta = [fmtDuration(episode.durationMin), episode.heard ? 'gehört' : 'offen', episode.rating ? ratingLabel(episode.rating) : '', episode.rockyRanking != null ? `Rocky ${Number(episode.rockyRanking).toFixed(2)}` : ''].filter(Boolean).join(' · ');
+    return `<div class="playlist-add-row" data-add-row="${episode.nr}"><button class="playlist-add-info" data-open="${episode.nr}"><strong>${episode.nr}. ${esc(episode.titel)}</strong><small>${esc(meta)}</small><span>Beschreibung ansehen</span></button><button class="playlist-add-confirm" data-playlist-quick-add="${playlist.id}:${episode.nr}" aria-label="Zur Playlist hinzufügen">＋</button></div>`;
+  }
+
+  function showPlaylistInlineStatus(message, tone = 'success') {
+    const node = $('playlistInlineStatus');
+    if (!node) return;
+    node.textContent = message;
+    node.className = `playlist-inline-status ${tone}`;
+    node.classList.remove('hidden');
+    clearTimeout(state.playlistInlineTimer);
+    state.playlistInlineTimer = setTimeout(() => node.classList.add('hidden'), 2600);
+  }
+
+  function pulsePlaylistCard(id) {
+    requestAnimationFrame(() => {
+      const card = document.querySelector(`[data-playlist-open="${CSS.escape(String(id))}"]`);
+      if (!card) return;
+      card.classList.remove('just-saved');
+      void card.offsetWidth;
+      card.classList.add('just-saved');
+      setTimeout(() => card.classList.remove('just-saved'), 1700);
+    });
+  }
+
+  function refreshOpenPlaylist(options = {}) {
+    const id = state.playlistDetailId;
+    if (!id || id.startsWith('curated:')) return;
+    const query = $('playlistAddSearch')?.value || '';
+    const panelWasOpen = !$('playlistAddPanel')?.classList.contains('hidden');
+    openPlaylistDetail(id, false, { keepAddPanel: options.keepAddPanel ?? panelWasOpen, query });
+    if (options.message) showPlaylistInlineStatus(options.message, options.tone || 'success');
   }
 
   function renderPlaylistAddResults(query = '') {
@@ -1286,16 +1320,21 @@
     section.classList.remove('hidden');
   }
 
-  function openPlaylistDetail(id, curated=false) {
+  function openPlaylistDetail(id, curated=false, options={}) {
     let title,description,episodes,editable=false,kicker='Playlist';
     if(curated){ const def=CURATED_PLAYLISTS.find(x=>x.id===id); if(!def)return; title=def.title;description=def.description;episodes=curatedEpisodes(def);kicker=def.sequence?'Kuratierte Reihenfolge':'Kuratierte Sammlung'; }
     else { const pl=playlistById(id);if(!pl)return;title=pl.title;description=pl.description;episodes=episodesForNumbers(pl.episodeNumbers);editable=true;kicker=pl.smartMeta?'Smart Playlist':'Eigene Playlist'; }
     state.playlistDetailId=curated?`curated:${id}`:id;
     $('playlistDetailKicker').textContent=kicker; $('playlistDetailTitle').textContent=title; $('playlistDetailDescription').textContent=description||'Keine Beschreibung';
     const stats=playlistStats(episodes); $('playlistDetailStats').innerHTML=`<span>${episodes.length} Folgen</span><span>${fmtDuration(stats.duration)}</span><span>${stats.heard} gehört</span>`;
-    $('playlistEditButton').classList.toggle('hidden',!editable); $('playlistDeleteButton').classList.toggle('hidden',!editable); $('playlistAddEpisodeButton').classList.toggle('hidden',!editable); $('playlistAddPanel').classList.add('hidden');
+    $('playlistEditButton').classList.toggle('hidden',!editable); $('playlistDeleteButton').classList.toggle('hidden',!editable); $('playlistAddEpisodeButton').classList.toggle('hidden',!editable); if (!options.keepAddPanel) $('playlistAddPanel').classList.add('hidden');
     $('playlistPlayFirst').disabled=!episodes.length;
-    $('playlistEpisodeList').innerHTML=episodes.length?episodes.map((episode,index)=>`<div class="playlist-episode"><span class="playlist-index">${index+1}</span><button class="rank-main" data-open="${episode.nr}"><strong>${episode.nr}. ${esc(episode.titel)}</strong><small>${fmtDuration(episode.durationMin)} · ${episode.heard?'gehört':'offen'}</small></button>${editable?`<span class="playlist-row-actions"><button data-playlist-move="${id}:${index}:-1" aria-label="Nach oben">↑</button><button data-playlist-move="${id}:${index}:1" aria-label="Nach unten">↓</button><button data-playlist-remove="${id}:${episode.nr}" aria-label="Entfernen">×</button></span>`:''}</div>`).join(''):'<div class="empty-playlists">Diese Liste enthält noch keine Folgen.</div>';
+    $('playlistEpisodeList').innerHTML=episodes.length?episodes.map((episode,index)=>`<div class="playlist-episode" data-playlist-episode="${episode.nr}"><span class="playlist-index">${index+1}</span><button class="rank-main playlist-episode-main" data-open="${episode.nr}"><strong>${episode.nr}. ${esc(episode.titel)}</strong><small>${fmtDuration(episode.durationMin)} · ${episode.heard?'gehört':'offen'} · Details ansehen</small></button><button class="playlist-row-info" data-open="${episode.nr}" aria-label="Vollständige Beschreibung">i</button>${editable?`<span class="playlist-row-actions"><button data-playlist-move="${id}:${index}:-1" aria-label="Nach oben">↑</button><button data-playlist-move="${id}:${index}:1" aria-label="Nach unten">↓</button><button data-playlist-remove="${id}:${episode.nr}" aria-label="Entfernen">×</button></span>`:''}</div>`).join(''):'<div class="empty-playlists">Diese Liste enthält noch keine Folgen.</div>';
+    if (options.keepAddPanel && editable) {
+      $('playlistAddPanel').classList.remove('hidden');
+      if ($('playlistAddSearch')) $('playlistAddSearch').value = options.query || '';
+      renderPlaylistAddResults(options.query || '');
+    }
     renderPlaylistSuggestions();
     $('playlistDetailOverlay').classList.remove('hidden'); $('playlistDetailOverlay').setAttribute('aria-hidden','false');
   }
@@ -1380,15 +1419,26 @@
     const plan=state.generatedPlan;if(!plan||!plan.episodes.length)return;
     state.user.playlists.push(normalizePlaylist({title:plan.title,description:`Automatisch geplant: ${fmtDuration(plan.target)} · ${moodLabel(plan.mood)} · ${plan.status==='unheard'?'nur ungehört':plan.status==='heard'?'nur bekannt':'gemischt'}`,episodeNumbers:plan.episodes.map(e=>e.nr),smartMeta:{target:plan.target,mood:plan.mood,status:plan.status,continuity:plan.continuity}}));
     const savedTitle = plan.title;
+    const savedPlaylist = state.user.playlists[state.user.playlists.length - 1];
     persistPlaylists('Smart Playlist gespeichert.');
     $('planPreview').classList.add('hidden');
     $('planPreview').innerHTML='';
     state.generatedPlan=null;
+    $('planName').value = 'Autofahrt';
+    $('planHours').value = '5';
+    $('planMinutes').value = '0';
+    $('planMood').value = 'any';
+    $('planStatus').value = 'mixed';
+    $('planContinuity').checked = true;
     const status=$('planSavedStatus');
     if(status){
       status.innerHTML=`<span>✓</span><div><strong>„${esc(savedTitle)}“ gespeichert</strong><small>Die Playlist findest du jetzt direkt unter „Meine Playlists“.</small></div>`;
       status.classList.remove('hidden');
       status.scrollIntoView({behavior:'smooth',block:'nearest'});
+      setTimeout(() => {
+        pulsePlaylistCard(savedPlaylist.id);
+        document.querySelector('[data-playlist-open="' + savedPlaylist.id + '"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 80);
       clearTimeout(state.planSavedTimer);
       state.planSavedTimer=setTimeout(()=>status.classList.add('hidden'),5000);
     }
@@ -1834,10 +1884,10 @@
       const playlistOpen=event.target.closest('[data-playlist-open]');if(playlistOpen){openPlaylistDetail(playlistOpen.dataset.playlistOpen,false);return;}
       const curatedOpen=event.target.closest('[data-curated-open]');if(curatedOpen){openPlaylistDetail(curatedOpen.dataset.curatedOpen,true);return;}
       const picker=event.target.closest('[data-picker-playlist]');if(picker&&state.playlistPickerNr){toggleEpisodeInPlaylist(picker.dataset.pickerPlaylist,state.playlistPickerNr);return;}
-      const quickAdd=event.target.closest('[data-playlist-quick-add]');if(quickAdd){const [id,nr]=quickAdd.dataset.playlistQuickAdd.split(':');const pl=playlistById(id);if(pl&&!pl.episodeNumbers.includes(Number(nr))){pl.episodeNumbers.push(Number(nr));pl.updatedAt=new Date().toISOString();persistPlaylists('Zur Playlist hinzugefügt.');openPlaylistDetail(id,false);$('playlistAddPanel').classList.remove('hidden');renderPlaylistAddResults($('playlistAddSearch').value);}return;}
-      const suggestAdd=event.target.closest('[data-playlist-suggest-add]');if(suggestAdd){const [id,nr]=suggestAdd.dataset.playlistSuggestAdd.split(':');const pl=playlistById(id);if(pl&&!pl.episodeNumbers.includes(Number(nr))){pl.episodeNumbers.push(Number(nr));pl.updatedAt=new Date().toISOString();persistPlaylists('Passende Folge hinzugefügt.');openPlaylistDetail(id,false);}return;}
-            const move=event.target.closest('[data-playlist-move]');if(move){const [id,indexText,deltaText]=move.dataset.playlistMove.split(':');const pl=playlistById(id),index=Number(indexText),next=index+Number(deltaText);if(pl&&next>=0&&next<pl.episodeNumbers.length){[pl.episodeNumbers[index],pl.episodeNumbers[next]]=[pl.episodeNumbers[next],pl.episodeNumbers[index]];pl.updatedAt=new Date().toISOString();persistPlaylists();openPlaylistDetail(id,false);}return;}
-      const remove=event.target.closest('[data-playlist-remove]');if(remove){const [id,nr]=remove.dataset.playlistRemove.split(':');const pl=playlistById(id);if(pl){pl.episodeNumbers=pl.episodeNumbers.filter(n=>n!==Number(nr));pl.updatedAt=new Date().toISOString();persistPlaylists();openPlaylistDetail(id,false);}return;}
+      const quickAdd=event.target.closest('[data-playlist-quick-add]');if(quickAdd){const [id,nr]=quickAdd.dataset.playlistQuickAdd.split(':');const pl=playlistById(id);const number=Number(nr);if(pl&&!pl.episodeNumbers.includes(number)){quickAdd.disabled=true;quickAdd.textContent='✓';pl.episodeNumbers.push(number);pl.updatedAt=new Date().toISOString();persistPlaylists();refreshOpenPlaylist({keepAddPanel:true,message:'Folge hinzugefügt ✓'});}return;}
+      const suggestAdd=event.target.closest('[data-playlist-suggest-add]');if(suggestAdd){const [id,nr]=suggestAdd.dataset.playlistSuggestAdd.split(':');const pl=playlistById(id);const number=Number(nr);if(pl&&!pl.episodeNumbers.includes(number)){suggestAdd.disabled=true;suggestAdd.textContent='✓';pl.episodeNumbers.push(number);pl.updatedAt=new Date().toISOString();persistPlaylists();refreshOpenPlaylist({message:'Passende Folge hinzugefügt ✓'});}return;}
+            const move=event.target.closest('[data-playlist-move]');if(move){const [id,indexText,deltaText]=move.dataset.playlistMove.split(':');const pl=playlistById(id),index=Number(indexText),next=index+Number(deltaText);if(pl&&next>=0&&next<pl.episodeNumbers.length){[pl.episodeNumbers[index],pl.episodeNumbers[next]]=[pl.episodeNumbers[next],pl.episodeNumbers[index]];pl.updatedAt=new Date().toISOString();persistPlaylists();refreshOpenPlaylist({message:'Reihenfolge aktualisiert'});}return;}
+      const remove=event.target.closest('[data-playlist-remove]');if(remove){const [id,nr]=remove.dataset.playlistRemove.split(':');const pl=playlistById(id);if(pl){const row=remove.closest('[data-playlist-episode]');row?.classList.add('removing');setTimeout(()=>{pl.episodeNumbers=pl.episodeNumbers.filter(n=>n!==Number(nr));pl.updatedAt=new Date().toISOString();persistPlaylists();refreshOpenPlaylist({message:'Folge entfernt'});},160);}return;}
       const streamButton = event.target.closest('[data-stream]');
       if (streamButton) {
         event.preventDefault();
