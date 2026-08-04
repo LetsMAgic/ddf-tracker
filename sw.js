@@ -1,4 +1,4 @@
-const CACHE = 'ddf-tracker-v11-1';
+const CACHE = 'ddf-tracker-v11-2';
 const ASSETS = [
   './',
   './index.html',

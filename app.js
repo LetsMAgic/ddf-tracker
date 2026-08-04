@@ -1592,9 +1592,9 @@ const TUTORIAL_STEPS = [
   { page: 'episodes', target: '.search-box', title: 'Intelligente Suche', text: 'Suche nach Titel, Autor, Figur, Handlung oder Stichwort – zum Beispiel „Peters Opa“, „André Marx“ oder „Fußball“.', next: 'Bewertungen' },
   { page: 'episodes', target: '.episode-card .rating-mini', title: 'Bewerten und entfernen', text: 'Minus, Neutral, Plus und Super sind exklusiv. Super zählt doppelt für Empfehlungen. Tippe erneut auf dieselbe aktive Bewertung, um sie wieder zu entfernen.', next: 'Hörstatus', demo: 'rating' },
   { page: 'episodes', target: '.episode-card [data-heard]', title: 'Gehört oder ungehört', text: 'Eine Bewertung markiert die Folge automatisch als gehört. Den Hörstatus kannst du wieder zurücksetzen; eine vorhandene Bewertung wird dabei auf Wunsch entfernt.', next: 'Details öffnen' },
-  { page: 'episodes', target: '.episode-card', title: 'Folgendetails', text: 'Ein Tipp auf die Karte öffnet Beschreibung, Streaminglinks, Wissenskarte, Rückbezüge und persönliche Notizen.', next: 'Listen entdecken' },
+  { page: 'episodes', target: '.episode-card .episode-title', title: 'Folgendetails', text: 'Ein Tipp auf die Folgenkarte öffnet Beschreibung, Streaminglinks, Wissenskarte, Rückbezüge und persönliche Notizen.', next: 'Listen entdecken' },
   { page: 'playlists', target: '[data-nav="playlists"]', title: 'Essentials, Themen und eigene Listen', text: 'Goldene Essentials sind besonders wichtige Sammlungen. Daneben findest du Themen und deine selbst benannten Playlists.', next: 'Smart-Planer' },
-  { page: 'playlists', target: '.smart-planner', title: 'Smart-Playlist erstellen', text: 'Gib Dauer, Stimmung, Hörstatus und optional einen Autor an. Die App stellt einen passenden Hörplan zusammen und beachtet auf Wunsch Reihenfolgen.', next: 'Backup & Hilfe' },
+  { page: 'playlists', target: '#generatePlanButton', title: 'Smart-Playlist erstellen', text: 'Gib Dauer, Stimmung, Hörstatus und optional einen Autor an. Mit diesem Button erstellt die App einen passenden Hörplan und beachtet auf Wunsch Reihenfolgen.', next: 'Backup & Hilfe' },
   { page: 'settings', target: '#exportButton', title: 'Alles wird automatisch gespeichert', text: 'Deine Änderungen liegen lokal auf diesem Gerät. Das JSON-Backup brauchst du nur zur Absicherung oder für einen Gerätewechsel.', next: 'Los geht’s' },
 ];
 
@@ -1612,24 +1612,102 @@ function tutorialDemoMarkup() {
   return `<span class="field-label">Demo-Bewertung</span><div id="tutorialRatingDemo" class="rating-control"><button data-demo-rating="minus"><span>−</span>Minus</button><button data-demo-rating="neutral"><span>●</span>Neutral</button><button data-demo-rating="plus"><span>＋</span>Plus</button><button data-demo-rating="super"><span>★</span>Super</button></div><small id="tutorialDemoNote" class="tutorial-demo-note">Probiere Plus oder Super aus – ein zweiter Tipp entfernt die Auswahl.</small>`;
 }
 
+function findVisibleTutorialTarget(selector) {
+  if (!selector) return null;
+  return [...document.querySelectorAll(selector)].find((element) => {
+    const style = getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    return style.display !== 'none'
+      && style.visibility !== 'hidden'
+      && Number(style.opacity || 1) > 0
+      && rect.width > 3
+      && rect.height > 3;
+  }) || null;
+}
+
+function resetTutorialCardPosition() {
+  const card = $('tutorialCard');
+  card.classList.remove('top', 'is-above', 'is-below', 'is-scrollable');
+  card.style.removeProperty('top');
+  card.style.removeProperty('bottom');
+  card.style.removeProperty('max-height');
+  card.style.removeProperty('overflow-y');
+}
+
 function positionTutorialFocus() {
-  if ($('tutorialOverlay').classList.contains('hidden')) return;
+  const overlay = $('tutorialOverlay');
+  if (overlay.classList.contains('hidden')) return;
   const step = TUTORIAL_STEPS[state.tutorialStep];
-  const target = document.querySelector(step?.target || '');
+  const target = findVisibleTutorialTarget(step?.target || '');
   const focus = $('tutorialFocus');
+  const card = $('tutorialCard');
+  resetTutorialCardPosition();
+
   if (!target) {
-    $('tutorialOverlay').classList.add('no-focus');
+    overlay.classList.add('no-focus');
     return;
   }
-  $('tutorialOverlay').classList.remove('no-focus');
-  const rect = target.getBoundingClientRect();
-  const card = $('tutorialCard');
-  card.classList.toggle('top', rect.bottom > window.innerHeight * 0.62);
-  const pad = 7;
-  focus.style.left = `${Math.max(6, rect.left - pad)}px`;
-  focus.style.top = `${Math.max(6, rect.top - pad)}px`;
-  focus.style.width = `${Math.min(window.innerWidth - 12, rect.width + pad * 2)}px`;
-  focus.style.height = `${rect.height + pad * 2}px`;
+
+  overlay.classList.remove('no-focus');
+  const viewportTop = window.visualViewport?.offsetTop || 0;
+  const viewportHeight = window.visualViewport?.height || window.innerHeight;
+  const viewportBottom = viewportTop + viewportHeight;
+  const safeEdge = 12;
+  const gap = 14;
+  const pad = 8;
+  let rect = target.getBoundingClientRect();
+
+  // The selected control must be fully inside the visible viewport before the
+  // spotlight and tutorial card are positioned around it.
+  if (rect.top < viewportTop + safeEdge || rect.bottom > viewportBottom - safeEdge) {
+    target.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'nearest' });
+    rect = target.getBoundingClientRect();
+  }
+
+  const focusLeft = Math.max(6, rect.left - pad);
+  const focusTop = Math.max(viewportTop + 6, rect.top - pad);
+  const focusRight = Math.min(window.innerWidth - 6, rect.right + pad);
+  const focusBottom = Math.min(viewportBottom - 6, rect.bottom + pad);
+  focus.style.left = `${focusLeft}px`;
+  focus.style.top = `${focusTop}px`;
+  focus.style.width = `${Math.max(8, focusRight - focusLeft)}px`;
+  focus.style.height = `${Math.max(8, focusBottom - focusTop)}px`;
+
+  // Measure the card without forcing it to overlap the highlighted control.
+  card.style.visibility = 'hidden';
+  card.style.top = `${viewportTop + safeEdge}px`;
+  card.style.bottom = 'auto';
+  card.style.maxHeight = 'none';
+  card.style.overflowY = 'visible';
+  const naturalHeight = card.offsetHeight;
+  card.style.visibility = '';
+
+  const availableAbove = Math.max(0, rect.top - gap - (viewportTop + safeEdge));
+  const availableBelow = Math.max(0, (viewportBottom - safeEdge) - (rect.bottom + gap));
+  let placement;
+  if (availableBelow >= naturalHeight) placement = 'below';
+  else if (availableAbove >= naturalHeight) placement = 'above';
+  else placement = availableBelow >= availableAbove ? 'below' : 'above';
+
+  const available = placement === 'below' ? availableBelow : availableAbove;
+  const maxHeight = Math.max(96, Math.floor(available));
+  card.style.maxHeight = `${maxHeight}px`;
+  if (naturalHeight > maxHeight) {
+    card.style.overflowY = 'auto';
+    card.classList.add('is-scrollable');
+  }
+
+  const cardHeight = Math.min(card.offsetHeight, maxHeight);
+  if (placement === 'above') {
+    card.classList.add('is-above');
+    card.style.top = `${Math.max(viewportTop + safeEdge, rect.top - gap - cardHeight)}px`;
+    card.style.bottom = 'auto';
+  } else {
+    card.classList.add('is-below');
+    const desiredTop = rect.bottom + gap;
+    card.style.top = `${Math.min(desiredTop, viewportBottom - safeEdge - cardHeight)}px`;
+    card.style.bottom = 'auto';
+  }
 }
 
 function renderTutorialStep() {
@@ -1644,9 +1722,11 @@ function renderTutorialStep() {
   $('tutorialDemo').classList.toggle('hidden', step.demo !== 'rating');
   $('tutorialDemo').innerHTML = step.demo === 'rating' ? tutorialDemoMarkup() : '';
   requestAnimationFrame(() => {
-    const target = document.querySelector(step.target);
-    target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    setTimeout(positionTutorialFocus, 330);
+    const target = findVisibleTutorialTarget(step.target);
+    target?.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'nearest' });
+    // Two passes cover late font/layout changes on Safari and small screens.
+    setTimeout(positionTutorialFocus, 40);
+    setTimeout(positionTutorialFocus, 220);
   });
 }
 
