@@ -386,6 +386,31 @@
   let persistChain = Promise.resolve();
   let homeRefreshTimer = null;
 
+  // Performance caches: expensive profile/recommendation calculations and rendered tabs
+  // are reused until personal data or catalog metadata actually changes.
+  let dataRevision = 0;
+  let tasteCache = { revision: -1, value: null };
+  const featureCache = new Map();
+  const recommendationCache = new Map();
+  const pageStatus = { home: false, episodes: false, ranking: false, settings: false };
+  const pageDirty = { home: true, episodes: true, ranking: true, settings: true };
+
+  function invalidateDerived({ catalog = false } = {}) {
+    dataRevision += 1;
+    tasteCache = { revision: -1, value: null };
+    recommendationCache.clear();
+    if (catalog) featureCache.clear();
+    pageDirty.home = true;
+    pageDirty.ranking = true;
+    pageDirty.settings = true;
+    pageDirty.episodes = true;
+  }
+
+  function markRendered(page) {
+    pageStatus[page] = true;
+    pageDirty[page] = false;
+  }
+
   function queueUserPersist() {
     clearTimeout(persistTimer);
     persistTimer = setTimeout(() => {
@@ -435,7 +460,7 @@
     homeRefreshTimer = setTimeout(() => {
       if (state.page === 'home') renderHome();
       if (state.page === 'ranking') renderRanking();
-      renderSettings();
+      if (state.page === 'settings') renderSettings();
     }, 180);
   }
 
@@ -460,6 +485,7 @@
 
     state.user.episodes[String(number)] = next;
     state.user.updatedAt = now;
+    invalidateDerived();
 
     // Sofortige, optimistische UI-Aktualisierung. IndexedDB läuft danach im Hintergrund.
     patchVisibleEpisode(number);
@@ -469,13 +495,17 @@
   }
 
   function episodeFeatures(episode) {
+    const key = Number(episode.nr);
+    if (featureCache.has(key)) return featureCache.get(key);
     const features = [];
     for (const tag of episode.tags || []) features.push({ key: `tag:${normalizeText(tag)}`, label: tag, type: 'tag' });
     for (const character of importantCharacters(episode, 8)) features.push({ key: `character:${normalizeText(character)}`, label: character, type: 'character' });
+    featureCache.set(key, features);
     return features;
   }
 
   function tasteProfile() {
+    if (tasteCache.revision === dataRevision && tasteCache.value) return tasteCache.value;
     const weights = new Map();
     let rated = 0;
     for (const episode of state.catalog) {
@@ -489,10 +519,15 @@
         weights.set(feature.key, current);
       }
     }
-    return { weights, rated };
+    const value = { weights, rated };
+    tasteCache = { revision: dataRevision, value };
+    return value;
   }
 
   function recommendationScore(episode) {
+    const cacheKey = Number(episode.nr);
+    const cached = recommendationCache.get(cacheKey);
+    if (cached?.revision === dataRevision) return cached.value;
     const profile = tasteProfile();
     const matching = [];
     let similarity = 0;
@@ -514,7 +549,9 @@
       .slice(0, 4)
       .map((item) => item.label);
     if (!reasons.length && episode.rockyRanking != null && episode.rockyRanking <= 2.1) reasons.push('starkes Community-Ranking');
-    return { score, match, reasons };
+    const value = { score, match, reasons };
+    recommendationCache.set(cacheKey, { revision: dataRevision, value });
+    return value;
   }
 
   function timeMatch(episode, mode = state.time) {
@@ -603,9 +640,15 @@
     state.page = page;
     document.querySelectorAll('.page').forEach((element) => element.classList.toggle('active', element.dataset.page === page));
     document.querySelectorAll('[data-nav]').forEach((element) => element.classList.toggle('active', element.dataset.nav === page));
-    if (page === 'episodes') renderEpisodes();
-    if (page === 'ranking') renderRanking();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Keep already rendered tabs alive. Rebuild only after relevant data changed.
+    if (!pageStatus[page] || pageDirty[page]) {
+      if (page === 'home') renderHome();
+      if (page === 'episodes') renderEpisodes();
+      if (page === 'ranking') renderRanking();
+      if (page === 'settings') renderSettings();
+    }
+    window.scrollTo({ top: 0, behavior: 'auto' });
   }
 
   function calculateStats() {
@@ -700,6 +743,7 @@
           <span class="compact-rating">${ratingSymbol(episode.rating)}</span>
         </button>`).join('')
       : '<div class="empty-message">Noch keine Aktivität. Eine Bewertung markiert die Folge automatisch als gehört.</div>';
+    markRendered('home');
   }
 
   function expandedSearchTerms(query) {
@@ -810,6 +854,7 @@
       $('activeCollection').innerHTML = `<span>Sammlung: <strong>${esc(state.collectionLabel)}</strong></span><button id="clearCollection" type="button">Aufheben</button>`;
     }
     $('episodeList').innerHTML = list.length ? list.map(episodeCard).join('') : '<div class="empty-message">Keine Folge passt zu dieser Suche oder diesem Filter.</div>';
+    markRendered('episodes');
   }
 
   function ratingPill(rating) {
@@ -847,12 +892,14 @@
       const ranked = state.catalog.map(merged).filter((episode) => episode.rockyRanking != null).sort(rockyCompare);
       info.innerHTML = `<strong>${ranked.length}</strong> Folgen besitzen eine Rocky-Beach-Community-Wertung. Kleinere Werte sind besser; Folge 29 „Die Originalmusik“ wird dort nicht geführt.`;
       list.innerHTML = ranked.map((episode, index) => rankingCard(episode, index + 1, 'rocky')).join('');
+      markRendered('ranking');
       return;
     }
     if (state.ranking === 'match') {
       const ranked = recommendationPool('any', 'any');
       info.innerHTML = `<strong>${ranked.length}</strong> ungehörte Folgen, sortiert nach deinem Profil. Super-Folgen zählen dabei doppelt.`;
       list.innerHTML = ranked.slice(0, 100).map((episode, index) => rankingCard(episode, index + 1, 'match')).join('') || '<div class="empty-message">Du hast alle Folgen gehört.</div>';
+      markRendered('ranking');
       return;
     }
     const groups = [
@@ -869,6 +916,7 @@
     }
     info.innerHTML = `<strong>${total}</strong> Folgen hast du bewertet. Innerhalb jeder Stufe sortiert das Community-Ranking.`;
     list.innerHTML = parts.join('') || '<div class="empty-message">Noch keine eigenen Bewertungen vorhanden.</div>';
+    markRendered('ranking');
   }
 
   function renderSettings() {
@@ -878,6 +926,7 @@
     $('metadataInfo').textContent = state.metadataUpdatedAt
       ? `Folgenwissen: ${roles.toLocaleString('de-DE')} Rollen · aktualisiert ${new Date(state.metadataUpdatedAt).toLocaleDateString('de-DE')}`
       : 'Laufzeiten, Figuren und Kapitel werden beim ersten Online-Start ergänzt.';
+    markRendered('settings');
   }
 
   function renderAll() {
@@ -1004,6 +1053,7 @@
       if (!confirm(`${count} gespeicherte Folgenstände importieren und vorhandene Daten ersetzen?`)) return;
       state.user = normalized;
       state.user.updatedAt = new Date().toISOString();
+      invalidateDerived();
       await dbSet(USER_KEY, state.user);
       renderAll();
       toast(`${count} Folgenstände importiert.`);
@@ -1083,6 +1133,7 @@
       const series = Array.isArray(data?.serie) ? data.serie : [];
       if (!series.length) throw new Error('Keine Metadaten gefunden');
       state.catalog = mergeCatalogs(state.catalog, series);
+      invalidateDerived({ catalog: true });
       state.metadataUpdatedAt = data?.dbInfo?.lastModified || new Date().toISOString();
       await dbSet(CATALOG_KEY, { catalog: state.catalog, updatedAt: state.metadataUpdatedAt });
       renderAll();
@@ -1114,13 +1165,14 @@
     $('searchInput').value = '';
     state.filter = 'all';
     document.querySelectorAll('[data-filter]').forEach((button) => button.classList.toggle('active', button.dataset.filter === 'all'));
+    pageDirty.episodes = true;
     showPage('episodes');
-    renderEpisodes();
   }
 
   function clearCollection() {
     state.collectionLabel = '';
     setMood('any');
+    pageDirty.episodes = true;
     renderEpisodes();
   }
 
@@ -1132,11 +1184,13 @@
     $('searchInput').addEventListener('input', debounce((event) => {
       state.search = event.target.value;
       state.collectionLabel = '';
+      pageDirty.episodes = true;
       renderEpisodes();
     }));
     $('clearSearch').addEventListener('click', () => {
       state.search = '';
       $('searchInput').value = '';
+      pageDirty.episodes = true;
       renderEpisodes();
       $('searchInput').focus();
     });
@@ -1145,10 +1199,12 @@
       if (!button) return;
       state.filter = button.dataset.filter;
       document.querySelectorAll('[data-filter]').forEach((item) => item.classList.toggle('active', item === button));
+      pageDirty.episodes = true;
       renderEpisodes();
     });
     $('episodeSort').addEventListener('change', (event) => {
       state.sort = event.target.value;
+      pageDirty.episodes = true;
       renderEpisodes();
     });
 
@@ -1157,6 +1213,7 @@
       if (!button) return;
       state.ranking = button.dataset.ranking;
       document.querySelectorAll('[data-ranking]').forEach((item) => item.classList.toggle('active', item === button));
+      pageDirty.ranking = true;
       renderRanking();
     });
 
@@ -1193,6 +1250,7 @@
     $('reloadCatalogButton').addEventListener('click', async () => {
       const seed = normalizeCatalog(window.DDF_EPISODES_SEED || []);
       state.catalog = seed;
+      invalidateDerived({ catalog: true });
       state.metadataUpdatedAt = null;
       await dbDelete(CATALOG_KEY);
       renderAll();
@@ -1202,6 +1260,7 @@
     $('resetButton').addEventListener('click', async () => {
       if (!confirm('Wirklich alle persönlichen Hörstände, Bewertungen und Notizen löschen?')) return;
       state.user = { version: APP_VERSION, episodes: {}, updatedAt: new Date().toISOString() };
+      invalidateDerived();
       await dbSet(USER_KEY, state.user);
       renderAll();
       toast('Persönliche Daten wurden zurückgesetzt.');
@@ -1291,6 +1350,7 @@
     try {
       const catalogStatus = await loadCatalog();
       await loadUser();
+      invalidateDerived({ catalog: true });
       bind();
       renderAll();
       if (catalogStatus.needsUpdate) updateMetadata(false);
