@@ -5,10 +5,10 @@
   const DB_VERSION = 1;
   const STORE = 'kv';
   const USER_KEY = 'appState';
-  const CATALOG_KEY = 'enrichedCatalogV8_3';
+  const CATALOG_KEY = 'enrichedCatalogV9';
   const LEGACY_CATALOG_KEYS = ['enrichedCatalogV8', 'enrichedCatalogV7', 'enrichedCatalogV6', 'enrichedCatalogV5', 'enrichedCatalogV4'];
   const LEGACY_USER_KEYS = ['user-state', 'userState', 'state'];
-  const APP_VERSION = 8.3;
+  const APP_VERSION = 9.0;
   const DEFAULT_STREAMING_SERVICE = 'spotify';
   const META_URL = 'https://dreimetadaten.de/data/Serie.json';
   const META_MAX_AGE = 1000 * 60 * 60 * 24 * 30;
@@ -18,6 +18,8 @@
     user: { version: APP_VERSION, episodes: {}, playlists: [], settings: { preferredService: DEFAULT_STREAMING_SERVICE }, updatedAt: null },
     page: 'home',
     filter: 'all',
+    authorFilter: 'all',
+    eraFilter: 'all',
     sort: 'nr',
     ranking: 'rocky',
     search: '',
@@ -124,7 +126,9 @@
 
   const CURATED_PLAYLISTS = [
     { id: 'halloween', icon: '☾', title: 'Halloween in Rocky Beach', description: 'Düstere, unheimliche und atmosphärische Fälle für einen langen Herbstabend.', type: 'theme', mood: 'grusel', max: 14 },
-    { id: 'winter', icon: '❄', title: 'Winter & Weihnachten', description: 'Schnee, Eis, Glocken und winterliche Stimmung.', type: 'keywords', keywords: ['weihnacht','advent','schnee','eis','glocken','winter','weisse grab','weiße grab'], max: 14 },
+    { id: 'winter', icon: '❄', title: 'Advent & Weihnachten', description: 'Alle eingebauten Adventskalender-Specials plus winterliche Hauptfolgen.', type: 'numbers', numbers: [77,142,202,10007,10008,10009,10010,10011,10012], sequence: false },
+    { id: 'football', icon: '⚽', title: 'Fußballfälle', description: 'Stadien, Spieler, Fouls, Turniere und gestohlene Siege.', type: 'numbers', numbers: [63,81,123,141,153,164,176,245], sequence: false },
+    { id: 'andre-marx', icon: '✎', title: 'André Marx', description: 'Fälle eines der prägendsten Autoren der modernen Serie.', type: 'author', author: 'André Marx', max: 24 },
     { id: 'summer', icon: '≈', title: 'Sommer, Meer & Inseln', description: 'Inseln, Küsten, Schiffe, Tauchen und salzige Seeluft.', type: 'theme', mood: 'meer', max: 16 },
     { id: 'classics', icon: '◇', title: 'Die Klassiker', description: 'Die ersten 39 Hörspielfolgen in chronologischer Reihenfolge.', type: 'range', from: 1, to: 39 },
     { id: 'hugenay', icon: '♜', title: 'Die Hugenay-Chronik', description: 'Die wichtigsten Auftritte des französischen Meisterdiebs in sinnvoller Reihenfolge.', type: 'numbers', numbers: [9,16,103,125], sequence: true },
@@ -329,7 +333,7 @@
       speakers: normalizeText((episode.speakers || []).join(' ')),
       chapters: normalizeText((episode.chapters || []).join(' ')),
       hidden: normalizeText(hidden.join(' ')),
-      authors: normalizeText(`${episode.author || ''} ${episode.scriptAuthor || ''}`),
+      authors: normalizeText(`${episode.author || ''} ${episode.scriptAuthor || ''} ${episode.era || ''}`),
     };
     fields.all = Object.values(fields).join(' ');
     return { fields, hidden };
@@ -350,6 +354,7 @@
     const source = [titel, beschreibung, chapters.join(' '), characters.join(' ')].join(' ');
     const episode = {
       nr,
+      displayNumber: String(raw.displayNumber || raw.folgenLabel || '').trim(),
       titel,
       beschreibung,
       tags: deriveTags(source, Array.isArray(raw.tags) ? raw.tags : []),
@@ -362,6 +367,7 @@
       chapters,
       author: authorValue(raw.author || raw.buchautor || raw.buchautoren),
       scriptAuthor: authorValue(raw.scriptAuthor || raw.hörspielskriptautor || raw.hoerspielskriptautor),
+      era: String(raw.era || '').trim() || (raw.collection === 'special' ? 'Spezialfolgen' : nr <= 56 ? 'US-Klassiker' : nr <= 72 ? 'Henkel-Waidhofer-Ära' : nr <= 120 ? 'Frühe deutsche Ära' : 'Moderne Ära'),
       searchKeywords: uniqueStrings(raw.searchKeywords || raw.keywords || []),
       spotifyUrl: directStreamingUrl(raw, 'spotify'),
       appleMusicUrl: directStreamingUrl(raw, 'appleMusic'),
@@ -532,7 +538,11 @@
   }
 
   function isSpecial(episode) {
-    return (episode.durationMin || 0) >= 120 || [100, 125, 150, 175, 200, 225].includes(episode.nr);
+    return episode.collection === 'special' || (episode.durationMin || 0) >= 120 || [100, 125, 150, 175, 200, 225].includes(episode.nr);
+  }
+
+  function episodeLabel(episode) {
+    return episode.displayNumber || `Folge ${episode.nr}`;
   }
 
   function displayDescription(episode) {
@@ -864,7 +874,7 @@
       <div class="recommendation-top">
         <div>
           <span class="eyebrow">${esc(kicker)}</span>
-          <h3>${episode.nr}. ${esc(episode.titel)}</h3>
+          <h3>${esc(episodeLabel(episode))} · ${esc(episode.titel)}</h3>
           <p>${result.reasons.length ? 'Passt zu Merkmalen deiner besonders gut bewerteten Folgen.' : 'Ausgewählt anhand des Community-Rankings und deiner bisherigen Daten.'}</p>
         </div>
         <div class="match-badge"><strong>${result.match}%</strong><span>Match</span></div>
@@ -904,7 +914,7 @@
     $('recentList').innerHTML = recent.length
       ? recent.map((episode) => `
         <button class="compact-item" data-open="${episode.nr}">
-          <span><strong>${episode.nr}. ${esc(episode.titel)}</strong><small>${episode.heard ? 'Gehört' : 'Offen'} · ${ratingLabel(episode.rating)}${episode.durationMin ? ` · ${fmtDuration(episode.durationMin)}` : ''}</small></span>
+          <span><strong>${esc(episodeLabel(episode))} · ${esc(episode.titel)}</strong><small>${episode.heard ? 'Gehört' : 'Offen'} · ${ratingLabel(episode.rating)}${episode.durationMin ? ` · ${fmtDuration(episode.durationMin)}` : ''}</small></span>
           <span class="compact-rating">${ratingSymbol(episode.rating)}</span>
         </button>`).join('')
       : '<div class="empty-message">Noch keine Aktivität. Eine Bewertung markiert die Folge automatisch als gehört.</div>';
@@ -953,6 +963,8 @@
     if (state.filter === 'long') list = list.filter((episode) => (episode.durationMin || 0) > 90);
     if (state.filter === 'special') list = list.filter(isSpecial);
     if (state.collectionLabel) list = list.filter((episode) => moodMatch(episode, state.mood));
+    if (state.authorFilter !== 'all') list = list.filter((episode) => episode.author === state.authorFilter);
+    if (state.eraFilter !== 'all') list = list.filter((episode) => episode.era === state.eraFilter);
 
     const query = state.search.trim();
     if (query) {
@@ -965,6 +977,7 @@
       if (query && b._searchScore !== a._searchScore) return b._searchScore - a._searchScore;
       if (state.sort === 'nr-desc') return b.nr - a.nr;
       if (state.sort === 'title') return a.titel.localeCompare(b.titel, 'de');
+      if (state.sort === 'author') return (a.author || 'ZZZ').localeCompare(b.author || 'ZZZ', 'de') || a.nr - b.nr;
       if (state.sort === 'duration-desc') return (b.durationMin || -1) - (a.durationMin || -1);
       if (state.sort === 'duration-asc') return (a.durationMin ?? 9999) - (b.durationMin ?? 9999);
       if (state.sort === 'rocky-best') return rockyCompare(a, b) || a.nr - b.nr;
@@ -987,7 +1000,7 @@
       <article class="episode-card rating-${episode.rating || 'none'}" data-open="${episode.nr}">
         <div class="episode-main">
           <div>
-            <span class="episode-number">FOLGE ${episode.nr}</span>
+            <span class="episode-number">${esc(episodeLabel(episode).toUpperCase())}</span>
             <h3 class="episode-title">${esc(episode.titel)}</h3>
             ${description ? `<p class="episode-description">${esc(description)}</p>` : ''}
           </div>
@@ -1001,6 +1014,7 @@
             <span class="badge">${fmtDuration(episode.durationMin)}</span>
             ${isSpecial(episode) ? '<span class="badge special-badge">✦ Spezial</span>' : ''}
             <span class="badge">Rocky ${fmtRocky(episode.rockyRanking)}</span>
+            ${episode.author ? `<span class="badge author-badge">${esc(episode.author)}</span>` : ''}
             ${showMatch ? `<span class="badge match">${result.match}% Match</span>` : `<span class="badge">${ratingLabel(episode.rating)}</span>`}
           </div>
           <div class="rating-mini" aria-label="Eigene Bewertung">
@@ -1048,7 +1062,7 @@
     return `
       <button class="ranking-card" data-open="${episode.nr}">
         <span class="rank-position">${position}</span>
-        <span class="rank-main"><strong>${episode.nr}. ${esc(episode.titel)}</strong><small>${esc(details || 'Keine Zusatzdaten')}</small></span>
+        <span class="rank-main"><strong>${esc(episodeLabel(episode))} · ${esc(episode.titel)}</strong><small>${esc(details || 'Keine Zusatzdaten')}</small></span>
         <span class="rank-side"><strong>${esc(mainValue)}</strong><small>${esc(label)}</small>${mode !== 'mine' ? ratingPill(episode.rating) : ''}</span>
       </button>`;
   }
@@ -1104,6 +1118,7 @@
     let list = state.catalog.map(merged);
     if (definition.type === 'numbers') return episodesForNumbers(definition.numbers);
     if (definition.type === 'range') return list.filter((episode) => episode.nr >= definition.from && episode.nr <= definition.to).sort((a,b)=>a.nr-b.nr);
+    if (definition.type === 'author') list = list.filter((episode) => episode.author === definition.author);
     if (definition.type === 'theme') list = list.filter((episode) => moodMatch(episode, definition.mood));
     if (definition.type === 'keywords') {
       list = list.filter((episode) => {
@@ -1212,7 +1227,7 @@
 
   function playlistAddResultMarkup(episode, playlist) {
     const meta = [fmtDuration(episode.durationMin), episode.heard ? 'gehört' : 'offen', episode.rating ? ratingLabel(episode.rating) : '', episode.rockyRanking != null ? `Rocky ${Number(episode.rockyRanking).toFixed(2)}` : ''].filter(Boolean).join(' · ');
-    return `<div class="playlist-add-row" data-add-row="${episode.nr}"><button class="playlist-add-info" data-open="${episode.nr}"><strong>${episode.nr}. ${esc(episode.titel)}</strong><small>${esc(meta)}</small><span>Beschreibung ansehen</span></button><button class="playlist-add-confirm" data-playlist-quick-add="${playlist.id}:${episode.nr}" aria-label="Zur Playlist hinzufügen">＋</button></div>`;
+    return `<div class="playlist-add-row" data-add-row="${episode.nr}"><button class="playlist-add-info" data-open="${episode.nr}"><strong>${esc(episodeLabel(episode))} · ${esc(episode.titel)}</strong><small>${esc(meta)}</small><span>Beschreibung ansehen</span></button><button class="playlist-add-confirm" data-playlist-quick-add="${playlist.id}:${episode.nr}" aria-label="Zur Playlist hinzufügen">＋</button></div>`;
   }
 
   function showPlaylistInlineStatus(message, tone = 'success') {
@@ -1315,7 +1330,7 @@
       const reason=playlistSuggestionReason(episode,episodes); const block=reason.startsWith('gehört zur Reihenfolge');
       const meta=[fmtDuration(episode.durationMin),episode.heard?'gehört':'offen',episode.rating?ratingLabel(episode.rating):'',episode.rockyRanking!=null?`Rocky ${Number(episode.rockyRanking).toFixed(2)}`:''].filter(Boolean).join(' · ');
       const match=Math.max(50,Math.min(98,Math.round(58+score*2)));
-      return `<div class="playlist-suggestion-row ${block?'story-link':''}"><button class="playlist-suggestion-main" data-open="${episode.nr}"><strong>${episode.nr}. ${esc(episode.titel)} <span class="match-pill">${match}%</span></strong><small>${esc(meta)}<br>${esc(reason)}</small></button><button class="playlist-suggestion-detail" data-open="${episode.nr}" aria-label="Details">i</button><button class="playlist-suggestion-add" data-playlist-suggest-add="${id}:${episode.nr}" aria-label="Hinzufügen">＋</button></div>`;
+      return `<div class="playlist-suggestion-row ${block?'story-link':''}"><button class="playlist-suggestion-main" data-open="${episode.nr}"><strong>${esc(episodeLabel(episode))} · ${esc(episode.titel)} <span class="match-pill">${match}%</span></strong><small>${esc(meta)}<br>${esc(reason)}</small></button><button class="playlist-suggestion-detail" data-open="${episode.nr}" aria-label="Details">i</button><button class="playlist-suggestion-add" data-playlist-suggest-add="${id}:${episode.nr}" aria-label="Hinzufügen">＋</button></div>`;
     }).join('');
     section.classList.remove('hidden');
   }
@@ -1329,7 +1344,7 @@
     const stats=playlistStats(episodes); $('playlistDetailStats').innerHTML=`<span>${episodes.length} Folgen</span><span>${fmtDuration(stats.duration)}</span><span>${stats.heard} gehört</span>`;
     $('playlistEditButton').classList.toggle('hidden',!editable); $('playlistDeleteButton').classList.toggle('hidden',!editable); $('playlistAddEpisodeButton').classList.toggle('hidden',!editable); if (!options.keepAddPanel) $('playlistAddPanel').classList.add('hidden');
     $('playlistPlayFirst').disabled=!episodes.length;
-    $('playlistEpisodeList').innerHTML=episodes.length?episodes.map((episode,index)=>`<div class="playlist-episode" data-playlist-episode="${episode.nr}"><span class="playlist-index">${index+1}</span><button class="rank-main playlist-episode-main" data-open="${episode.nr}"><strong>${episode.nr}. ${esc(episode.titel)}</strong><small>${fmtDuration(episode.durationMin)} · ${episode.heard?'gehört':'offen'} · Details ansehen</small></button><button class="playlist-row-info" data-open="${episode.nr}" aria-label="Vollständige Beschreibung">i</button>${editable?`<span class="playlist-row-actions"><button data-playlist-move="${id}:${index}:-1" aria-label="Nach oben">↑</button><button data-playlist-move="${id}:${index}:1" aria-label="Nach unten">↓</button><button data-playlist-remove="${id}:${episode.nr}" aria-label="Entfernen">×</button></span>`:''}</div>`).join(''):'<div class="empty-playlists">Diese Liste enthält noch keine Folgen.</div>';
+    $('playlistEpisodeList').innerHTML=episodes.length?episodes.map((episode,index)=>`<div class="playlist-episode" data-playlist-episode="${episode.nr}"><span class="playlist-index">${index+1}</span><button class="rank-main playlist-episode-main" data-open="${episode.nr}"><strong>${esc(episodeLabel(episode))} · ${esc(episode.titel)}</strong><small>${fmtDuration(episode.durationMin)} · ${episode.heard?'gehört':'offen'} · Details ansehen</small></button><button class="playlist-row-info" data-open="${episode.nr}" aria-label="Vollständige Beschreibung">i</button>${editable?`<span class="playlist-row-actions"><button data-playlist-move="${id}:${index}:-1" aria-label="Nach oben">↑</button><button data-playlist-move="${id}:${index}:1" aria-label="Nach unten">↓</button><button data-playlist-remove="${id}:${episode.nr}" aria-label="Entfernen">×</button></span>`:''}</div>`).join(''):'<div class="empty-playlists">Diese Liste enthält noch keine Folgen.</div>';
     if (options.keepAddPanel && editable) {
       $('playlistAddPanel').classList.remove('hidden');
       if ($('playlistAddSearch')) $('playlistAddSearch').value = options.query || '';
@@ -1347,22 +1362,23 @@
     const pl=playlistById(state.playlistDetailId);return pl?episodesForNumbers(pl.episodeNumbers):[];
   }
 
-  function candidateScoreForPlan(episode,mood,status){
+  function candidateScoreForPlan(episode,mood,status,author='all'){
     if(status==='unheard'&&episode.heard)return -999;
     if(status==='heard'&&!episode.heard)return -999;
+    if(author!=='all' && episode.author!==author)return -999;
     let score=recommendationScore(episode).score;
     if(mood!=='any') score += moodMatch(episode,mood)?5:-5;
     if(status==='mixed') score += episode.heard?(episode.rating==='super'?2:episode.rating==='plus'?1:-1):2;
     return score;
   }
 
-  function buildSmartPlan(target,mood,status,continuity){
-    const all=state.catalog.map(merged).filter(e=>e.durationMin&&candidateScoreForPlan(e,mood,status)>-100);
+  function buildSmartPlan(target,mood,status,continuity,author='all'){
+    const all=state.catalog.map(merged).filter(e=>e.durationMin&&candidateScoreForPlan(e,mood,status,author)>-100);
     const used=new Set(); const units=[];
     if(continuity){
-      for(const block of STORY_BLOCKS){const eps=episodesForNumbers(block.numbers).filter(e=>all.some(a=>a.nr===e.nr));if(eps.length===block.numbers.length&&eps.length>1){eps.forEach(e=>used.add(e.nr));units.push({episodes:eps,duration:eps.reduce((s,e)=>s+e.durationMin,0),score:eps.reduce((s,e)=>s+candidateScoreForPlan(e,mood,status),0)+3,title:block.title});}}
+      for(const block of STORY_BLOCKS){const eps=episodesForNumbers(block.numbers).filter(e=>all.some(a=>a.nr===e.nr));if(eps.length===block.numbers.length&&eps.length>1){eps.forEach(e=>used.add(e.nr));units.push({episodes:eps,duration:eps.reduce((s,e)=>s+e.durationMin,0),score:eps.reduce((s,e)=>s+candidateScoreForPlan(e,mood,status,author),0)+3,title:block.title});}}
     }
-    for(const episode of all){if(!used.has(episode.nr))units.push({episodes:[episode],duration:episode.durationMin,score:candidateScoreForPlan(episode,mood,status),title:episode.titel});}
+    for(const episode of all){if(!used.has(episode.nr))units.push({episodes:[episode],duration:episode.durationMin,score:candidateScoreForPlan(episode,mood,status,author),title:episode.titel});}
     let best=[];let bestMetric=Infinity;
     for(let run=0;run<450;run++){
       const shuffled=units.slice().sort((a,b)=>(b.score+Math.random()*8)-(a.score+Math.random()*8));let chosen=[];let total=0;
@@ -1399,7 +1415,7 @@
     return `<article class="plan-episode-card">
       <div class="plan-episode-number">${index + 1}</div>
       <div class="plan-episode-copy">
-        <div class="plan-episode-title"><strong>${esc(episode.nr + '. ' + episode.titel)}</strong><span>${fmtDuration(episode.durationMin)}</span></div>
+        <div class="plan-episode-title"><strong>${esc(episodeLabel(episode) + ' · ' + episode.titel)}</strong><span>${fmtDuration(episode.durationMin)}</span></div>
         <p>${esc(description)}</p>
         <small><b>Warum dabei:</b> ${esc(reason)}</small>
       </div>
@@ -1408,8 +1424,8 @@
 
   function generatePlan(){
     const target=Math.max(30,Math.min(720,(Number($('planHours').value)||0)*60+(Number($('planMinutes').value)||0)));
-    const mood=$('planMood').value,status=$('planStatus').value,continuity=$('planContinuity').checked;
-    const result=buildSmartPlan(target,mood,status,continuity); state.generatedPlan={...result,target,mood,status,continuity,title:$('planName').value.trim()||'Smart Playlist'};
+    const mood=$('planMood').value,status=$('planStatus').value,continuity=$('planContinuity').checked,author=$('planAuthor')?.value||'all';
+    const result=buildSmartPlan(target,mood,status,continuity,author); state.generatedPlan={...result,target,mood,status,continuity,author,title:$('planName').value.trim()||'Smart Playlist'};
     $('planSavedStatus')?.classList.add('hidden');
     $('planPreview').classList.remove('hidden');
     $('planPreview').innerHTML=`<div class="plan-preview-head"><div><h3>${esc(state.generatedPlan.title)}</h3><p>${result.episodes.length} Folgen · ${fmtDuration(result.duration)} von gewünschten ${fmtDuration(target)}</p></div><strong>${Math.abs(target-result.duration)<=15?'Sehr passend':`${Math.abs(target-result.duration)} Min. Abweichung`}</strong></div><div class="plan-preview-list detailed">${result.episodes.map((episode,index)=>smartPlanEpisodeMarkup(episode,index,result.episodes,state.generatedPlan)).join('')}</div><div class="plan-preview-actions"><button id="saveGeneratedPlan" class="primary-button">Playlist speichern</button><button id="regeneratePlan" class="subtle-button">Neu mischen</button></div>`;
@@ -1429,6 +1445,7 @@
     $('planMinutes').value = '0';
     $('planMood').value = 'any';
     $('planStatus').value = 'mixed';
+    if ($('planAuthor')) $('planAuthor').value = 'all';
     $('planContinuity').checked = true;
     const status=$('planSavedStatus');
     if(status){
@@ -1463,7 +1480,21 @@
     markRendered('settings');
   }
 
+
+  function populateAuthorControls() {
+    const authors = uniqueStrings(state.catalog.map((episode) => episode.author).filter(Boolean)).sort((a,b)=>a.localeCompare(b,'de'));
+    const authorOptions = '<option value="all">Alle Autoren</option>' + authors.map((author)=>`<option value="${esc(author)}">${esc(author)}</option>`).join('');
+    for (const id of ['authorFilter','planAuthor']) {
+      const select = $(id);
+      if (!select) continue;
+      const current = select.value || 'all';
+      select.innerHTML = authorOptions;
+      select.value = authors.includes(current) ? current : 'all';
+    }
+  }
+
   function renderAll() {
+    populateAuthorControls();
     renderHome();
     if (state.page === 'episodes') renderEpisodes();
     if (state.page === 'ranking') renderRanking();
@@ -1508,7 +1539,7 @@
     const result = recommendationScore(episode);
     const description = displayDescription(episode);
     const characters = importantCharacters(episode, 8);
-    $('detailNumber').textContent = `Folge ${episode.nr}`;
+    $('detailNumber').textContent = episodeLabel(episode);
     $('detailTitle').textContent = episode.titel;
     $('detailMatch').textContent = `${result.match}%`;
     $('detailDescription').textContent = description || 'Für diese Folge ist noch keine Kurzbeschreibung lokal gespeichert. Unter Einstellungen kannst du das Folgenwissen aktualisieren.';
@@ -1517,6 +1548,8 @@
       <span class="badge">${fmtDuration(episode.durationMin)}</span>
       ${isSpecial(episode) ? '<span class="badge special-badge">✦ Spezial / extra lang</span>' : ''}
       <span class="badge">Rocky ${fmtRocky(episode.rockyRanking)}</span>
+      ${episode.author ? `<span class="badge author-badge">Text: ${esc(episode.author)}</span>` : ''}
+      ${episode.era ? `<span class="badge era-badge">${esc(episode.era)}</span>` : ''}
       ${episode.releaseDate ? `<span class="badge">${esc(new Date(episode.releaseDate).toLocaleDateString('de-DE'))}</span>` : ''}`;
 
     $('detailReasonsSection').classList.toggle('hidden', !result.reasons.length);
@@ -1681,7 +1714,7 @@
     const map = new Map(base.map((episode) => [episode.nr, episode]));
     for (const item of enrichment || []) {
       const nr = Number(item.nr ?? item.nummer);
-      if (!nr || nr > 248) continue;
+      if (!nr || nr > 11000) continue;
       const existing = map.get(nr) || {};
       const enriched = item.nummer != null || item.sprechrollen
         ? metadataToEpisode(item, existing)
@@ -1696,7 +1729,7 @@
         };
       map.set(nr, normalizeEpisode(enriched));
     }
-    return applyCanonicalCorrections([...map.values()].filter((episode) => episode.nr <= 248).sort((a, b) => a.nr - b.nr));
+    return applyCanonicalCorrections([...map.values()].filter((episode) => episode.nr <= 11000).sort((a, b) => a.nr - b.nr));
   }
 
   async function updateMetadata(manual = false) {
@@ -1796,6 +1829,16 @@
     });
     $('episodeSort').addEventListener('change', (event) => {
       state.sort = event.target.value;
+      pageDirty.episodes = true;
+      renderEpisodes();
+    });
+    $('authorFilter')?.addEventListener('change', (event) => {
+      state.authorFilter = event.target.value;
+      pageDirty.episodes = true;
+      renderEpisodes();
+    });
+    $('eraFilter')?.addEventListener('change', (event) => {
+      state.eraFilter = event.target.value;
       pageDirty.episodes = true;
       renderEpisodes();
     });

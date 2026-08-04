@@ -109,10 +109,10 @@
       <div class="sticky-tools">
         <label class="search-box">
           <span aria-hidden="true">⌕</span>
-          <input id="searchInput" type="search" placeholder="Titel, Figur, Handlung oder Kapitel" autocomplete="off" autocapitalize="none">
+          <input id="searchInput" type="search" placeholder="Titel, Autor, Figur, Handlung oder Kapitel" autocomplete="off" autocapitalize="none">
           <button id="clearSearch" class="clear-search hidden" type="button" aria-label="Suche löschen">×</button>
         </label>
-        <p class="search-hint">Zum Beispiel „Peters Opa“, „Skinny“, „Zirkus“ oder „böser Franzose“.</p>
+        <p class="search-hint">Zum Beispiel „André Marx“, „Peters Opa“, „Skinny“, „Zirkus“ oder „böser Franzose“.</p>
         <div id="filterChips" class="chips-scroll">
           <button class="chip active" data-filter="all">Alle</button>
           <button class="chip" data-filter="unheard">Offen</button>
@@ -125,10 +125,22 @@
           <button class="chip" data-filter="long">90+ Min.</button>
           <button class="chip" data-filter="special">Spezial</button>
         </div>
+        <div class="catalog-select-grid">
+          <select id="authorFilter" class="select-control" aria-label="Nach Autor filtern"><option value="all">Alle Autoren</option></select>
+          <select id="eraFilter" class="select-control" aria-label="Nach Ära filtern">
+            <option value="all">Alle Ären</option>
+            <option value="US-Klassiker">US-Klassiker</option>
+            <option value="Henkel-Waidhofer-Ära">Henkel-Waidhofer-Ära</option>
+            <option value="Frühe deutsche Ära">Frühe deutsche Ära</option>
+            <option value="Moderne Ära">Moderne Ära</option>
+            <option value="Spezialfolgen">Spezialfolgen</option>
+          </select>
+        </div>
         <select id="episodeSort" class="select-control" aria-label="Folgen sortieren">
           <option value="nr">Nummer aufsteigend</option>
           <option value="nr-desc">Nummer absteigend</option>
           <option value="title">Titel A–Z</option>
+          <option value="author">Autor A–Z</option>
           <option value="duration-desc">Längste zuerst</option>
           <option value="duration-asc">Kürzeste zuerst</option>
           <option value="rocky-best">Rocky-Beach: beste zuerst</option>
@@ -171,6 +183,7 @@
           <label><span>Dauer</span><div class="duration-input"><input id="planHours" type="number" min="0" max="12" value="5"><b>Std.</b><input id="planMinutes" type="number" min="0" max="59" step="5" value="0"><b>Min.</b></div></label>
           <label><span>Stimmung</span><select id="planMood"><option value="any">Bunte Mischung</option><option value="grusel">Grusel & Mystery</option><option value="klassiker">Klassiker</option><option value="meer">Meer & Insel</option><option value="familie">Familie</option><option value="skinny">Skinny Norris</option><option value="hugenay">Victor Hugenay</option><option value="kunst">Kunst & Rätsel</option></select></label>
           <label><span>Hörstatus</span><select id="planStatus"><option value="mixed">Gemischt</option><option value="unheard">Nur ungehört</option><option value="heard">Nur bekannt</option></select></label>
+          <label><span>Autor</span><select id="planAuthor"><option value="all">Alle Autoren</option></select></label>
         </div>
         <label class="planner-toggle"><input id="planContinuity" type="checkbox" checked><span><strong>Zusammenhänge beachten</strong><small>Mehrteiler, Vorgeschichten und Rückbezüge bleiben in sinnvoller Reihenfolge zusammen.</small></span></label>
         <button id="generatePlanButton" class="primary-button full">Smart Playlist erstellen</button>

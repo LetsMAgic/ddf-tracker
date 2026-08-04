@@ -13,7 +13,9 @@
       "schatz"
     ],
     "appleMusicUrl": "https://music.apple.com/de/album/1092529875",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4N9tvSjWfZXx3eHKblYEWQ"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4N9tvSjWfZXx3eHKblYEWQ",
+    "author": "Robert Arthur",
+    "era": "US-Klassiker"
   },
   {
     "nr": 2,
@@ -27,7 +29,9 @@
     "rockyRanking": 1.8223,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092530929",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0xldqK4Ocdt8dwQSxUzt6x"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0xldqK4Ocdt8dwQSxUzt6x",
+    "author": "William Arden",
+    "era": "US-Klassiker"
   },
   {
     "nr": 3,
@@ -37,7 +41,9 @@
     "rockyRanking": 1.65,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092531572",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/61OtrnMm1lqoMgMRb1aw7g"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/61OtrnMm1lqoMgMRb1aw7g",
+    "author": "M. V. Carey",
+    "era": "US-Klassiker"
   },
   {
     "nr": 4,
@@ -47,7 +53,9 @@
     "rockyRanking": 2.3752,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092538644",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2w902iYtkf0ipmTImyLlsL"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2w902iYtkf0ipmTImyLlsL",
+    "author": "William Arden",
+    "era": "US-Klassiker"
   },
   {
     "nr": 5,
@@ -59,7 +67,9 @@
     "rockyRanking": 1.783,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092528575",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/5YWM39RnabpxekZuHriTam"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/5YWM39RnabpxekZuHriTam",
+    "author": "Robert Arthur",
+    "era": "US-Klassiker"
   },
   {
     "nr": 6,
@@ -72,7 +82,9 @@
     "rockyRanking": 1.7737,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092534669",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/54eP8BYMR270sTqklv83V0"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/54eP8BYMR270sTqklv83V0",
+    "author": "Robert Arthur",
+    "era": "US-Klassiker"
   },
   {
     "nr": 7,
@@ -84,7 +96,9 @@
     "rockyRanking": 2.3353,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092528550",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3nGyW4ETDrDpInYEAQCyYS"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3nGyW4ETDrDpInYEAQCyYS",
+    "author": "Nick West",
+    "era": "US-Klassiker"
   },
   {
     "nr": 8,
@@ -96,7 +110,9 @@
     "rockyRanking": 1.8567,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092538504",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6MRsf5IcfqJIogaNqtESnh"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6MRsf5IcfqJIogaNqtESnh",
+    "author": "Robert Arthur",
+    "era": "US-Klassiker"
   },
   {
     "nr": 9,
@@ -108,7 +124,9 @@
     "rockyRanking": 2.0363,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092538040",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0aNqdp5ayuUNsOdUwu8x0b"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0aNqdp5ayuUNsOdUwu8x0b",
+    "author": "William Arden",
+    "era": "US-Klassiker"
   },
   {
     "nr": 10,
@@ -118,7 +136,9 @@
     "rockyRanking": 1.8747,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092529538",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4h75QQIxW1etThTuw6vWzg"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4h75QQIxW1etThTuw6vWzg",
+    "author": "Robert Arthur",
+    "era": "US-Klassiker"
   },
   {
     "nr": 11,
@@ -134,7 +154,9 @@
       "spuk"
     ],
     "appleMusicUrl": "https://music.apple.com/de/album/1092535180",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/07EhJ6uxWcQQWKeXJ1e8Lb"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/07EhJ6uxWcQQWKeXJ1e8Lb",
+    "author": "Robert Arthur",
+    "era": "US-Klassiker"
   },
   {
     "nr": 12,
@@ -144,7 +166,9 @@
     "rockyRanking": 1.7842,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092537786",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0bSrvyOjOzFoFJfx3uaFgk"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0bSrvyOjOzFoFJfx3uaFgk",
+    "author": "Robert Arthur",
+    "era": "US-Klassiker"
   },
   {
     "nr": 13,
@@ -157,7 +181,9 @@
     "rockyRanking": 2.2119,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092534668",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2AZ7zFBophWEIuBPjAG60I"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2AZ7zFBophWEIuBPjAG60I",
+    "author": "William Arden",
+    "era": "US-Klassiker"
   },
   {
     "nr": 14,
@@ -170,7 +196,9 @@
     "rockyRanking": 2.4466,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092538533",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3O5STjjugoL5cNKfeRuBiU"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3O5STjjugoL5cNKfeRuBiU",
+    "author": "M. V. Carey",
+    "era": "US-Klassiker"
   },
   {
     "nr": 15,
@@ -180,7 +208,9 @@
     "rockyRanking": 2.4984,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092533811",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2dQYcaTRh5qEYk2oH7WoBC"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2dQYcaTRh5qEYk2oH7WoBC",
+    "author": "Nick West",
+    "era": "US-Klassiker"
   },
   {
     "nr": 16,
@@ -190,7 +220,9 @@
     "rockyRanking": 1.8926,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092539968",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/16dOhg07DVqoSxlS7ToLM5"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/16dOhg07DVqoSxlS7ToLM5",
+    "author": "M. V. Carey",
+    "era": "US-Klassiker"
   },
   {
     "nr": 17,
@@ -200,7 +232,9 @@
     "rockyRanking": 1.6734,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092539865",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0CMsNalUakIcv6znyVLALr"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0CMsNalUakIcv6znyVLALr",
+    "author": "William Arden",
+    "era": "US-Klassiker"
   },
   {
     "nr": 18,
@@ -219,7 +253,9 @@
       "meer"
     ],
     "appleMusicUrl": "https://music.apple.com/de/album/1092529766",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/1yqICFWBL4l7fJkrFWvfWL"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/1yqICFWBL4l7fJkrFWvfWL",
+    "author": "Robert Arthur",
+    "era": "US-Klassiker"
   },
   {
     "nr": 19,
@@ -232,7 +268,9 @@
     "rockyRanking": 1.9585,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092537787",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3JqJ2zIt3UzKug7onmbmAo"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3JqJ2zIt3UzKug7onmbmAo",
+    "author": "William Arden",
+    "era": "US-Klassiker"
   },
   {
     "nr": 20,
@@ -244,7 +282,9 @@
     "rockyRanking": 2.1688,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092533372",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/5ilbdbGu5eQRUIsbslyiLe"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/5ilbdbGu5eQRUIsbslyiLe",
+    "author": "M. V. Carey",
+    "era": "US-Klassiker"
   },
   {
     "nr": 21,
@@ -256,7 +296,9 @@
     "rockyRanking": 2.1571,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092530740",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2koZEkq7vQnHjMP73gVXCo"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2koZEkq7vQnHjMP73gVXCo",
+    "author": "William Arden",
+    "era": "US-Klassiker"
   },
   {
     "nr": 22,
@@ -266,7 +308,9 @@
     "rockyRanking": 2.2962,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092530263",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/7i50aK2wKvszWNnay4DtxP"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/7i50aK2wKvszWNnay4DtxP",
+    "author": "Robert Arthur",
+    "era": "US-Klassiker"
   },
   {
     "nr": 23,
@@ -278,7 +322,9 @@
     "rockyRanking": 2.036,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092538233",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/67qFOAxbhNRHEIeOjQ9Zkp"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/67qFOAxbhNRHEIeOjQ9Zkp",
+    "author": "William Arden",
+    "era": "US-Klassiker"
   },
   {
     "nr": 24,
@@ -288,7 +334,9 @@
     "rockyRanking": 2.1138,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092541991",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/211IEWHi59nUsHx8li8G9r"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/211IEWHi59nUsHx8li8G9r",
+    "author": "Robert Arthur",
+    "era": "US-Klassiker"
   },
   {
     "nr": 25,
@@ -298,7 +346,9 @@
     "rockyRanking": 2.0521,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092535345",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6RXr8BmKNSK9Zk11k0I7Dl"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6RXr8BmKNSK9Zk11k0I7Dl",
+    "author": "M. V. Carey",
+    "era": "US-Klassiker"
   },
   {
     "nr": 26,
@@ -308,7 +358,9 @@
     "rockyRanking": 2.0701,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092541382",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2NSreywe8UbWo7BJVY3Spk"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2NSreywe8UbWo7BJVY3Spk",
+    "author": "M. V. Carey",
+    "era": "US-Klassiker"
   },
   {
     "nr": 27,
@@ -318,7 +370,9 @@
     "rockyRanking": 2.2016,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092535830",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2AisAUu4deLpNi6g6qlTLC"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2AisAUu4deLpNi6g6qlTLC",
+    "author": "M. V. Carey",
+    "era": "US-Klassiker"
   },
   {
     "nr": 28,
@@ -328,7 +382,9 @@
     "rockyRanking": 2.2472,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092534844",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/7Dbd2rya9glmBLVxclcU4d"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/7Dbd2rya9glmBLVxclcU4d",
+    "author": "William Arden",
+    "era": "US-Klassiker"
   },
   {
     "nr": 29,
@@ -350,7 +406,9 @@
       "soundtrack"
     ],
     "appleMusicUrl": "https://music.apple.com/de/album/1092538230",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/5JHijjtr65MjdNOnNvD3Ec"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/5JHijjtr65MjdNOnNvD3Ec",
+    "author": "",
+    "era": "US-Klassiker"
   },
   {
     "nr": 30,
@@ -360,7 +418,9 @@
     "rockyRanking": 2.1624,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092537830",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0zV9pnaXLuogDr6prsvb4M"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0zV9pnaXLuogDr6prsvb4M",
+    "author": "William Arden",
+    "era": "US-Klassiker"
   },
   {
     "nr": 31,
@@ -370,7 +430,9 @@
     "rockyRanking": 2.2173,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092535832",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0tPetsUWuZIC0E85x6eVN5"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0tPetsUWuZIC0E85x6eVN5",
+    "author": "M. V. Carey",
+    "era": "US-Klassiker"
   },
   {
     "nr": 32,
@@ -380,7 +442,9 @@
     "rockyRanking": 1.9425,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092535668",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/7K3VEzD1rm0dgUGBi1i5PW"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/7K3VEzD1rm0dgUGBi1i5PW",
+    "author": "M. V. Carey",
+    "era": "US-Klassiker"
   },
   {
     "nr": 33,
@@ -390,7 +454,9 @@
     "rockyRanking": 2.0744,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092551507",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/1imKVIfJIM0vKNymevqKjP"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/1imKVIfJIM0vKNymevqKjP",
+    "author": "M. V. Carey",
+    "era": "US-Klassiker"
   },
   {
     "nr": 34,
@@ -400,7 +466,9 @@
     "rockyRanking": 2.5631,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092530380",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2L18qTB1EfS4FuBk2M6QwV"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2L18qTB1EfS4FuBk2M6QwV",
+    "author": "William Arden",
+    "era": "US-Klassiker"
   },
   {
     "nr": 35,
@@ -410,7 +478,9 @@
     "rockyRanking": 2.3399,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092542351",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2REEfC6tVMiYv1eKMlGiOX"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2REEfC6tVMiYv1eKMlGiOX",
+    "author": "M. V. Carey",
+    "era": "US-Klassiker"
   },
   {
     "nr": 36,
@@ -420,7 +490,9 @@
     "rockyRanking": 2.9022,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092537257",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4R24oyyqxGkczNpqWGCXBZ"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4R24oyyqxGkczNpqWGCXBZ",
+    "author": "Marc Brandel",
+    "era": "US-Klassiker"
   },
   {
     "nr": 37,
@@ -430,7 +502,9 @@
     "rockyRanking": 2.3062,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092529767",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6R4gnRHXKgw2cxneWgTiEL"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6R4gnRHXKgw2cxneWgTiEL",
+    "author": "M. V. Carey",
+    "era": "US-Klassiker"
   },
   {
     "nr": 38,
@@ -440,7 +514,9 @@
     "rockyRanking": 2.197,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092534775",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6d3Pavm0enVICdOvBEqxYA"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6d3Pavm0enVICdOvBEqxYA",
+    "author": "M. V. Carey",
+    "era": "US-Klassiker"
   },
   {
     "nr": 39,
@@ -450,7 +526,9 @@
     "rockyRanking": 2.3166,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092538232",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0AKPkUh4ElyZNipc0lZoiR"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0AKPkUh4ElyZNipc0lZoiR",
+    "author": "Marc Brandel",
+    "era": "US-Klassiker"
   },
   {
     "nr": 40,
@@ -462,7 +540,9 @@
     "rockyRanking": 2.7605,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092531916",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2IIw1KESZrJQBFdZQAWcKY"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2IIw1KESZrJQBFdZQAWcKY",
+    "author": "William Arden",
+    "era": "US-Klassiker"
   },
   {
     "nr": 41,
@@ -472,7 +552,9 @@
     "rockyRanking": 2.614,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092527886",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/5KUXX8H2LNsuik46M5XLx0"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/5KUXX8H2LNsuik46M5XLx0",
+    "author": "Rose Estes",
+    "era": "US-Klassiker"
   },
   {
     "nr": 42,
@@ -482,7 +564,9 @@
     "rockyRanking": 2.7552,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092538531",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/24bba3w45LGGm7ps3qonkc"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/24bba3w45LGGm7ps3qonkc",
+    "author": "Megan Stine",
+    "era": "US-Klassiker"
   },
   {
     "nr": 43,
@@ -494,7 +578,9 @@
     "rockyRanking": 3.1569,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092501646",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/48QVzskevXtA0KpJjXzvb1"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/48QVzskevXtA0KpJjXzvb1",
+    "author": "M. V. Carey",
+    "era": "US-Klassiker"
   },
   {
     "nr": 44,
@@ -504,7 +590,9 @@
     "rockyRanking": 3.0552,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092532671",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6JNNLdq9ELeKENK3RmxLWQ"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6JNNLdq9ELeKENK3RmxLWQ",
+    "author": "Marc Brandel",
+    "era": "US-Klassiker"
   },
   {
     "nr": 45,
@@ -516,7 +604,9 @@
     "rockyRanking": 2.4871,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092504628",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/39mWWzaUZp0AXyN9Vnp4od"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/39mWWzaUZp0AXyN9Vnp4od",
+    "author": "William Arden",
+    "era": "US-Klassiker"
   },
   {
     "nr": 46,
@@ -528,7 +618,9 @@
     "rockyRanking": 2.7102,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092503388",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6YX4i7aMCYmn20zvAFM3lG"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6YX4i7aMCYmn20zvAFM3lG",
+    "author": "M. V. Carey",
+    "era": "US-Klassiker"
   },
   {
     "nr": 47,
@@ -538,7 +630,9 @@
     "rockyRanking": 2.6854,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092503309",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3iWNsrEs9D0FFlKFfscdvL"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3iWNsrEs9D0FFlKFfscdvL",
+    "author": "Megan & H. William Stine",
+    "era": "US-Klassiker"
   },
   {
     "nr": 48,
@@ -548,7 +642,9 @@
     "rockyRanking": 2.7518,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092518600",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/5IRxm1lo35PttzU8YLslZy"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/5IRxm1lo35PttzU8YLslZy",
+    "author": "G. H. Stone",
+    "era": "US-Klassiker"
   },
   {
     "nr": 49,
@@ -561,7 +657,9 @@
     "rockyRanking": 2.5521,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092503380",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/7t2SteAH5OnLLC1ghTAmka"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/7t2SteAH5OnLLC1ghTAmka",
+    "author": "William McCay",
+    "era": "US-Klassiker"
   },
   {
     "nr": 50,
@@ -571,7 +669,9 @@
     "rockyRanking": 3.0528,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1092502471",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6DKfjDIB1BSYRGAi2YJYm3"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6DKfjDIB1BSYRGAi2YJYm3",
+    "author": "Megan & H. William Stine",
+    "era": "US-Klassiker"
   },
   {
     "nr": 51,
@@ -581,7 +681,9 @@
     "rockyRanking": 2.5176,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1110312706",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/71kiy6INV3LzsCddpTZoHf"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/71kiy6INV3LzsCddpTZoHf",
+    "author": "Marc Brandel",
+    "era": "US-Klassiker"
   },
   {
     "nr": 52,
@@ -593,7 +695,9 @@
     "rockyRanking": 3.065,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1110311863",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3pXJh2A9gYzNt22rEIE5q7"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3pXJh2A9gYzNt22rEIE5q7",
+    "author": "G. H. Stone",
+    "era": "US-Klassiker"
   },
   {
     "nr": 53,
@@ -605,7 +709,9 @@
     "rockyRanking": 2.9762,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1110316053",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0F9ebKwTd5RNZZOu49lWuF"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0F9ebKwTd5RNZZOu49lWuF",
+    "author": "William Arden",
+    "era": "US-Klassiker"
   },
   {
     "nr": 54,
@@ -618,7 +724,9 @@
     "rockyRanking": 2.9948,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1110318678",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/1Fg15cBLFliy6Kr60QqRan"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/1Fg15cBLFliy6Kr60QqRan",
+    "author": "Peter Lerangis",
+    "era": "US-Klassiker"
   },
   {
     "nr": 55,
@@ -628,7 +736,9 @@
     "rockyRanking": 3.2165,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1110318637",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4oH2GUWlSSsSgVkxyPVHX1"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4oH2GUWlSSsSgVkxyPVHX1",
+    "author": "Megan & H. William Stine",
+    "era": "US-Klassiker"
   },
   {
     "nr": 56,
@@ -641,7 +751,9 @@
     "rockyRanking": 3.1109,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1110323229",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3fotka2Hbq0N7V9KKWIDdw"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3fotka2Hbq0N7V9KKWIDdw",
+    "author": "G. H. Stone",
+    "era": "US-Klassiker"
   },
   {
     "nr": 57,
@@ -659,7 +771,9 @@
       "zirkus"
     ],
     "appleMusicUrl": "https://music.apple.com/de/album/1110322732",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/5W6dRiaeSVE7zUBYHbepak"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/5W6dRiaeSVE7zUBYHbepak",
+    "author": "Brigitte Johanna Henkel-Waidhofer",
+    "era": "Henkel-Waidhofer-Ära"
   },
   {
     "nr": 58,
@@ -669,7 +783,9 @@
     "rockyRanking": 3.1266,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1110322633",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6DWykdlgf60Mq02hPAGYVD"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6DWykdlgf60Mq02hPAGYVD",
+    "author": "Brigitte Johanna Henkel-Waidhofer",
+    "era": "Henkel-Waidhofer-Ära"
   },
   {
     "nr": 59,
@@ -679,7 +795,9 @@
     "rockyRanking": 3.2831,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1110323285",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2qcA1EqAoUsqxXqIivY6Zc"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2qcA1EqAoUsqxXqIivY6Zc",
+    "author": "Brigitte Johanna Henkel-Waidhofer",
+    "era": "Henkel-Waidhofer-Ära"
   },
   {
     "nr": 60,
@@ -689,7 +807,9 @@
     "rockyRanking": 3.709,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1110323342",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/7cBoiWgh1bTMZmCwJE0eMu"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/7cBoiWgh1bTMZmCwJE0eMu",
+    "author": "Brigitte Johanna Henkel-Waidhofer",
+    "era": "Henkel-Waidhofer-Ära"
   },
   {
     "nr": 61,
@@ -702,7 +822,9 @@
     "rockyRanking": 3.1527,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1110773048",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/26M4ktHp3isOX6XJazAxPn"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/26M4ktHp3isOX6XJazAxPn",
+    "author": "Brigitte Johanna Henkel-Waidhofer",
+    "era": "Henkel-Waidhofer-Ära"
   },
   {
     "nr": 62,
@@ -715,7 +837,9 @@
     "rockyRanking": 2.3808,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1110774403",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0biXUv1uGUaVsPcw8nAZCY"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0biXUv1uGUaVsPcw8nAZCY",
+    "author": "Brigitte Johanna Henkel-Waidhofer",
+    "era": "Henkel-Waidhofer-Ära"
   },
   {
     "nr": 63,
@@ -723,12 +847,23 @@
     "beschreibung": "Stichworte: krimi, humor",
     "tags": [
       "krimi",
-      "humor"
+      "humor",
+      "Sport",
+      "Fußball"
     ],
     "rockyRanking": 4.0954,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1110774845",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/5GPTZKrD7eaCp9p6VOBuIN"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/5GPTZKrD7eaCp9p6VOBuIN",
+    "author": "Brigitte Johanna Henkel-Waidhofer",
+    "era": "Henkel-Waidhofer-Ära",
+    "searchKeywords": [
+      "fußball",
+      "stadion",
+      "spieler",
+      "sport",
+      "turnier"
+    ]
   },
   {
     "nr": 64,
@@ -741,7 +876,9 @@
     "rockyRanking": 2.8216,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1110774478",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0tmMvsGyWRzVckCYgkvve3"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0tmMvsGyWRzVckCYgkvve3",
+    "author": "Brigitte Johanna Henkel-Waidhofer",
+    "era": "Henkel-Waidhofer-Ära"
   },
   {
     "nr": 65,
@@ -753,7 +890,9 @@
     "rockyRanking": 3.0423,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1110776310",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/62z7yW4RKhhuAp0RklmNvc"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/62z7yW4RKhhuAp0RklmNvc",
+    "author": "Brigitte Johanna Henkel-Waidhofer",
+    "era": "Henkel-Waidhofer-Ära"
   },
   {
     "nr": 66,
@@ -766,7 +905,9 @@
     "rockyRanking": 3.2754,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1110777991",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6qj4LD0zotutkIgEg9OvDj"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6qj4LD0zotutkIgEg9OvDj",
+    "author": "Brigitte Johanna Henkel-Waidhofer",
+    "era": "Henkel-Waidhofer-Ära"
   },
   {
     "nr": 67,
@@ -778,7 +919,9 @@
     "rockyRanking": 3.1952,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1110778079",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/7Hjk98j1FSrHV5IHWmeeFh"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/7Hjk98j1FSrHV5IHWmeeFh",
+    "author": "Brigitte Johanna Henkel-Waidhofer",
+    "era": "Henkel-Waidhofer-Ära"
   },
   {
     "nr": 68,
@@ -791,7 +934,9 @@
     "rockyRanking": 3.3181,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1110779156",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/21pUsEhxssm6fvumGFmi35"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/21pUsEhxssm6fvumGFmi35",
+    "author": "Brigitte Johanna Henkel-Waidhofer",
+    "era": "Henkel-Waidhofer-Ära"
   },
   {
     "nr": 69,
@@ -803,7 +948,9 @@
     "rockyRanking": 2.9668,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1110780549",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2erJcBofKBO6GFMqDPppsU"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2erJcBofKBO6GFMqDPppsU",
+    "author": "Brigitte Johanna Henkel-Waidhofer",
+    "era": "Henkel-Waidhofer-Ära"
   },
   {
     "nr": 70,
@@ -813,7 +960,9 @@
     "rockyRanking": 3.3782,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1110781480",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4mlQEwk6I0XuksZCYTtatz"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4mlQEwk6I0XuksZCYTtatz",
+    "author": "Brigitte Johanna Henkel-Waidhofer",
+    "era": "Henkel-Waidhofer-Ära"
   },
   {
     "nr": 71,
@@ -823,7 +972,9 @@
     "rockyRanking": 2.981,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112949182",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6EEN6onzbHIOxnwUkGfKhv"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6EEN6onzbHIOxnwUkGfKhv",
+    "author": "Brigitte Johanna Henkel-Waidhofer",
+    "era": "Henkel-Waidhofer-Ära"
   },
   {
     "nr": 72,
@@ -833,7 +984,9 @@
     "rockyRanking": 3.2193,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112951262",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2GQjkF0ceIse6jVZkUuAQc"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2GQjkF0ceIse6jVZkUuAQc",
+    "author": "Brigitte Johanna Henkel-Waidhofer",
+    "era": "Henkel-Waidhofer-Ära"
   },
   {
     "nr": 73,
@@ -845,7 +998,9 @@
     "rockyRanking": 1.9835,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112954575",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/1K8kXLhNnHSdPvtUwf74DE"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/1K8kXLhNnHSdPvtUwf74DE",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 74,
@@ -855,7 +1010,9 @@
     "rockyRanking": 2.2694,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112953470",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/69VLqtWA1bpguYRCFRAxQl"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/69VLqtWA1bpguYRCFRAxQl",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 75,
@@ -868,7 +1025,9 @@
     "rockyRanking": 2.1556,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112955599",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2IqfdlQamN3vCWN3CKLEVI"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2IqfdlQamN3vCWN3CKLEVI",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 76,
@@ -878,7 +1037,9 @@
     "rockyRanking": 1.9313,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112958296",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6RDPGc2budsdTw1lj8f2O5"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6RDPGc2budsdTw1lj8f2O5",
+    "author": "André Minninger",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 77,
@@ -890,7 +1051,9 @@
     "rockyRanking": 2.9749,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112957080",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3CMN8Y4kjoG4sFwlOEpfsV"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3CMN8Y4kjoG4sFwlOEpfsV",
+    "author": "Ben Nevis",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 78,
@@ -900,7 +1063,9 @@
     "rockyRanking": 2.1887,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112959233",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6t7Y1H4dUM0d4JycenVskN"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6t7Y1H4dUM0d4JycenVskN",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 79,
@@ -910,7 +1075,9 @@
     "rockyRanking": 2.6699,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112961664",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/1rDYlXZy6vN4wqqQ6buqOr"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/1rDYlXZy6vN4wqqQ6buqOr",
+    "author": "André Minninger",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 80,
@@ -923,19 +1090,32 @@
     "rockyRanking": 2.881,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112960657",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4izXuApLzBWtWHrFqgcrxL"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4izXuApLzBWtWHrFqgcrxL",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 81,
     "titel": "Verdeckte Fouls",
     "beschreibung": "Stichworte: krimi",
     "tags": [
-      "krimi"
+      "krimi",
+      "Sport",
+      "Fußball"
     ],
     "rockyRanking": 3.6414,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112967702",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2s5u6hCaMpTIvZtBRvQzha"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2s5u6hCaMpTIvZtBRvQzha",
+    "author": "Ben Nevis",
+    "era": "Frühe deutsche Ära",
+    "searchKeywords": [
+      "fußball",
+      "stadion",
+      "spieler",
+      "sport",
+      "turnier"
+    ]
   },
   {
     "nr": 82,
@@ -947,7 +1127,9 @@
     "rockyRanking": 2.907,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112971448",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/7iysTnwaaFrPPWAuUyyi0c"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/7iysTnwaaFrPPWAuUyyi0c",
+    "author": "André Minninger",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 83,
@@ -960,7 +1142,9 @@
     "rockyRanking": 2.3285,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112967082",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3yofHdHiOLtVZlxWCZ4XBB"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3yofHdHiOLtVZlxWCZ4XBB",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 84,
@@ -973,7 +1157,9 @@
     "rockyRanking": 2.0451,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112968659",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3bhsXwKIDwVK5LTkDCICp0"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3bhsXwKIDwVK5LTkDCICp0",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 85,
@@ -983,7 +1169,9 @@
     "rockyRanking": 2.3905,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112967184",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2eeodcwD9HXpcA2rvoFkIq"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2eeodcwD9HXpcA2rvoFkIq",
+    "author": "Ben Nevis",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 86,
@@ -1001,7 +1189,9 @@
       "zug"
     ],
     "appleMusicUrl": "https://music.apple.com/de/album/1112972382",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4uF9MjchYgq5jjPi5x5YZy"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4uF9MjchYgq5jjPi5x5YZy",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 87,
@@ -1011,7 +1201,9 @@
     "rockyRanking": 2.2091,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112972302",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/1KpWkUQaj5ECJsrb8SrPl4"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/1KpWkUQaj5ECJsrb8SrPl4",
+    "author": "Katharina Fischer",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 88,
@@ -1024,7 +1216,9 @@
     "rockyRanking": 3.3471,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112975108",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3CZCwdMpj2jnjI43ZlnY5T"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3CZCwdMpj2jnjI43ZlnY5T",
+    "author": "André Minninger",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 89,
@@ -1036,7 +1230,9 @@
     "rockyRanking": 1.9708,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112975061",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3TcIn19pVz5LXE8UleuLuX"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3TcIn19pVz5LXE8UleuLuX",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 90,
@@ -1048,7 +1244,9 @@
     "rockyRanking": 2.2678,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112976055",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2dlgtHB8z7ZhSl1fsSb0Ic"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2dlgtHB8z7ZhSl1fsSb0Ic",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 91,
@@ -1058,7 +1256,9 @@
     "rockyRanking": 1.9449,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112977101",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0Jh7gzQaOscoFndb3raq2l"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0Jh7gzQaOscoFndb3raq2l",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 92,
@@ -1071,7 +1271,9 @@
     "rockyRanking": 3.7225,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112977700",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/7yMRFgR8FRyWwiLHzQQa2B"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/7yMRFgR8FRyWwiLHzQQa2B",
+    "author": "Ben Nevis",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 93,
@@ -1084,7 +1286,9 @@
     "rockyRanking": 2.3304,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112981466",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/7a9rwqPkVdU4FC2cWFudVO"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/7a9rwqPkVdU4FC2cWFudVO",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 94,
@@ -1096,7 +1300,9 @@
     "rockyRanking": 3.0569,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112983262",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3UHj03eU7OnDuMVCTLbmcj"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3UHj03eU7OnDuMVCTLbmcj",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 95,
@@ -1108,7 +1314,9 @@
     "rockyRanking": 2.6118,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112985296",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4KEZWleMTT8lDaQDLgozFc"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4KEZWleMTT8lDaQDLgozFc",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 96,
@@ -1118,7 +1326,9 @@
     "rockyRanking": 2.2972,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112992823",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/5ub4r9Q0YVMrWuOEesu6dR"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/5ub4r9Q0YVMrWuOEesu6dR",
+    "author": "Katharina Fischer",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 97,
@@ -1128,7 +1338,9 @@
     "rockyRanking": 2.614,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112991670",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2bfJa4PRKVb7as86HZv8Df"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2bfJa4PRKVb7as86HZv8Df",
+    "author": "André Minninger",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 98,
@@ -1140,7 +1352,9 @@
     "rockyRanking": 2.2936,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112993706",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4C4o7tHpT20QrdsvmI70uI"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4C4o7tHpT20QrdsvmI70uI",
+    "author": "Ben Nevis",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 99,
@@ -1152,7 +1366,9 @@
     "rockyRanking": 2.3636,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112993619",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3haGZZ8x7PyaGxiqcLmLf9"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3haGZZ8x7PyaGxiqcLmLf9",
+    "author": "André Minninger",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 100,
@@ -1173,7 +1389,9 @@
       "toteninsel"
     ],
     "appleMusicUrl": "https://music.apple.com/de/album/1112996835",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6zwBnyiy9Hy9TAser0DOuL"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6zwBnyiy9Hy9TAser0DOuL",
+    "author": "",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 101,
@@ -1185,7 +1403,9 @@
     "rockyRanking": 2.9182,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112995195",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/1DZAe0qMw8Pq9EPoX6gETA"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/1DZAe0qMw8Pq9EPoX6gETA",
+    "author": "André Minninger",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 102,
@@ -1197,7 +1417,9 @@
     "rockyRanking": 2.3478,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112995814",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3NYWEuwAPt4PIJ4OeNxmzO"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3NYWEuwAPt4PIJ4OeNxmzO",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 103,
@@ -1217,7 +1439,9 @@
       "victor hugenay"
     ],
     "appleMusicUrl": "https://music.apple.com/de/album/1112995942",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4ADdmpObDUmBdvyJ9oNz5o"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4ADdmpObDUmBdvyJ9oNz5o",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 104,
@@ -1227,7 +1451,9 @@
     "rockyRanking": 2.9324,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112998433",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6joRNVLN69v3eSnxM86BSM"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6joRNVLN69v3eSnxM86BSM",
+    "author": "Ben Nevis",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 105,
@@ -1240,7 +1466,9 @@
     "rockyRanking": 1.8243,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1112996544",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6Mi4Smq7Fn8qNOg6Xnf0In"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6Mi4Smq7Fn8qNOg6Xnf0In",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 106,
@@ -1250,7 +1478,9 @@
     "rockyRanking": 3.6718,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1115173891",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4eX1wH67TDcYPZ1ZsjtPb6"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4eX1wH67TDcYPZ1ZsjtPb6",
+    "author": "André Minninger",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 107,
@@ -1260,7 +1490,9 @@
     "rockyRanking": 2.3682,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1115175534",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3kBby5GJMI4U97XljKcPFD"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3kBby5GJMI4U97XljKcPFD",
+    "author": "Ben Nevis",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 108,
@@ -1270,7 +1502,9 @@
     "rockyRanking": 2.1222,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1115207494",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3v4W4AFaI8uO7J88ojaSkS"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3v4W4AFaI8uO7J88ojaSkS",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 109,
@@ -1282,7 +1516,9 @@
     "rockyRanking": 3.1729,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1115197863",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4RZllDAKF3DeDz6jZJFXTa"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4RZllDAKF3DeDz6jZJFXTa",
+    "author": "Marco Sonnleitner",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 110,
@@ -1292,7 +1528,9 @@
     "rockyRanking": 3.517,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1115199675",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/1OBHPhBUih26oQTqxLvJTQ"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/1OBHPhBUih26oQTqxLvJTQ",
+    "author": "Marco Sonnleitner",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 111,
@@ -1302,7 +1540,9 @@
     "rockyRanking": 2.4543,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1115200110",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/7b9OiVsktCZyldiAnjkVDx"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/7b9OiVsktCZyldiAnjkVDx",
+    "author": "Ben Nevis",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 112,
@@ -1314,7 +1554,9 @@
     "rockyRanking": 3.3222,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1115201471",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0WBhXS0uAYuL1sYb6vjYeS"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0WBhXS0uAYuL1sYb6vjYeS",
+    "author": "Marco Sonnleitner",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 113,
@@ -1327,7 +1569,9 @@
     "rockyRanking": 2.1282,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1115202256",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3bFvjy9IyWd7GrzN2dr0Hi"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3bFvjy9IyWd7GrzN2dr0Hi",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 114,
@@ -1341,7 +1585,9 @@
     "rockyRanking": 2.1288,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1115204879",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/5L2KCw21QT3JKg1KKuqSeF"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/5L2KCw21QT3JKg1KKuqSeF",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 115,
@@ -1351,7 +1597,9 @@
     "rockyRanking": 2.4458,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1115207538",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/5Hafee7JOUqNVqtsrCtrTZ"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/5Hafee7JOUqNVqtsrCtrTZ",
+    "author": "Ben Nevis",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 116,
@@ -1361,7 +1609,9 @@
     "rockyRanking": 3.1537,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1144029965",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3piMnopGsrEAKd1EZxsU3i"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3piMnopGsrEAKd1EZxsU3i",
+    "author": "Marco Sonnleitner",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 117,
@@ -1371,7 +1621,9 @@
     "rockyRanking": 2.281,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1144029626",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3rxr4SLE2EG0EAlpSeI99o"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3rxr4SLE2EG0EAlpSeI99o",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 118,
@@ -1381,7 +1633,9 @@
     "rockyRanking": 2.7043,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1144029104",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/1GKXpMQRKEyZI8pL62VUIP"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/1GKXpMQRKEyZI8pL62VUIP",
+    "author": "Ben Nevis",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 119,
@@ -1393,7 +1647,9 @@
     "rockyRanking": 2.18,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1144030186",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/7rPDg8NlFJ1a2HMTQvVaB2"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/7rPDg8NlFJ1a2HMTQvVaB2",
+    "author": "André Marx",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 120,
@@ -1403,7 +1659,9 @@
     "rockyRanking": 2.9047,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1144029397",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6fVTJQKJBku1yaOmZOnfwg"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6fVTJQKJBku1yaOmZOnfwg",
+    "author": "Marco Sonnleitner",
+    "era": "Frühe deutsche Ära"
   },
   {
     "nr": 121,
@@ -1415,7 +1673,9 @@
     "rockyRanking": 2.1367,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1146357252",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6d21lwV9Imn3ObWUyV1UN2"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6d21lwV9Imn3ObWUyV1UN2",
+    "author": "André Marx",
+    "era": "Moderne Ära"
   },
   {
     "nr": 122,
@@ -1429,19 +1689,32 @@
     "rockyRanking": 2.2565,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1146358292",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/68NWcgqeCQMZ3QcPJXBhzH"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/68NWcgqeCQMZ3QcPJXBhzH",
+    "author": "Astrid Vollenbruch",
+    "era": "Moderne Ära"
   },
   {
     "nr": 123,
     "titel": "Fußballfieber",
     "beschreibung": "Stichworte: humor",
     "tags": [
-      "humor"
+      "humor",
+      "Sport",
+      "Fußball"
     ],
     "rockyRanking": 3.4913,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1146357190",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3HgetGSMzg6bGM6b67YZcj"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3HgetGSMzg6bGM6b67YZcj",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära",
+    "searchKeywords": [
+      "fußball",
+      "stadion",
+      "spieler",
+      "sport",
+      "turnier"
+    ]
   },
   {
     "nr": 124,
@@ -1454,7 +1727,9 @@
     "rockyRanking": 2.3455,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1146357253",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0LoesJ9VnJPrlvIDz4u4Xt"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0LoesJ9VnJPrlvIDz4u4Xt",
+    "author": "Ben Nevis",
+    "era": "Moderne Ära"
   },
   {
     "nr": 125,
@@ -1471,7 +1746,9 @@
       "meisterdieb"
     ],
     "appleMusicUrl": "https://music.apple.com/de/album/1146359675",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0sIRyuExi7jBQmOpHyyY78"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0sIRyuExi7jBQmOpHyyY78",
+    "author": "",
+    "era": "Moderne Ära"
   },
   {
     "nr": 126,
@@ -1484,7 +1761,9 @@
     "rockyRanking": 2.4521,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1148510489",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0AnyLaLPx339iGaxjqVfob"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0AnyLaLPx339iGaxjqVfob",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 127,
@@ -1496,7 +1775,9 @@
     "rockyRanking": 2.5606,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1148511050",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0mp5HVWlYinEYa7Y4Q2vau"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0mp5HVWlYinEYa7Y4Q2vau",
+    "author": "Astrid Vollenbruch",
+    "era": "Moderne Ära"
   },
   {
     "nr": 128,
@@ -1510,7 +1791,9 @@
     "rockyRanking": 2.3977,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1148509989",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3XXYXmCEe185oHxigCRo97"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3XXYXmCEe185oHxigCRo97",
+    "author": "Astrid Vollenbruch",
+    "era": "Moderne Ära"
   },
   {
     "nr": 129,
@@ -1520,7 +1803,9 @@
     "rockyRanking": 2.7332,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1148510004",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/1lD4RdnibVS7QhtZqCal9E"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/1lD4RdnibVS7QhtZqCal9E",
+    "author": "Ben Nevis",
+    "era": "Moderne Ära"
   },
   {
     "nr": 130,
@@ -1534,7 +1819,9 @@
     "rockyRanking": 2.2385,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1148510023",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/5l5CFSjzSdhbflqmplcTFX"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/5l5CFSjzSdhbflqmplcTFX",
+    "author": "André Marx",
+    "era": "Moderne Ära"
   },
   {
     "nr": 131,
@@ -1547,7 +1834,9 @@
     "rockyRanking": 1.949,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1148627701",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4eorcDi9eRfsi7X0A91Z7u"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4eorcDi9eRfsi7X0A91Z7u",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 132,
@@ -1561,7 +1850,9 @@
     "rockyRanking": 3.0865,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1148643722",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/23wcElHGWpunC23ggr4PcW"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/23wcElHGWpunC23ggr4PcW",
+    "author": "Astrid Vollenbruch",
+    "era": "Moderne Ära"
   },
   {
     "nr": 133,
@@ -1573,7 +1864,9 @@
     "rockyRanking": 2.9159,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1148646414",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/1juMQy6yZVmk9Za6HeiicB"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/1juMQy6yZVmk9Za6HeiicB",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 134,
@@ -1585,7 +1878,9 @@
     "rockyRanking": 2.7619,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1148648763",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/1Cta130Rwp5vH1ddfAChbU"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/1Cta130Rwp5vH1ddfAChbU",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 135,
@@ -1597,7 +1892,9 @@
     "rockyRanking": 2.7,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1148649918",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0TmWLedytkxVuP9b5Hqeqq"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0TmWLedytkxVuP9b5Hqeqq",
+    "author": "Ben Nevis",
+    "era": "Moderne Ära"
   },
   {
     "nr": 136,
@@ -1609,7 +1906,9 @@
     "rockyRanking": 1.8373,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1148657366",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/5HiWGQmaCRaxdaon49Iw9S"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/5HiWGQmaCRaxdaon49Iw9S",
+    "author": "André Marx",
+    "era": "Moderne Ära"
   },
   {
     "nr": 137,
@@ -1619,7 +1918,9 @@
     "rockyRanking": 2.8231,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1148657349",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3m7fR2wOkytZHq9m4QeBkB"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3m7fR2wOkytZHq9m4QeBkB",
+    "author": "Astrid Vollenbruch",
+    "era": "Moderne Ära"
   },
   {
     "nr": 138,
@@ -1631,7 +1932,9 @@
     "rockyRanking": 2.7455,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1148669353",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/79enDMGQWH7LQ5weNB96g7"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/79enDMGQWH7LQ5weNB96g7",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 139,
@@ -1643,7 +1946,9 @@
     "rockyRanking": 2.6582,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1148669725",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6RJf8I60kNhnYxlnw7eTGv"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6RJf8I60kNhnYxlnw7eTGv",
+    "author": "Astrid Vollenbruch",
+    "era": "Moderne Ära"
   },
   {
     "nr": 140,
@@ -1657,19 +1962,32 @@
     "rockyRanking": 2.4762,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1148670271",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3HxAtK23R2gFkW000mdaFT"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3HxAtK23R2gFkW000mdaFT",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 141,
     "titel": "Die Fußball-Falle",
     "beschreibung": "Stichworte: humor",
     "tags": [
-      "humor"
+      "humor",
+      "Sport",
+      "Fußball"
     ],
     "rockyRanking": 3.722,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1148996010",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6gxj68DOHRSVlEM4xzwtRy"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6gxj68DOHRSVlEM4xzwtRy",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära",
+    "searchKeywords": [
+      "fußball",
+      "stadion",
+      "spieler",
+      "sport",
+      "turnier"
+    ]
   },
   {
     "nr": 142,
@@ -1679,7 +1997,9 @@
     "rockyRanking": 2.4776,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1148996011",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/71moidSHTwJsc2N70axEce"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/71moidSHTwJsc2N70axEce",
+    "author": "Kari Erlhoff",
+    "era": "Moderne Ära"
   },
   {
     "nr": 143,
@@ -1689,7 +2009,9 @@
     "rockyRanking": 3.1311,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1148998456",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4Y7Pxv7pzLmKVJowmBwOkd"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4Y7Pxv7pzLmKVJowmBwOkd",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 144,
@@ -1699,7 +2021,9 @@
     "rockyRanking": 3.2394,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1156014250",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2RxTF6MhAVOtudVNOyHTQz"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2RxTF6MhAVOtudVNOyHTQz",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 145,
@@ -1712,7 +2036,9 @@
     "rockyRanking": 2.5123,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1148999599",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6TjzBTmeDakBgh5NOGj1BC"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6TjzBTmeDakBgh5NOGj1BC",
+    "author": "Ben Nevis",
+    "era": "Moderne Ära"
   },
   {
     "nr": 146,
@@ -1722,7 +2048,9 @@
     "rockyRanking": 2.5415,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1148999592",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3D9Jf4mdOBoeyrKpffYBvy"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3D9Jf4mdOBoeyrKpffYBvy",
+    "author": "Kari Erlhoff",
+    "era": "Moderne Ära"
   },
   {
     "nr": 147,
@@ -1734,7 +2062,9 @@
     "rockyRanking": 3.228,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149001066",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/35aU9bfmxPGdjiRA4JMuFd"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/35aU9bfmxPGdjiRA4JMuFd",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 148,
@@ -1744,7 +2074,9 @@
     "rockyRanking": 2.5238,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149001129",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2uOsf31oenHRd4DVxCSjn9"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2uOsf31oenHRd4DVxCSjn9",
+    "author": "Kari Erlhoff",
+    "era": "Moderne Ära"
   },
   {
     "nr": 149,
@@ -1754,7 +2086,9 @@
     "rockyRanking": 2.1415,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149003866",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/7K7dfMc3VwHOKtENI1BWTD"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/7K7dfMc3VwHOKtENI1BWTD",
+    "author": "Kari Erlhoff",
+    "era": "Moderne Ära"
   },
   {
     "nr": 150,
@@ -1773,7 +2107,9 @@
       "jubiläum"
     ],
     "appleMusicUrl": "https://music.apple.com/de/album/1149007411",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6cPgVsZ6TPyVIP9BHP5ty5"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6cPgVsZ6TPyVIP9BHP5ty5",
+    "author": "",
+    "era": "Moderne Ära"
   },
   {
     "nr": 151,
@@ -1783,7 +2119,9 @@
     "rockyRanking": 2.7688,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149005753",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3u0OSCwiOblOhm4dKjwLN5"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3u0OSCwiOblOhm4dKjwLN5",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 152,
@@ -1795,7 +2133,9 @@
     "rockyRanking": 2.5479,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149007296",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/5iNeANVy4supl8HowB9V2h"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/5iNeANVy4supl8HowB9V2h",
+    "author": "Ben Nevis",
+    "era": "Moderne Ära"
   },
   {
     "nr": 153,
@@ -1803,12 +2143,23 @@
     "beschreibung": "Stichworte: sci-fi, humor",
     "tags": [
       "sci-fi",
-      "humor"
+      "humor",
+      "Sport",
+      "Fußball"
     ],
     "rockyRanking": 2.8394,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149006848",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/7nxSEeJiQwI34VwnWT83C9"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/7nxSEeJiQwI34VwnWT83C9",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära",
+    "searchKeywords": [
+      "fußball",
+      "stadion",
+      "spieler",
+      "sport",
+      "turnier"
+    ]
   },
   {
     "nr": 154,
@@ -1818,7 +2169,9 @@
     "rockyRanking": 2.0047,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149010695",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3uggg8gNlh1kpBxLeOfFTV"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3uggg8gNlh1kpBxLeOfFTV",
+    "author": "Kari Erlhoff",
+    "era": "Moderne Ära"
   },
   {
     "nr": 155,
@@ -1830,7 +2183,9 @@
     "rockyRanking": 1.8159,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149012184",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/623V90QowsF4WSqV3cHGKf"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/623V90QowsF4WSqV3cHGKf",
+    "author": "Kari Erlhoff",
+    "era": "Moderne Ära"
   },
   {
     "nr": 156,
@@ -1845,7 +2200,9 @@
     "rockyRanking": 2.9861,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149012208",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/78wUIvkGT2CdWW0ngeEy8V"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/78wUIvkGT2CdWW0ngeEy8V",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 157,
@@ -1855,7 +2212,9 @@
     "rockyRanking": 2.2778,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149014146",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0pdXEEgKjfh4H0aZg4IOTS"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0pdXEEgKjfh4H0aZg4IOTS",
+    "author": "Hendrik Buchna",
+    "era": "Moderne Ära"
   },
   {
     "nr": 158,
@@ -1867,7 +2226,9 @@
     "rockyRanking": 3.9774,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149014175",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3uFt95otJjaxH8o40tPtIS"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3uFt95otJjaxH8o40tPtIS",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 159,
@@ -1880,7 +2241,9 @@
     "rockyRanking": 2.3448,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149016169",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4rCAnDrNJ96srnBEoA0ISj"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4rCAnDrNJ96srnBEoA0ISj",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 160,
@@ -1892,7 +2255,9 @@
     "rockyRanking": 2.4286,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149017354",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2F6VxgWbGCUpTU9ux6Dtbi"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2F6VxgWbGCUpTU9ux6Dtbi",
+    "author": "Christoph Dittert",
+    "era": "Moderne Ära"
   },
   {
     "nr": 161,
@@ -1902,7 +2267,9 @@
     "rockyRanking": 2.4895,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149329426",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/1GEzdjI5N25iuGjvypRscs"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/1GEzdjI5N25iuGjvypRscs",
+    "author": "Kari Erlhoff",
+    "era": "Moderne Ära"
   },
   {
     "nr": 162,
@@ -1914,7 +2281,9 @@
     "rockyRanking": 1.7874,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149330399",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/7beppYTqtHAEPKoXyodssF"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/7beppYTqtHAEPKoXyodssF",
+    "author": "Hendrik Buchna",
+    "era": "Moderne Ära"
   },
   {
     "nr": 163,
@@ -1924,7 +2293,9 @@
     "rockyRanking": 2.1575,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149332439",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4fv0pPN7ZjbUiejSTxTPZh"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4fv0pPN7ZjbUiejSTxTPZh",
+    "author": "Ben Nevis",
+    "era": "Moderne Ära"
   },
   {
     "nr": 164,
@@ -1932,12 +2303,23 @@
     "beschreibung": "Stichworte: grusel, humor",
     "tags": [
       "grusel",
-      "humor"
+      "humor",
+      "Sport",
+      "Fußball"
     ],
     "rockyRanking": 3.2041,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149333141",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3An657Q0wkVp4nIDg2zpcB"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3An657Q0wkVp4nIDg2zpcB",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära",
+    "searchKeywords": [
+      "fußball",
+      "stadion",
+      "spieler",
+      "sport",
+      "turnier"
+    ]
   },
   {
     "nr": 165,
@@ -1950,7 +2332,9 @@
     "rockyRanking": 2.2448,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149333942",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4izJKxYT4fTwIZjoXNgkX7"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4izJKxYT4fTwIZjoXNgkX7",
+    "author": "Kari Erlhoff",
+    "era": "Moderne Ära"
   },
   {
     "nr": 166,
@@ -1962,7 +2346,9 @@
     "rockyRanking": 2.3543,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149334526",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/427kScPIeUSfoNKCNercMC"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/427kScPIeUSfoNKCNercMC",
+    "author": "Christoph Dittert",
+    "era": "Moderne Ära"
   },
   {
     "nr": 167,
@@ -1972,7 +2358,9 @@
     "rockyRanking": 2.7143,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149335077",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/7kskBahbrQWCOiaXKuoPjE"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/7kskBahbrQWCOiaXKuoPjE",
+    "author": "Hendrik Buchna",
+    "era": "Moderne Ära"
   },
   {
     "nr": 168,
@@ -1984,7 +2372,9 @@
     "rockyRanking": 2.7788,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149335801",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/77aawQqgLQZxPb9kwSg0JR"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/77aawQqgLQZxPb9kwSg0JR",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 169,
@@ -1996,7 +2386,9 @@
     "rockyRanking": 1.5858,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149337256",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/5PEHeYcUhz1Aq02ZB1pUgJ"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/5PEHeYcUhz1Aq02ZB1pUgJ",
+    "author": "André Marx",
+    "era": "Moderne Ära"
   },
   {
     "nr": 170,
@@ -2006,7 +2398,9 @@
     "rockyRanking": 2.4444,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149906410",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/62CKj2RCiWDDUtBWTn4KxQ"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/62CKj2RCiWDDUtBWTn4KxQ",
+    "author": "Kari Erlhoff",
+    "era": "Moderne Ära"
   },
   {
     "nr": 171,
@@ -2020,7 +2414,9 @@
     "rockyRanking": 3.1532,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149912131",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6YbaUGc6ZeR1YnDFGQJV8F"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6YbaUGc6ZeR1YnDFGQJV8F",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 172,
@@ -2030,7 +2426,9 @@
     "rockyRanking": 2.3932,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149910943",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6Anfub4AoVHg9bhJ7js0L0"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6Anfub4AoVHg9bhJ7js0L0",
+    "author": "Ben Nevis",
+    "era": "Moderne Ära"
   },
   {
     "nr": 173,
@@ -2043,7 +2441,9 @@
     "rockyRanking": 2.2455,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149354238",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2ALDCHCHdawewN1sduWVQQ"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2ALDCHCHdawewN1sduWVQQ",
+    "author": "Hendrik Buchna",
+    "era": "Moderne Ära"
   },
   {
     "nr": 174,
@@ -2056,7 +2456,9 @@
     "rockyRanking": 3.581,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149348842",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/5RoL0jdWMoJ8KRFVOeFYtX"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/5RoL0jdWMoJ8KRFVOeFYtX",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 175,
@@ -2074,17 +2476,31 @@
       "schattenwelt"
     ],
     "appleMusicUrl": "https://music.apple.com/de/album/1149344576",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4uggmrJ3Xpm1e2tcz6laze"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4uggmrJ3Xpm1e2tcz6laze",
+    "author": "",
+    "era": "Moderne Ära"
   },
   {
     "nr": 176,
     "titel": "Der gestohlene Sieg",
     "beschreibung": "Stichwortsuche über den Titel möglich.",
-    "tags": [],
+    "tags": [
+      "Sport",
+      "Fußball"
+    ],
     "rockyRanking": 3.2353,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149349243",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4qbxSVpr3NxRjdIVC411ue"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4qbxSVpr3NxRjdIVC411ue",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära",
+    "searchKeywords": [
+      "fußball",
+      "stadion",
+      "spieler",
+      "sport",
+      "turnier"
+    ]
   },
   {
     "nr": 177,
@@ -2097,7 +2513,9 @@
     "rockyRanking": 1.9845,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149354207",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0w6Khy7kpqTXrEDITf0rZ0"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0w6Khy7kpqTXrEDITf0rZ0",
+    "author": "André Marx",
+    "era": "Moderne Ära"
   },
   {
     "nr": 178,
@@ -2109,7 +2527,9 @@
     "rockyRanking": 2.5727,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149355884",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3w5glP0mzKfTanzXpAjN27"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3w5glP0mzKfTanzXpAjN27",
+    "author": "Christoph Dittert",
+    "era": "Moderne Ära"
   },
   {
     "nr": 179,
@@ -2123,7 +2543,9 @@
     "rockyRanking": 2.2727,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149356212",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4IZ7Lsm5le7HJPtaGLCrjO"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4IZ7Lsm5le7HJPtaGLCrjO",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 180,
@@ -2133,7 +2555,9 @@
     "rockyRanking": 2.7667,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149352111",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6tioH9PNiZbmUT54MsiX5k"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6tioH9PNiZbmUT54MsiX5k",
+    "author": "André Minninger",
+    "era": "Moderne Ära"
   },
   {
     "nr": 181,
@@ -2143,7 +2567,9 @@
     "rockyRanking": 2.3524,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149351738",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/18xyskqkEGnVfVFhznkFIK"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/18xyskqkEGnVfVFhznkFIK",
+    "author": "André Marx",
+    "era": "Moderne Ära"
   },
   {
     "nr": 182,
@@ -2155,7 +2581,9 @@
     "rockyRanking": 2.8969,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149351939",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4zCPToY7AoTqvOKf4HRqAN"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4zCPToY7AoTqvOKf4HRqAN",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 183,
@@ -2167,7 +2595,9 @@
     "rockyRanking": 2.4059,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1149355993",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/1qhlRmclvYWkrYkLnFxFZN"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/1qhlRmclvYWkrYkLnFxFZN",
+    "author": "Ben Nevis",
+    "era": "Moderne Ära"
   },
   {
     "nr": 184,
@@ -2179,7 +2609,9 @@
     "rockyRanking": 2.5429,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1179325253",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/5B7w9vkfh979tEyzwkLk9k"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/5B7w9vkfh979tEyzwkLk9k",
+    "author": "Kari Erlhoff",
+    "era": "Moderne Ära"
   },
   {
     "nr": 185,
@@ -2189,7 +2621,9 @@
     "rockyRanking": 2.7356,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1198202669",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/7eHh5PAxQBt5KBWzd3a10G"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/7eHh5PAxQBt5KBWzd3a10G",
+    "author": "Christoph Dittert",
+    "era": "Moderne Ära"
   },
   {
     "nr": 186,
@@ -2213,7 +2647,9 @@
       "seniorenheim"
     ],
     "appleMusicUrl": "https://music.apple.com/de/album/1207830126",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/5kevid18ttcAPK1vk0kLtc"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/5kevid18ttcAPK1vk0kLtc",
+    "author": "André Marx",
+    "era": "Moderne Ära"
   },
   {
     "nr": 187,
@@ -2223,7 +2659,9 @@
     "rockyRanking": 3.0698,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1225246976",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6uj8JeIgluMibSu8Divkbh"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6uj8JeIgluMibSu8Divkbh",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 188,
@@ -2235,7 +2673,9 @@
     "rockyRanking": 3.0891,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1257760310",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/22soWryC08ctyMNb6NrMGD"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/22soWryC08ctyMNb6NrMGD",
+    "author": "André Minninger",
+    "era": "Moderne Ära"
   },
   {
     "nr": 189,
@@ -2245,7 +2685,9 @@
     "rockyRanking": 2.2252,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1294740417",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/02MXdFaVMz0qQJjmivjI8g"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/02MXdFaVMz0qQJjmivjI8g",
+    "author": "Hendrik Buchna",
+    "era": "Moderne Ära"
   },
   {
     "nr": 190,
@@ -2257,7 +2699,9 @@
     "rockyRanking": 2.9247,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1318247066",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/100ZHoBX994GlckxjoGpma"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/100ZHoBX994GlckxjoGpma",
+    "author": "Ben Nevis",
+    "era": "Moderne Ära"
   },
   {
     "nr": 191,
@@ -2269,7 +2713,9 @@
     "rockyRanking": 3.34,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1333105792",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2ICtKWqLqMBTzi7UeByhKd"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2ICtKWqLqMBTzi7UeByhKd",
+    "author": "Kari Erlhoff",
+    "era": "Moderne Ära"
   },
   {
     "nr": 192,
@@ -2282,7 +2728,9 @@
     "rockyRanking": 3.8351,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1349191008",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/1qag2AiFcxXU1UaIgrDFff"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/1qag2AiFcxXU1UaIgrDFff",
+    "author": "Christoph Dittert",
+    "era": "Moderne Ära"
   },
   {
     "nr": 193,
@@ -2294,7 +2742,9 @@
     "rockyRanking": 2.4725,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1400669710",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4m6VlVOWfrUVhWWrueMo7p"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4m6VlVOWfrUVhWWrueMo7p",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 194,
@@ -2307,7 +2757,9 @@
     "rockyRanking": 3.6316,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1417848434",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2oKngJQA5TdxF5QcP3uZEf"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2oKngJQA5TdxF5QcP3uZEf",
+    "author": "André Minninger",
+    "era": "Moderne Ära"
   },
   {
     "nr": 195,
@@ -2317,7 +2769,9 @@
     "rockyRanking": 2.9114,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1437362850",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3pbXIzVk7CA5VM2ltxu9TN"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3pbXIzVk7CA5VM2ltxu9TN",
+    "author": "Hendrik Buchna",
+    "era": "Moderne Ära"
   },
   {
     "nr": 196,
@@ -2329,7 +2783,9 @@
     "rockyRanking": 1.802,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1441757895",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/39a7bHWZyWPxwukCHPrTly"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/39a7bHWZyWPxwukCHPrTly",
+    "author": "André Marx",
+    "era": "Moderne Ära"
   },
   {
     "nr": 197,
@@ -2339,7 +2795,9 @@
     "rockyRanking": 2.3556,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1445830975",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0GRoTtX1wI16M7GSnnN96R"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0GRoTtX1wI16M7GSnnN96R",
+    "author": "Kari Erlhoff",
+    "era": "Moderne Ära"
   },
   {
     "nr": 198,
@@ -2352,7 +2810,9 @@
     "rockyRanking": 3.8974,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1456265671",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4piiNuehCc4VjN8NBIcnRt"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4piiNuehCc4VjN8NBIcnRt",
+    "author": "Christoph Dittert",
+    "era": "Moderne Ära"
   },
   {
     "nr": 199,
@@ -2362,7 +2822,9 @@
     "rockyRanking": 2.725,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1462260403",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/7bTKP2hU0LRks1bXN1R7ko"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/7bTKP2hU0LRks1bXN1R7ko",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 200,
@@ -2377,7 +2839,9 @@
       "jubiläum"
     ],
     "appleMusicUrl": "https://music.apple.com/de/album/1462398864",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/09Ckx1JLgPsQHHGuSIt2j3"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/09Ckx1JLgPsQHHGuSIt2j3",
+    "author": "André Marx",
+    "era": "Moderne Ära"
   },
   {
     "nr": 201,
@@ -2387,7 +2851,9 @@
     "rockyRanking": 2.2427,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1470374382",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4FxNfDSXqAg8N1D8NBtvZ5"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4FxNfDSXqAg8N1D8NBtvZ5",
+    "author": "André Minninger",
+    "era": "Moderne Ära"
   },
   {
     "nr": 202,
@@ -2397,7 +2863,9 @@
     "rockyRanking": 2.049,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1479540077",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4Exxckn0GwbhnGl6N4um2N"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4Exxckn0GwbhnGl6N4um2N",
+    "author": "Ben Nevis",
+    "era": "Moderne Ära"
   },
   {
     "nr": 203,
@@ -2409,7 +2877,9 @@
     "rockyRanking": 2.7976,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1488585423",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/79Drf49yNdGLBzzHMGGmBz"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/79Drf49yNdGLBzzHMGGmBz",
+    "author": "Kari Erlhoff",
+    "era": "Moderne Ära"
   },
   {
     "nr": 204,
@@ -2419,7 +2889,9 @@
     "rockyRanking": 2.2237,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1494861137",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/1yMMjH3tDN9GyXiADzTkL9"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/1yMMjH3tDN9GyXiADzTkL9",
+    "author": "Ben Nevis",
+    "era": "Moderne Ära"
   },
   {
     "nr": 205,
@@ -2431,7 +2903,9 @@
     "rockyRanking": 2.9437,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1501321342",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2Sw9FBHOoT6fBhYxHsRFxq"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2Sw9FBHOoT6fBhYxHsRFxq",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 206,
@@ -2441,7 +2915,9 @@
     "rockyRanking": 2.4177,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1508160053",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/7khAMIQlYBmW7mI9cphDhJ"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/7khAMIQlYBmW7mI9cphDhJ",
+    "author": "Christoph Dittert",
+    "era": "Moderne Ära"
   },
   {
     "nr": 207,
@@ -2453,7 +2929,9 @@
     "rockyRanking": 2.4875,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1520380006",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6BxvBG51szGmlg5x3F1rHj"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6BxvBG51szGmlg5x3F1rHj",
+    "author": "Ben Nevis",
+    "era": "Moderne Ära"
   },
   {
     "nr": 208,
@@ -2463,7 +2941,9 @@
     "rockyRanking": 2.8438,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1529406670",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6WgRUQY49NRG6JT6dJ4xEq"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6WgRUQY49NRG6JT6dJ4xEq",
+    "author": "Kari Erlhoff",
+    "era": "Moderne Ära"
   },
   {
     "nr": 209,
@@ -2475,7 +2955,9 @@
     "rockyRanking": 3.6935,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1543186727",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0q4FbI22wSMrzgWh5vgHi9"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0q4FbI22wSMrzgWh5vgHi9",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 210,
@@ -2485,7 +2967,9 @@
     "rockyRanking": 2.3521,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1555455044",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3ieWqOL150wJOcft7iZHKZ"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3ieWqOL150wJOcft7iZHKZ",
+    "author": "Christoph Dittert",
+    "era": "Moderne Ära"
   },
   {
     "nr": 211,
@@ -2495,7 +2979,9 @@
     "rockyRanking": 2.0,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1569609366",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/7pZotNNAYOkeHNvJRKzYRk"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/7pZotNNAYOkeHNvJRKzYRk",
+    "author": "André Marx",
+    "era": "Moderne Ära"
   },
   {
     "nr": 212,
@@ -2507,7 +2993,9 @@
     "rockyRanking": 2.4706,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1575573696",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2zHMeFNQQxKOmUgmppOjIM"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2zHMeFNQQxKOmUgmppOjIM",
+    "author": "Hendrik Buchna",
+    "era": "Moderne Ära"
   },
   {
     "nr": 213,
@@ -2519,7 +3007,9 @@
     "rockyRanking": 2.4923,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1585776843",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4BZfSV9maCil4l4yftT74F"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4BZfSV9maCil4l4yftT74F",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 214,
@@ -2531,7 +3021,9 @@
     "rockyRanking": 2.3973,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1593847687",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/1cJ3fNx6K47p4eDFqhnvsA"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/1cJ3fNx6K47p4eDFqhnvsA",
+    "author": "Ben Nevis",
+    "era": "Moderne Ära"
   },
   {
     "nr": 215,
@@ -2543,7 +3035,9 @@
     "rockyRanking": 2.6102,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1606130509",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/76pYNMMVZTiuNy3IoXcavU"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/76pYNMMVZTiuNy3IoXcavU",
+    "author": "Christoph Dittert",
+    "era": "Moderne Ära"
   },
   {
     "nr": 216,
@@ -2553,7 +3047,9 @@
     "rockyRanking": 3.125,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1612467355",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2BkEUZY7Da7bqlUjmMA2Cq"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2BkEUZY7Da7bqlUjmMA2Cq",
+    "author": "Hendrik Buchna",
+    "era": "Moderne Ära"
   },
   {
     "nr": 217,
@@ -2565,7 +3061,9 @@
     "rockyRanking": 1.8676,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1683338536",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/1WlRnNunbHpnRTTVkxMRnd"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/1WlRnNunbHpnRTTVkxMRnd",
+    "author": "André Marx",
+    "era": "Moderne Ära"
   },
   {
     "nr": 218,
@@ -2578,7 +3076,9 @@
     "rockyRanking": 2.0,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1683338209",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2WwOKZLpFWrvw3O9CISod1"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2WwOKZLpFWrvw3O9CISod1",
+    "author": "Kari Erlhoff",
+    "era": "Moderne Ära"
   },
   {
     "nr": 219,
@@ -2590,7 +3090,9 @@
     "rockyRanking": 1.9844,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1683339377",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6ewdyVIW2LurJhYGU0UBAa"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6ewdyVIW2LurJhYGU0UBAa",
+    "author": "Ben Nevis",
+    "era": "Moderne Ära"
   },
   {
     "nr": 220,
@@ -2602,7 +3104,9 @@
     "rockyRanking": 1.8219,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1683337919",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/01i4iyB40EU7Qgd6EgKoZt"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/01i4iyB40EU7Qgd6EgKoZt",
+    "author": "André Marx",
+    "era": "Moderne Ära"
   },
   {
     "nr": 221,
@@ -2614,7 +3118,9 @@
     "rockyRanking": 2.5968,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1695104461",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/1KpVSqapKAUAtAepWWxPWs"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/1KpVSqapKAUAtAepWWxPWs",
+    "author": "Hendrik Buchna",
+    "era": "Moderne Ära"
   },
   {
     "nr": 222,
@@ -2624,7 +3130,9 @@
     "rockyRanking": 2.2,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1752443158",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3o2Gwvg8lqLNRnlV1v1s5K"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3o2Gwvg8lqLNRnlV1v1s5K",
+    "author": "Kari Erlhoff",
+    "era": "Moderne Ära"
   },
   {
     "nr": 223,
@@ -2634,7 +3142,9 @@
     "rockyRanking": 2.8033,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1752449378",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/451jKBwuSNrNgLlqEAZfra"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/451jKBwuSNrNgLlqEAZfra",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 224,
@@ -2644,7 +3154,9 @@
     "rockyRanking": 2.4127,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1752449423",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/7JhdaReI98XYFrzb3jJPFa"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/7JhdaReI98XYFrzb3jJPFa",
+    "author": "Ben Nevis",
+    "era": "Moderne Ära"
   },
   {
     "nr": 225,
@@ -2659,7 +3171,9 @@
       "puppenmacher"
     ],
     "appleMusicUrl": "https://music.apple.com/de/album/1752450507",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0FuC7q4bJG41g1naKBx4ot"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0FuC7q4bJG41g1naKBx4ot",
+    "author": "André Marx",
+    "era": "Moderne Ära"
   },
   {
     "nr": 226,
@@ -2673,7 +3187,9 @@
     "rockyRanking": 2.7361,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1752449751",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/3Sv5tE8PcAlGY6Ys2ISQXF"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/3Sv5tE8PcAlGY6Ys2ISQXF",
+    "author": "André Minninger",
+    "era": "Moderne Ära"
   },
   {
     "nr": 227,
@@ -2685,7 +3201,9 @@
     "rockyRanking": 3.127,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1752449669",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2CMXywsh8wVXXCmr2bLTZ6"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2CMXywsh8wVXXCmr2bLTZ6",
+    "author": "Christoph Dittert",
+    "era": "Moderne Ära"
   },
   {
     "nr": 228,
@@ -2695,7 +3213,9 @@
     "rockyRanking": 3.6197,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1757389491",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6sNAlohza1ZTWVMGhFTGJW"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6sNAlohza1ZTWVMGhFTGJW",
+    "author": "André Minninger",
+    "era": "Moderne Ära"
   },
   {
     "nr": 229,
@@ -2707,7 +3227,9 @@
     "rockyRanking": 2.2951,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1753904987",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6SMOmIWODrO1gND2YPpjHf"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6SMOmIWODrO1gND2YPpjHf",
+    "author": "Hendrik Buchna",
+    "era": "Moderne Ära"
   },
   {
     "nr": 230,
@@ -2720,7 +3242,9 @@
     "rockyRanking": 2.1167,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1764904056",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/154I9rUwPuFHj6snU4amYg"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/154I9rUwPuFHj6snU4amYg",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 231,
@@ -2730,7 +3254,9 @@
     "rockyRanking": 3.0,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1777986506",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/6isiJbL3hh7e60KigIgKuY"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/6isiJbL3hh7e60KigIgKuY",
+    "author": "Ben Nevis",
+    "era": "Moderne Ära"
   },
   {
     "nr": 232,
@@ -2743,7 +3269,9 @@
     "rockyRanking": 2.463,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1794782655",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/1Qnn3AAN3Nquv7GlNk41YQ"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/1Qnn3AAN3Nquv7GlNk41YQ",
+    "author": "Christoph Dittert",
+    "era": "Moderne Ära"
   },
   {
     "nr": 233,
@@ -2755,7 +3283,9 @@
     "rockyRanking": 2.5254,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1807053258",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/0qZ0R61AqoD2i8GnzUk91C"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0qZ0R61AqoD2i8GnzUk91C",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 234,
@@ -2767,7 +3297,9 @@
     "rockyRanking": 4.381,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1817631978",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/4sQsFeHojdbFPB07vSg3Rd"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/4sQsFeHojdbFPB07vSg3Rd",
+    "author": "André Minninger",
+    "era": "Moderne Ära"
   },
   {
     "nr": 235,
@@ -2777,7 +3309,9 @@
     "rockyRanking": 2.2619,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1829447719",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/031exGT0P6IWBYY6faqoLV"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/031exGT0P6IWBYY6faqoLV",
+    "author": "Kari Erlhoff",
+    "era": "Moderne Ära"
   },
   {
     "nr": 236,
@@ -2789,7 +3323,9 @@
     "rockyRanking": 2.3953,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1849190704",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/5yCEzMfmMnSG97SXDFGjR8"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/5yCEzMfmMnSG97SXDFGjR8",
+    "author": "Hendrik Buchna",
+    "era": "Moderne Ära"
   },
   {
     "nr": 237,
@@ -2801,7 +3337,9 @@
     "rockyRanking": 1.3846,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1868936291",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/1IkEurD7s47M9ukevi0bWA"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/1IkEurD7s47M9ukevi0bWA",
+    "author": "André Marx",
+    "era": "Moderne Ära"
   },
   {
     "nr": 238,
@@ -2813,7 +3351,9 @@
     "rockyRanking": 3.0,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1874900327",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/00Pxqrupz6xjkI0vd4Otxb"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/00Pxqrupz6xjkI0vd4Otxb",
+    "author": "Ben Nevis",
+    "era": "Moderne Ära"
   },
   {
     "nr": 239,
@@ -2826,7 +3366,9 @@
     "rockyRanking": 2.3846,
     "collection": "main",
     "appleMusicUrl": "https://music.apple.com/de/album/1887229472",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/2mh0BDhRAJFa7clABwut3L"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2mh0BDhRAJFa7clABwut3L",
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 240,
@@ -2842,7 +3384,9 @@
       "unbekannter absender"
     ],
     "appleMusicUrl": "https://music.apple.com/de/album/6770563852",
-    "spotifyUrl": "https://open.spotify.com/intl-de/album/55djiROmSQZWDVzzUwyKFc"
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/55djiROmSQZWDVzzUwyKFc",
+    "author": "Ben Nevis",
+    "era": "Moderne Ära"
   },
   {
     "nr": 241,
@@ -2857,7 +3401,9 @@
       "meister des lichts"
     ],
     "appleMusicUrl": "https://music.apple.com/de/album/6789055080",
-    "spotifyUrl": null
+    "spotifyUrl": null,
+    "author": "Christoph Dittert",
+    "era": "Moderne Ära"
   },
   {
     "nr": 242,
@@ -2867,7 +3413,9 @@
     "rockyRanking": 2.6,
     "collection": "main",
     "appleMusicUrl": null,
-    "spotifyUrl": null
+    "spotifyUrl": null,
+    "author": "Marco Sonnleitner",
+    "era": "Moderne Ära"
   },
   {
     "nr": 243,
@@ -2877,7 +3425,8 @@
     "rockyRanking": 2.0588,
     "collection": "main",
     "appleMusicUrl": null,
-    "spotifyUrl": null
+    "spotifyUrl": null,
+    "era": "Moderne Ära"
   },
   {
     "nr": 244,
@@ -2889,19 +3438,30 @@
     "rockyRanking": 2.2222,
     "collection": "main",
     "appleMusicUrl": null,
-    "spotifyUrl": null
+    "spotifyUrl": null,
+    "era": "Moderne Ära"
   },
   {
     "nr": 245,
     "titel": "Fußball-Skandal",
     "beschreibung": "Stichworte: humor",
     "tags": [
-      "humor"
+      "humor",
+      "Sport",
+      "Fußball"
     ],
     "rockyRanking": 2.3333,
     "collection": "main",
     "appleMusicUrl": null,
-    "spotifyUrl": null
+    "spotifyUrl": null,
+    "era": "Moderne Ära",
+    "searchKeywords": [
+      "fußball",
+      "stadion",
+      "spieler",
+      "sport",
+      "turnier"
+    ]
   },
   {
     "nr": 246,
@@ -2911,7 +3471,8 @@
     "collection": "main",
     "rockyRanking": 2.5714,
     "appleMusicUrl": null,
-    "spotifyUrl": null
+    "spotifyUrl": null,
+    "era": "Moderne Ära"
   },
   {
     "nr": 247,
@@ -2921,7 +3482,8 @@
     "collection": "main",
     "rockyRanking": 2.1429,
     "appleMusicUrl": null,
-    "spotifyUrl": null
+    "spotifyUrl": null,
+    "era": "Moderne Ära"
   },
   {
     "nr": 248,
@@ -2931,6 +3493,169 @@
     "collection": "main",
     "rockyRanking": 3.1429,
     "appleMusicUrl": null,
-    "spotifyUrl": null
+    "spotifyUrl": null,
+    "era": "Moderne Ära"
+  },
+  {
+    "nr": 10007,
+    "displayNumber": "Spezial 7",
+    "titel": "Der 5. Advent",
+    "beschreibung": "Die anstehenden Festtage haben sich Justus, Peter und Bob wahrlich anders vorgestellt: Durch einen Zufall wird Justus Zeuge, wie Tante Mathildas Freundin Lydia Candle am 1. Dezember in ihrem Adventskalender einen erschreckenden Fund macht!\nUnd schon bald stellt sich heraus, dass ein furchtbares Verbrechen verübt werden soll! Viel Zeit bleibt den drei Detektiven nicht, diesen verzwickten Fall zu lösen, in dem an jedem Tag neue Stolpersteine auftauchen, die schließlich nicht nur das Leben von Bob Andrews bedrohen! Die Zeit drängt und bis zum 24. Dezember gilt es, manch harte Nuss zu knacken …",
+    "tags": [
+      "Weihnachten",
+      "Advent",
+      "Spezial"
+    ],
+    "rockyRanking": null,
+    "collection": "special",
+    "durationMin": 171,
+    "releaseDate": "2013-10-04",
+    "author": "André Minninger",
+    "era": "Spezialfolgen",
+    "searchKeywords": [
+      "weihnachten",
+      "advent",
+      "adventskalender",
+      "weihnachtsfolge",
+      "winter",
+      "sonderfolge"
+    ],
+    "appleMusicUrl": "https://music.apple.com/de/album/1174866876",
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/2qFuUJMx8w4VEO0Zdf8jFJ"
+  },
+  {
+    "nr": 10008,
+    "displayNumber": "Spezial 8",
+    "titel": "Stille Nacht, düstere Nacht",
+    "beschreibung": "Weihnachten steht vor der Tür. Die drei ??? besuchen die \"GameFame\", eine landesweit berühmte Spielzeugmesse. Die Actionfiguren der Serie Heroes Of The Universe sind mit einer bisher geheim gehaltenen technischen Neuheit das diesjährige Messe-Highlight. Doch kurz vor der feierlichen Präsentation der Neuheit bricht der Festredner plötzlich zusammen. War das ein Anschlag auf sein Leben? Die Ermittlungen beginnen – und Justus, Peter und Bob haben nur 24 Stunden Zeit …",
+    "tags": [
+      "Weihnachten",
+      "Advent",
+      "Spezial"
+    ],
+    "rockyRanking": null,
+    "collection": "special",
+    "durationMin": 165,
+    "releaseDate": "2016-11-04",
+    "author": "Hendrik Buchna",
+    "era": "Spezialfolgen",
+    "searchKeywords": [
+      "weihnachten",
+      "advent",
+      "adventskalender",
+      "weihnachtsfolge",
+      "winter",
+      "sonderfolge"
+    ],
+    "appleMusicUrl": "https://music.apple.com/de/album/1295117431",
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/5iobM2gNVymvP8XqnRnHVR"
+  },
+  {
+    "nr": 10009,
+    "displayNumber": "Spezial 9",
+    "titel": "O du finstere",
+    "beschreibung": "Für Tante Mathilda erfüllt sich ein lang gehegter Wunsch: Gemeinsam mit Onkel Titus, Justus, Peter und Bob will sie Weihnachten in einer verschneiten Berghütte feiern. Die besinnliche Stimmung wird schnell getrübt, als eine gehörnte Schreckgestalt in die Idylle hereinbricht. Doch auch unheimliche Vorfälle und Drohbotschaften halten die drei ??? nicht davon ab, diesem Rätsel auf den Grund zu gehen.",
+    "tags": [
+      "Weihnachten",
+      "Advent",
+      "Spezial"
+    ],
+    "rockyRanking": null,
+    "collection": "special",
+    "durationMin": 166,
+    "releaseDate": "2020-10-09",
+    "author": "Hendrik Buchna",
+    "era": "Spezialfolgen",
+    "searchKeywords": [
+      "weihnachten",
+      "advent",
+      "adventskalender",
+      "weihnachtsfolge",
+      "winter",
+      "sonderfolge"
+    ],
+    "appleMusicUrl": "https://music.apple.com/de/album/1529420801",
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/7ynXpeQRwzqKiv8WVh7c7B"
+  },
+  {
+    "nr": 10010,
+    "displayNumber": "Spezial 10",
+    "titel": "Eine schreckliche Bescherung",
+    "beschreibung": "Es weihnachtet sehr in Rocky Beach:\nAuf der Suche nach den passenden Geschenken geraten die drei ??? in einen neuen Fall.",
+    "tags": [
+      "Weihnachten",
+      "Advent",
+      "Spezial"
+    ],
+    "rockyRanking": null,
+    "collection": "special",
+    "durationMin": 153,
+    "releaseDate": "2022-10-14",
+    "author": "Marco Sonnleitner",
+    "era": "Spezialfolgen",
+    "searchKeywords": [
+      "weihnachten",
+      "advent",
+      "adventskalender",
+      "weihnachtsfolge",
+      "winter",
+      "sonderfolge"
+    ],
+    "appleMusicUrl": "https://music.apple.com/de/album/1695696461",
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/5u2wd0lYukcINw8dUFCREq"
+  },
+  {
+    "nr": 10011,
+    "displayNumber": "Spezial 11",
+    "titel": "Böser die Glocken nie klingen",
+    "beschreibung": "Weihnachten auf dem Schrottplatz – doch die drei ??? gönnen sich keine Pause. Auch in der besinnlichen Adventszeit übernehmen Justus, Peter und Bob jeden Fall.",
+    "tags": [
+      "Weihnachten",
+      "Advent",
+      "Spezial"
+    ],
+    "rockyRanking": null,
+    "collection": "special",
+    "durationMin": 204,
+    "releaseDate": "2023-11-03",
+    "author": "André Minninger",
+    "era": "Spezialfolgen",
+    "searchKeywords": [
+      "weihnachten",
+      "advent",
+      "adventskalender",
+      "weihnachtsfolge",
+      "winter",
+      "sonderfolge"
+    ],
+    "appleMusicUrl": "https://music.apple.com/de/album/1752450018",
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0oZaQfEwMWY2TfviD4fEdV"
+  },
+  {
+    "nr": 10012,
+    "displayNumber": "Spezial 12",
+    "titel": "Gruselige Weihnacht überall",
+    "beschreibung": "Ein ohrenbetäubender Knall ertönt, der Auktionsraum füllt sich mit Rauch, und den drei Detektiven entwischt ein Dieb!",
+    "tags": [
+      "Weihnachten",
+      "Advent",
+      "Spezial"
+    ],
+    "rockyRanking": null,
+    "collection": "special",
+    "durationMin": 181,
+    "releaseDate": "2025-11-07",
+    "author": "Christoph Dittert",
+    "era": "Spezialfolgen",
+    "searchKeywords": [
+      "weihnachten",
+      "advent",
+      "adventskalender",
+      "weihnachtsfolge",
+      "winter",
+      "sonderfolge"
+    ],
+    "appleMusicUrl": "https://music.apple.com/de/album/1843382938",
+    "spotifyUrl": "https://open.spotify.com/intl-de/album/0PLjPVDHMsLP0tF1Zt6uvx"
   }
 ]

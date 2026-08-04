@@ -187,3 +187,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 /* v8.4: Folgendetails aus einer geöffneten Playlist immer darüber anzeigen */
 .overlay.overlay-front{z-index:70}
 #playlistPickerOverlay,#playlistEditorOverlay{z-index:75}
+
+.catalog-select-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+.author-badge{max-width:13rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.era-badge{border-color:rgba(255,213,74,.35);color:#f7dda0}
+@media(max-width:520px){.catalog-select-grid{grid-template-columns:1fr}.author-badge{max-width:10rem}}
