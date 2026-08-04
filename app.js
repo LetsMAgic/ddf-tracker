@@ -38,6 +38,8 @@
     playlistSuggestionMode: 'similar',
     playlistTab: 'essentials',
     tutorialStep: 0,
+    tutorialPositionFrame: 0,
+    tutorialPositionTimer: 0,
     pendingUnheardNr: null,
   };
 
@@ -1721,12 +1723,23 @@ function renderTutorialStep() {
   $('tutorialBack').disabled = state.tutorialStep === 0;
   $('tutorialDemo').classList.toggle('hidden', step.demo !== 'rating');
   $('tutorialDemo').innerHTML = step.demo === 'rating' ? tutorialDemoMarkup() : '';
-  requestAnimationFrame(() => {
+  cancelAnimationFrame(state.tutorialPositionFrame);
+  clearTimeout(state.tutorialPositionTimer);
+  const overlay = $('tutorialOverlay');
+  overlay.classList.add('tutorial-positioning');
+  state.tutorialPositionFrame = requestAnimationFrame(() => {
     const target = findVisibleTutorialTarget(step.target);
     target?.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'nearest' });
-    // Two passes cover late font/layout changes on Safari and small screens.
-    setTimeout(positionTutorialFocus, 40);
-    setTimeout(positionTutorialFocus, 220);
+    state.tutorialPositionFrame = requestAnimationFrame(() => {
+      positionTutorialFocus();
+      overlay.classList.remove('tutorial-positioning');
+      state.tutorialPositionTimer = setTimeout(() => {
+        // One silent correction for late Safari layout changes.
+        overlay.classList.add('tutorial-positioning');
+        positionTutorialFocus();
+        requestAnimationFrame(() => overlay.classList.remove('tutorial-positioning'));
+      }, 180);
+    });
   });
 }
 
@@ -2403,8 +2416,13 @@ function closeHelp() {
       note.textContent = wasActive ? 'Bewertung entfernt ✓' : `${ratingLabel(button.dataset.demoRating)} ausgewählt. Tippe erneut zum Entfernen.`;
       note.classList.toggle('tutorial-demo-success', wasActive);
     });
-    window.addEventListener('resize', debounce(positionTutorialFocus, 80));
-    window.addEventListener('scroll', debounce(positionTutorialFocus, 30), true);
+    const scheduleTutorialPosition = debounce(() => {
+      if ($('tutorialOverlay').classList.contains('hidden')) return;
+      cancelAnimationFrame(state.tutorialPositionFrame);
+      state.tutorialPositionFrame = requestAnimationFrame(positionTutorialFocus);
+    }, 90);
+    window.addEventListener('resize', scheduleTutorialPosition);
+    window.addEventListener('scroll', scheduleTutorialPosition, true);
     $('closeHeardReset').addEventListener('click', closeHeardReset);
     $('cancelHeardReset').addEventListener('click', closeHeardReset);
     $('confirmUnheardAndClear').addEventListener('click', confirmUnheardAndClear);
