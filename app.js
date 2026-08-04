@@ -8,7 +8,7 @@
   const CATALOG_KEY = 'enrichedCatalogV10';
   const LEGACY_CATALOG_KEYS = ['enrichedCatalogV9', 'enrichedCatalogV8', 'enrichedCatalogV7', 'enrichedCatalogV6', 'enrichedCatalogV5', 'enrichedCatalogV4'];
   const LEGACY_USER_KEYS = ['user-state', 'userState', 'state'];
-  const APP_VERSION = 11.5;
+  const APP_VERSION = 11.0;
   const DEFAULT_STREAMING_SERVICE = 'spotify';
   const META_URL = 'https://dreimetadaten.de/data/Serie.json';
   const META_MAX_AGE = 1000 * 60 * 60 * 24 * 30;
@@ -1591,13 +1591,13 @@ function renderPlaylists() {
 const TUTORIAL_STEPS = [
   { page: 'home', target: '[data-nav="home"]', title: 'Willkommen in deinem Archiv', text: 'Auf der Startseite siehst du Fortschritt, Tagesempfehlung und passende Folgen für deine verfügbare Zeit.', next: 'Folgen entdecken' },
   { page: 'episodes', target: '[data-nav="episodes"]', title: 'Alle Folgen', text: 'Hier findest du den vollständigen Katalog. Filter, Autor, Ära und Sortierung lassen sich miteinander kombinieren.', next: 'Suche zeigen' },
-  { page: 'episodes', target: '.search-box', title: 'Intelligente Suche', text: 'Suche nach Titel, Autor, Figur, Handlung oder Stichwort – zum Beispiel „Peters Opa“, „André Marx“ oder „Fußball“.', next: 'Bewertungen', card: 'top' },
-  { page: 'episodes', target: '[data-nav="episodes"]', title: 'Bewerten und entfernen', text: 'Minus, Neutral, Plus und Super sind exklusiv. Super zählt doppelt für Empfehlungen. Tippe erneut auf dieselbe aktive Bewertung, um sie wieder zu entfernen.', next: 'Hörstatus', demo: 'rating' },
-  { page: 'episodes', target: '[data-nav="episodes"]', title: 'Gehört oder ungehört', text: 'Eine Bewertung markiert die Folge automatisch als gehört. Den Hörstatus kannst du jederzeit zurücksetzen.', next: 'Details öffnen', demo: 'heard' },
-  { page: 'episodes', target: '[data-nav="episodes"]', title: 'Folgendetails', text: 'Ein Tipp auf eine Folge öffnet Beschreibung, Streaminglinks, Wissenskarte, Rückbezüge und persönliche Notizen.', next: 'Listen entdecken', demo: 'details' },
-  { page: 'playlists', target: '[data-nav="playlists"]', title: 'Essentials, Themen und eigene Listen', text: 'Goldene Essentials sind besonders wichtige Sammlungen. Daneben findest du Themen und deine selbst benannten Playlists.', next: 'Smart-Planer', demo: 'playlists' },
-  { page: 'playlists', target: '[data-nav="playlists"]', title: 'Smart-Playlist erstellen', text: 'Gib Dauer, Stimmung, Hörstatus und optional einen Autor an. Die App erstellt daraus einen passenden Hörplan und beachtet auf Wunsch Reihenfolgen.', next: 'Backup & Hilfe', demo: 'smart' },
-  { page: 'settings', target: '[data-nav="settings"]', title: 'Alles wird automatisch gespeichert', text: 'Deine Änderungen liegen lokal auf diesem Gerät. Das JSON-Backup brauchst du nur zur Absicherung oder für einen Gerätewechsel.', next: 'Los geht’s', demo: 'backup' },
+  { page: 'episodes', target: '.search-box', title: 'Intelligente Suche', text: 'Suche nach Titel, Autor, Figur, Handlung oder Stichwort – zum Beispiel „Peters Opa“, „André Marx“ oder „Fußball“.', next: 'Bewertungen' },
+  { page: 'episodes', target: '.episode-card .rating-mini', title: 'Bewerten und entfernen', text: 'Minus, Neutral, Plus und Super sind exklusiv. Super zählt doppelt für Empfehlungen. Tippe erneut auf dieselbe aktive Bewertung, um sie wieder zu entfernen.', next: 'Hörstatus', demo: 'rating' },
+  { page: 'episodes', target: '.episode-card [data-heard]', title: 'Gehört oder ungehört', text: 'Eine Bewertung markiert die Folge automatisch als gehört. Den Hörstatus kannst du wieder zurücksetzen; eine vorhandene Bewertung wird dabei auf Wunsch entfernt.', next: 'Details öffnen' },
+  { page: 'episodes', target: '.episode-card .episode-title', title: 'Folgendetails', text: 'Ein Tipp auf die Folgenkarte öffnet Beschreibung, Streaminglinks, Wissenskarte, Rückbezüge und persönliche Notizen.', next: 'Listen entdecken' },
+  { page: 'playlists', target: '[data-nav="playlists"]', title: 'Essentials, Themen und eigene Listen', text: 'Goldene Essentials sind besonders wichtige Sammlungen. Daneben findest du Themen und deine selbst benannten Playlists.', next: 'Smart-Planer' },
+  { page: 'playlists', target: '#generatePlanButton', title: 'Smart-Playlist erstellen', text: 'Gib Dauer, Stimmung, Hörstatus und optional einen Autor an. Mit diesem Button erstellt die App einen passenden Hörplan und beachtet auf Wunsch Reihenfolgen.', next: 'Backup & Hilfe' },
+  { page: 'settings', target: '#exportButton', title: 'Alles wird automatisch gespeichert', text: 'Deine Änderungen liegen lokal auf diesem Gerät. Das JSON-Backup brauchst du nur zur Absicherung oder für einen Gerätewechsel.', next: 'Los geht’s' },
 ];
 
 function tutorialCompleted() {
@@ -1610,14 +1610,8 @@ function setTutorialCompleted(value = true) {
   queueUserPersist();
 }
 
-function tutorialDemoMarkup(type) {
-  if (type === 'rating') return `<div class="tutorial-demo-title">Beispielbewertung</div><div id="tutorialRatingDemo" class="rating-control"><button data-demo-rating="minus"><span>−</span>Minus</button><button data-demo-rating="neutral"><span>●</span>Neutral</button><button data-demo-rating="plus"><span>＋</span>Plus</button><button data-demo-rating="super"><span>★</span>Super</button></div><small id="tutorialDemoNote" class="tutorial-demo-note">Tippe eine Bewertung an. Ein zweiter Tipp entfernt sie wieder.</small>`;
-  if (type === 'heard') return `<div class="tutorial-demo-row"><div><strong>73 · Poltergeist</strong><small id="tutorialHeardText">Noch nicht gehört</small></div><button id="tutorialHeardDemo" class="tutorial-heard-button" aria-pressed="false">○ Ungehört</button></div><small class="tutorial-demo-note">Bewerten setzt diesen Status automatisch auf gehört. Hier kannst du ihn auch manuell ändern.</small>`;
-  if (type === 'details') return `<button id="tutorialDetailsDemo" class="tutorial-episode-demo"><span><strong>73 · Poltergeist</strong><small>78 Min. · André Marx · Triumvirats-Ära</small></span><span aria-hidden="true">›</span></button><small id="tutorialDetailsNote" class="tutorial-demo-note">Tippe auf die Beispiel-Folge, um zu sehen, welche Informationen sich dahinter befinden.</small>`;
-  if (type === 'playlists') return `<div class="tutorial-playlist-demo"><button><span>★</span><strong>Essentials</strong></button><button><span>☾</span><strong>Themen</strong></button><button><span>＋</span><strong>Meine</strong></button></div><small class="tutorial-demo-note">Eigene Listen lassen sich benennen, beschreiben und frei sortieren.</small>`;
-  if (type === 'smart') return `<div class="tutorial-smart-demo"><div><span>Fahrtdauer</span><strong>5 Std. 00 Min.</strong></div><div><span>Stimmung</span><strong>Grusel</strong></div><button id="tutorialSmartDemo">Smart Playlist erstellen</button></div><small id="tutorialSmartNote" class="tutorial-demo-note">Die App kombiniert passende Folgen möglichst genau auf deine gewünschte Dauer.</small>`;
-  if (type === 'backup') return `<div class="tutorial-backup-demo"><button id="tutorialExportDemo">JSON exportieren</button><button>JSON importieren</button></div><small id="tutorialBackupNote" class="tutorial-demo-note">Automatisches Speichern läuft immer. Das Backup ist nur deine zusätzliche Absicherung.</small>`;
-  return '';
+function tutorialDemoMarkup() {
+  return `<span class="field-label">Demo-Bewertung</span><div id="tutorialRatingDemo" class="rating-control"><button data-demo-rating="minus"><span>−</span>Minus</button><button data-demo-rating="neutral"><span>●</span>Neutral</button><button data-demo-rating="plus"><span>＋</span>Plus</button><button data-demo-rating="super"><span>★</span>Super</button></div><small id="tutorialDemoNote" class="tutorial-demo-note">Probiere Plus oder Super aus – ein zweiter Tipp entfernt die Auswahl.</small>`;
 }
 
 function findVisibleTutorialTarget(selector) {
@@ -1642,7 +1636,7 @@ function resetTutorialCardPosition() {
   card.style.removeProperty('overflow-y');
 }
 
-function positionTutorialFocus() {
+function positionTutorialFocus({ jump = true } = {}) {
   const overlay = $('tutorialOverlay');
   if (overlay.classList.contains('hidden')) return;
   const step = TUTORIAL_STEPS[state.tutorialStep];
@@ -1661,15 +1655,28 @@ function positionTutorialFocus() {
   const viewportTop = window.visualViewport?.offsetTop || 0;
   const viewportHeight = window.visualViewport?.height || window.innerHeight;
   const viewportBottom = viewportTop + viewportHeight;
-  const safeEdge = 14;
   const pad = 8;
 
-  // Stable tour: never scroll or reposition the document.
-  const rect = target.getBoundingClientRect();
-  const cardAtTop = step.card === 'top' || (step.card !== 'bottom' && (rect.top + rect.bottom) / 2 > viewportTop + viewportHeight / 2);
+  let rect = target.getBoundingClientRect();
+  const targetInitiallyLow = (rect.top + rect.bottom) / 2 > viewportTop + viewportHeight / 2;
+  const cardAtTop = targetInitiallyLow;
   card.classList.add(cardAtTop ? 'tutorial-card-top-fixed' : 'tutorial-card-bottom-fixed');
-  card.style.maxHeight = `${Math.max(190, Math.floor(viewportHeight * 0.48))}px`;
+  card.style.maxHeight = `${Math.max(170, Math.floor(viewportHeight * 0.42))}px`;
   card.style.overflowY = 'auto';
+
+  // One immediate jump only. No smooth scrolling, no repeated correction and
+  // no scroll listener. This is intentionally deterministic for iOS Safari.
+  if (jump) {
+    const desiredCenter = cardAtTop
+      ? viewportTop + viewportHeight * 0.68
+      : viewportTop + viewportHeight * 0.30;
+    const absoluteTargetCenter = window.scrollY + (rect.top + rect.bottom) / 2;
+    const nextScrollTop = Math.max(0, Math.round(absoluteTargetCenter - desiredCenter));
+    document.documentElement.classList.add('tutorial-instant-scroll');
+    window.scrollTo(0, nextScrollTop);
+    document.documentElement.classList.remove('tutorial-instant-scroll');
+    rect = target.getBoundingClientRect();
+  }
 
   const focusLeft = Math.max(6, rect.left - pad);
   const focusTop = Math.max(viewportTop + 6, rect.top - pad);
@@ -1690,15 +1697,19 @@ function renderTutorialStep() {
   $('tutorialText').textContent = step.text;
   $('tutorialNext').textContent = step.next || 'Weiter';
   $('tutorialBack').disabled = state.tutorialStep === 0;
-  $('tutorialDemo').classList.toggle('hidden', !step.demo);
-  $('tutorialDemo').innerHTML = step.demo ? tutorialDemoMarkup(step.demo) : '';
+  $('tutorialDemo').classList.toggle('hidden', step.demo !== 'rating');
+  $('tutorialDemo').innerHTML = step.demo === 'rating' ? tutorialDemoMarkup() : '';
   cancelAnimationFrame(state.tutorialPositionFrame);
   clearTimeout(state.tutorialPositionTimer);
   const overlay = $('tutorialOverlay');
   overlay.classList.add('tutorial-positioning');
+  // Wait for the selected tab/page to render, then jump exactly once and show
+  // the overlay. A second frame only paints the already-final geometry.
   state.tutorialPositionFrame = requestAnimationFrame(() => {
-    positionTutorialFocus();
-    overlay.classList.remove('tutorial-positioning');
+    requestAnimationFrame(() => {
+      positionTutorialFocus({ jump: true });
+      overlay.classList.remove('tutorial-positioning');
+    });
   });
 }
 
@@ -2366,41 +2377,20 @@ function closeHelp() {
     $('tutorialBack').addEventListener('click', tutorialBack);
     $('skipTutorial').addEventListener('click', skipTutorial);
     $('tutorialDemo').addEventListener('click', (event) => {
-      const ratingButton = event.target.closest('[data-demo-rating]');
-      if (ratingButton) {
-        const wasActive = ratingButton.classList.contains('active');
-        document.querySelectorAll('#tutorialRatingDemo [data-demo-rating]').forEach((item) => item.classList.remove('active'));
-        if (!wasActive) ratingButton.classList.add('active');
-        const note = $('tutorialDemoNote');
-        if (note) note.textContent = wasActive ? 'Bewertung entfernt ✓' : `${ratingLabel(ratingButton.dataset.demoRating)} ausgewählt. Tippe erneut zum Entfernen.`;
-        note?.classList.toggle('tutorial-demo-success', wasActive);
-        return;
-      }
-      const heardButton = event.target.closest('#tutorialHeardDemo');
-      if (heardButton) {
-        const heard = heardButton.getAttribute('aria-pressed') !== 'true';
-        heardButton.setAttribute('aria-pressed', String(heard));
-        heardButton.textContent = heard ? '✓ Gehört' : '○ Ungehört';
-        heardButton.classList.toggle('active', heard);
-        const text = $('tutorialHeardText');
-        if (text) text.textContent = heard ? 'Als gehört markiert' : 'Noch nicht gehört';
-        return;
-      }
-      if (event.target.closest('#tutorialDetailsDemo')) {
-        const note = $('tutorialDetailsNote');
-        if (note) { note.textContent = 'Details enthalten Beschreibung, Wissenskarte, Reihen, Notizen und beide Streamingdienste.'; note.classList.add('tutorial-demo-success'); }
-        return;
-      }
-      if (event.target.closest('#tutorialSmartDemo')) {
-        const note = $('tutorialSmartNote');
-        if (note) { note.textContent = 'Beispiel erstellt: 4 Folgen · 4 Std. 57 Min. · passende Reihenfolge berücksichtigt.'; note.classList.add('tutorial-demo-success'); }
-        return;
-      }
-      if (event.target.closest('#tutorialExportDemo')) {
-        const note = $('tutorialBackupNote');
-        if (note) { note.textContent = 'Im echten Export öffnet sich das Teilen- oder Speichern-Menü deines Geräts.'; note.classList.add('tutorial-demo-success'); }
-      }
+      const button = event.target.closest('[data-demo-rating]');
+      if (!button) return;
+      const wasActive = button.classList.contains('active');
+      document.querySelectorAll('#tutorialRatingDemo [data-demo-rating]').forEach((item) => item.classList.remove('active'));
+      if (!wasActive) button.classList.add('active');
+      const note = $('tutorialDemoNote');
+      note.textContent = wasActive ? 'Bewertung entfernt ✓' : `${ratingLabel(button.dataset.demoRating)} ausgewählt. Tippe erneut zum Entfernen.`;
+      note.classList.toggle('tutorial-demo-success', wasActive);
     });
+    const scheduleTutorialPosition = debounce(() => {
+      if ($('tutorialOverlay').classList.contains('hidden')) return;
+      positionTutorialFocus();
+    }, 140);
+    window.addEventListener('resize', scheduleTutorialPosition);
     $('closeHeardReset').addEventListener('click', closeHeardReset);
     $('cancelHeardReset').addEventListener('click', closeHeardReset);
     $('confirmUnheardAndClear').addEventListener('click', confirmUnheardAndClear);

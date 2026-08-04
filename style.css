@@ -282,23 +282,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .tutorial-overlay.tutorial-positioning .tutorial-card{opacity:0}
 @media(max-height:650px){.tutorial-card{font-size:.92rem}.tutorial-card h2{font-size:1.18rem;margin:7px 0 5px}.tutorial-actions{margin-top:10px}.tutorial-demo{margin-top:9px;padding:10px}}
 
-/* v11.5: stable sectioned tutorial; no page scrolling after step 3 */
-.tutorial-demo-title{font-size:.78rem;font-weight:800;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em}
-.tutorial-demo-row,.tutorial-episode-demo{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left}
-.tutorial-demo-row small,.tutorial-episode-demo small{display:block;color:var(--muted);margin-top:3px}
-.tutorial-heard-button{white-space:nowrap;background:#252a32;border:1px solid #3d4450;color:#e8eaee;border-radius:12px;padding:10px 12px}
-.tutorial-heard-button.active{background:rgba(64,190,118,.16);border-color:rgba(64,190,118,.55);color:#92e6b4}
-.tutorial-episode-demo{padding:13px;border-radius:15px;background:#181b21;border:1px solid #343a45;color:#f5f6f8}
-.tutorial-episode-demo>span:last-child{font-size:1.7rem;color:var(--accent)}
-.tutorial-playlist-demo{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.tutorial-playlist-demo button{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 5px;background:#181b21;border:1px solid #343a45;border-radius:14px;color:#f2f3f5;font-size:.72rem}
-.tutorial-playlist-demo span{font-size:1.25rem;color:var(--accent)}
-.tutorial-smart-demo{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.tutorial-smart-demo>div{padding:10px;border-radius:13px;background:#181b21;border:1px solid #343a45}
-.tutorial-smart-demo span{display:block;color:var(--muted);font-size:.68rem;margin-bottom:3px}
-.tutorial-smart-demo strong{font-size:.82rem}
-.tutorial-smart-demo button{grid-column:1/-1;background:var(--accent);color:#131313;font-weight:850;border-radius:13px;padding:11px}
-.tutorial-backup-demo{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.tutorial-backup-demo button{padding:11px 8px;border-radius:13px;background:#20242b;border:1px solid #3b424d;color:#f3f4f6;font-weight:750}
-.tutorial-overlay.tutorial-positioning .tutorial-card{opacity:1!important}
-@media(max-height:700px){.tutorial-card{max-height:52vh!important}.tutorial-card p{line-height:1.35}.tutorial-demo{padding:10px}.tutorial-actions{margin-top:10px}}
+
+/* v11.6: tutorial moves by a single immediate jump, never smooth scrolling */
+html.tutorial-instant-scroll,html.tutorial-instant-scroll body{scroll-behavior:auto!important}
+.tutorial-overlay.tutorial-positioning .tutorial-card,.tutorial-overlay.tutorial-positioning .tutorial-focus{opacity:0!important}
+.tutorial-focus,.tutorial-card{transition:none!important}
