@@ -8,7 +8,7 @@
   const CATALOG_KEY = 'enrichedCatalogV10';
   const LEGACY_CATALOG_KEYS = ['enrichedCatalogV9', 'enrichedCatalogV8', 'enrichedCatalogV7', 'enrichedCatalogV6', 'enrichedCatalogV5', 'enrichedCatalogV4'];
   const LEGACY_USER_KEYS = ['user-state', 'userState', 'state'];
-  const APP_VERSION = 12.3;
+  const APP_VERSION = 12.7;
   const DEFAULT_STREAMING_SERVICE = 'spotify';
   const META_URL = 'https://dreimetadaten.de/data/Serie.json';
   const META_MAX_AGE = 1000 * 60 * 60 * 24 * 30;
@@ -1611,6 +1611,14 @@ function renderPlaylists() {
 
 
 
+function tutorialCreatedPlaylistCard() {
+  const wantedId = String(state.tutorialPlaylistId || '');
+  const cards = [...document.querySelectorAll('#userPlaylists .playlist-card[data-playlist-open]')]
+    .filter((card) => card.isConnected && card.getClientRects().length);
+  if (!cards.length) return null;
+  return cards.find((card) => String(card.dataset.playlistOpen || '') === wantedId) || cards[0];
+}
+
 const TUTORIAL_STEPS = [
   {
     id: 'go-episodes',
@@ -1874,42 +1882,44 @@ const TUTORIAL_STEPS = [
   {
     id: 'open-playlist',
     contextPage: 'playlists',
-    focus: '#tutorialCreatedPlaylist',
-    actionTarget: '#tutorialCreatedPlaylist',
+    focus: () => tutorialCreatedPlaylistCard(),
+    actionTarget: () => tutorialCreatedPlaylistCard(),
     card: 'top',
     title: 'Playlist öffnen',
     text: 'In der Playlist kannst du Folgen hinzufügen, sortieren, entfernen und passende Vorschläge ansehen.',
     action: 'Tippe auf die gerade erstellte Playlist.',
     event: 'click',
+    intercept: true,
     prepare: () => {
       state.playlistTab = 'mine';
       state.user.settings = { ...(state.user.settings || {}), playlistTab: 'mine' };
       pageDirty.playlists = true;
       $('planSavedStatus')?.classList.add('hidden');
       renderPlaylists();
+      const card = tutorialCreatedPlaylistCard();
+      if (card) {
+        card.id = 'tutorialCreatedPlaylist';
+        card.classList.add('tutorial-created-playlist');
+      }
     },
     beforePosition: () => {
-      const card = document.getElementById('tutorialCreatedPlaylist');
+      const card = tutorialCreatedPlaylistCard();
       if (!card) return;
-      const scrollParent = tutorialScrollableAncestor(card);
       document.documentElement.classList.add('tutorial-instant-scroll');
-      if (scrollParent) {
-        const parentRect = scrollParent.getBoundingClientRect();
-        const cardRect = card.getBoundingClientRect();
-        scrollParent.scrollTop += cardRect.top - parentRect.top - Math.max(18, (scrollParent.clientHeight - cardRect.height) * 0.5);
-      } else {
-        const viewport = tutorialViewportMetrics();
-        const desiredTop = viewport.top + viewport.topGuard + 36;
-        const cardRect = card.getBoundingClientRect();
-        window.scrollTo(0, Math.max(0, window.scrollY + cardRect.top - desiredTop));
-      }
+      card.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'nearest' });
       void document.documentElement.offsetHeight;
       document.documentElement.classList.remove('tutorial-instant-scroll');
+    },
+    onAction: (event) => {
+      const card = event?.target?.closest?.('#userPlaylists .playlist-card[data-playlist-open]') || tutorialCreatedPlaylistCard();
+      const playlistId = card?.dataset?.playlistOpen || state.tutorialPlaylistId;
+      if (playlistId) openPlaylistDetail(playlistId, false);
     },
     revealAlign: 'center',
     focusPadding: 6,
     verify: () => String(state.playlistDetailId || '') === String(state.tutorialPlaylistId || '') && !$('playlistDetailOverlay').classList.contains('hidden'),
-    settle: 220,
+    invalidMessage: 'Tippe direkt auf die hervorgehobene Playlist-Karte.',
+    settle: 260,
   },
   {
     id: 'open-add-panel',

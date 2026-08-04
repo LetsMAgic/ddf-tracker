@@ -1,4 +1,4 @@
-const CACHE = 'ddf-v12-6-playlist-tutorial-layout';
+const CACHE = 'ddf-v12-7-playlist-open-target';
 const ASSETS = [
   './',
   './index.html',
