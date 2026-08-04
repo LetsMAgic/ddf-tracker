@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0b1020" />
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="apple-mobile-web-app-title" content="DDF Tracker" />
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+  <title>Drei ??? Folgen-Tracker</title>
+  <link rel="stylesheet" href="./style.css" />
+  <script src="./data/episodes-seed.js" defer></script>
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">Die drei ???</div>
+        <h1>Folgen-Tracker</h1>
+      </div>
+      <button id="btnSettings" class="icon-btn" aria-label="Einstellungen">⚙️</button>
+    </header>
+
+    <section class="hero card">
+      <div class="hero-main">
+        <div class="metric">
+          <div class="metric-value" id="heardCount">0</div>
+          <div class="metric-label">gehörte Folgen</div>
+        </div>
+        <div class="metric">
+          <div class="metric-value" id="unheardCount">0</div>
+          <div class="metric-label">ung gehört</div>
+        </div>
+        <div class="metric">
+          <div class="metric-value" id="plusCount">0</div>
+          <div class="metric-label">Plus</div>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <button class="primary" id="btnRecommend">Empfohlene Folge</button>
+        <button class="secondary" id="btnRandomNew">Zufällige neue Folge</button>
+        <button class="secondary" id="btnRandomHeard">Zufällige bekannte Folge</button>
+      </div>
+      <div id="recommendationBox" class="recommendation hidden"></div>
+    </section>
+
+    <section class="controls card">
+      <input id="search" type="search" placeholder="Suche nach Titel, Stichwort, Tag …" autocomplete="off" />
+      <div class="filter-row" role="tablist" aria-label="Filter">
+        <button class="filter active" data-filter="all">Alle</button>
+        <button class="filter" data-filter="heard">Nur gehört</button>
+        <button class="filter" data-filter="unheard">Nur ungehört</button>
+        <button class="filter" data-filter="plus">Plus</button>
+        <button class="filter" data-filter="minus">Minus</button>
+      </div>
+      <div class="filter-row">
+        <button class="secondary" id="btnImportBackup">Import JSON</button>
+        <button class="secondary" id="btnExportBackup">Export JSON</button>
+        <button class="secondary" id="btnLoadCatalog">Katalog neu laden</button>
+      </div>
+      <input id="fileInput" type="file" accept=".json,application/json" hidden />
+    </section>
+
+    <section class="status card">
+      <div id="statusText">Lade …</div>
+      <div class="small" id="syncText"></div>
+    </section>
+
+    <main>
+      <div class="list-head">
+        <div id="resultInfo">0 Folgen</div>
+        <button id="btnSort" class="ghost">Sort: Nummer</button>
+      </div>
+      <div id="episodeList" class="list"></div>
+    </main>
+  </div>
+
+  <div id="editorOverlay" class="overlay hidden" aria-hidden="true">
+    <div class="sheet card">
+      <div class="sheet-head">
+        <div>
+          <div class="eyebrow" id="editNr">Folge</div>
+          <h2 id="editTitle">Bearbeiten</h2>
+        </div>
+        <button id="btnCloseEditor" class="icon-btn">✕</button>
+      </div>
+      <label>Bewertung</label>
+      <div class="rating-row">
+        <button data-rate="plus" class="rate-btn">Plus</button>
+        <button data-rate="neutral" class="rate-btn">Neutral</button>
+        <button data-rate="minus" class="rate-btn">Minus</button>
+      </div>
+
+      <label for="heardToggle" class="inline-check">
+        <input id="heardToggle" type="checkbox" />
+        schon gehört
+      </label>
+
+      <label for="tagsInput">Eigene Tags</label>
+      <input id="tagsInput" type="text" placeholder="z. B. grusel, insel, skinny" />
+
+      <label for="noteInput">Notiz</label>
+      <textarea id="noteInput" rows="4" placeholder="Dein kurzer Eindruck …"></textarea>
+
+      <div class="sheet-actions">
+        <button id="btnSaveEpisode" class="primary">Speichern</button>
+        <button id="btnResetEpisode" class="secondary">Zurücksetzen</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toasts" class="toasts"></div>
+</body>
+</html>
