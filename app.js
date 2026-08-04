@@ -1483,16 +1483,22 @@
   function openDetail(number) {
     state.detailNr = Number(number);
     refreshDetail();
-    $('detailOverlay').classList.remove('hidden');
-    $('detailOverlay').setAttribute('aria-hidden', 'false');
+    const detailOverlay = $('detailOverlay');
+    const playlistIsOpen = !$('playlistDetailOverlay').classList.contains('hidden');
+    detailOverlay.classList.toggle('overlay-front', playlistIsOpen);
+    detailOverlay.classList.remove('hidden');
+    detailOverlay.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
   }
 
   function closeDetail() {
     state.detailNr = null;
-    $('detailOverlay').classList.add('hidden');
-    $('detailOverlay').setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
+    const detailOverlay = $('detailOverlay');
+    detailOverlay.classList.add('hidden');
+    detailOverlay.classList.remove('overlay-front');
+    detailOverlay.setAttribute('aria-hidden', 'true');
+    // Bleibt die Playlist geöffnet, darf der Hintergrund weiterhin nicht scrollen.
+    document.body.style.overflow = $('playlistDetailOverlay').classList.contains('hidden') ? '' : 'hidden';
   }
 
   function refreshDetail() {

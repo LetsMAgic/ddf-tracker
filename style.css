@@ -183,3 +183,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .playlist-episode{grid-template-columns:auto minmax(0,1fr) auto auto;transition:opacity .16s ease,transform .16s ease,max-height .16s ease}.playlist-episode.removing{opacity:0;transform:translateX(16px)}.playlist-row-info{width:32px;height:32px;border:0;border-radius:10px;background:rgba(255,255,255,.055);color:var(--muted);font-weight:900}.playlist-episode-main small{display:block;margin-top:3px}
 .plan-saved-status{animation:savedBanner .32s ease}.plan-saved-status:not(.hidden){box-shadow:0 0 0 5px rgba(83,210,142,.05)}@keyframes savedBanner{from{opacity:0;transform:translateY(-7px)}}
 @media(max-width:520px){.playlist-episode{grid-template-columns:auto minmax(0,1fr) auto}.playlist-row-info{display:none}.playlist-row-actions{grid-column:2/-1;justify-content:flex-end}.playlist-add-info span{display:block}}
+
+/* v8.4: Folgendetails aus einer geöffneten Playlist immer darüber anzeigen */
+.overlay.overlay-front{z-index:70}
+#playlistPickerOverlay,#playlistEditorOverlay{z-index:75}
