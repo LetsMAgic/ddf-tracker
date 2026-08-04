@@ -192,14 +192,17 @@
         <div id="planSavedStatus" class="plan-saved-status hidden" role="status" aria-live="polite"></div>
       </section>
 
-      <section class="section-block">
-        <div class="section-heading"><div><span class="eyebrow">Persönlich</span><h2>Meine Playlists</h2></div><button id="newPlaylistTextButton" class="text-button">Neu</button></div>
-        <div id="userPlaylists" class="playlist-grid"></div>
-      </section>
-
-      <section class="section-block">
-        <div class="section-heading"><div><span class="eyebrow">Fertig zusammengestellt</span><h2>Entdecken</h2></div></div>
-        <div id="curatedPlaylists" class="curated-grid"></div>
+      <section class="section-block playlist-library">
+        <div class="section-heading"><div><span class="eyebrow">Deine Hörbibliothek</span><h2>Playlists entdecken</h2></div><button id="newPlaylistTextButton" class="text-button">Neu</button></div>
+        <div id="playlistLibraryTabs" class="segmented playlist-tabs" role="tablist" aria-label="Playlist-Kategorien">
+          <button class="active" data-playlist-tab="essentials" role="tab" aria-selected="true">★ Essentials</button>
+          <button data-playlist-tab="themes" role="tab" aria-selected="false">Themen</button>
+          <button data-playlist-tab="mine" role="tab" aria-selected="false">Meine</button>
+        </div>
+        <div id="playlistTabIntro" class="playlist-tab-intro"></div>
+        <div id="essentialPlaylists" class="curated-grid playlist-tab-panel"></div>
+        <div id="themePlaylists" class="curated-grid playlist-tab-panel hidden"></div>
+        <div id="userPlaylists" class="playlist-grid playlist-tab-panel hidden"></div>
       </section>
     </section>
 
@@ -233,6 +236,11 @@
         <button id="reloadCatalogButton" class="settings-row"><span><strong>Eingebauten Katalog neu laden</strong><small>Rocky-Ranking und Grunddaten zurücksetzen</small></span><b>↻</b></button>
       </div>
       <div class="settings-group">
+        <h3>Hilfe & Einführung</h3>
+        <button id="startTutorialButton" class="settings-row"><span><strong>Interaktives Tutorial starten</strong><small>Schritt für Schritt durch Bewertungen, Folgen und Playlists</small></span><b>›</b></button>
+        <button id="openHelpButton" class="settings-row"><span><strong>Kurzanleitung öffnen</strong><small>Bewertungen, Smart-Playlists, Speicherung und Backups nachlesen</small></span><b>›</b></button>
+      </div>
+      <div class="settings-group">
         <h3>Persönliche Daten</h3>
         <button id="resetButton" class="settings-row danger"><span><strong>Persönliche Daten zurücksetzen</strong><small>Hörstatus, Bewertungen und Notizen löschen</small></span><b>›</b></button>
       </div>
@@ -242,7 +250,7 @@
           <strong>Folgen-Tracker</strong>
           <small id="storageInfo">Lade Daten …</small>
           <small id="metadataInfo">Folgenwissen wird geprüft …</small>
-          <small>Version 10.1 · Speicherung ausschließlich auf diesem Gerät</small>
+          <small>Version 11.0 · Speicherung ausschließlich auf diesem Gerät</small>
           <small class="source-note">Folgenmetadaten & Streaming-Links: dreimetadaten.de · Community-Wertungen: rocky-beach.com</small>
         </div>
       </div>
@@ -333,7 +341,7 @@
 
       <details id="detailNoteSection" class="detail-accordion note-accordion">
         <summary><span><strong>Persönliche Notiz</strong><small>Deine Gedanken zu dieser Folge</small></span><b aria-hidden="true"></b></summary>
-        <div class="detail-accordion-content"><label class="note-field compact-note"><textarea id="detailNote" maxlength="600" placeholder="Was ist dir an der Folge aufgefallen?"></textarea></label></div>
+        <div class="detail-accordion-content"><label class="note-field compact-note"><textarea id="detailNote" maxlength="600" placeholder="Was ist dir an der Folge aufgefallen?"></textarea></label><button id="resetEpisodeData" class="episode-reset-button">Persönliche Daten dieser Folge zurücksetzen</button></div>
       </details>
     </div>
   </article>
@@ -376,6 +384,42 @@
       <p id="playlistSuggestionSummary" class="playlist-suggestion-summary"></p>
       <div id="playlistSuggestions" class="playlist-suggestion-list"></div>
     </section>
+  </article>
+</div>
+
+<div id="heardResetOverlay" class="overlay action-overlay hidden" aria-hidden="true">
+  <article class="mini-sheet action-sheet" role="dialog" aria-modal="true" aria-labelledby="heardResetTitle">
+    <div class="sheet-handle"></div>
+    <header class="detail-header"><div><span class="eyebrow">Hörstatus ändern</span><h2 id="heardResetTitle">Als ungehört markieren?</h2></div><button id="closeHeardReset" class="icon-button" aria-label="Abbrechen">×</button></header>
+    <p>Eine bewertete Folge gilt als gehört. Um sie wieder als ungehört zu markieren, wird deshalb auch deine Bewertung entfernt.</p>
+    <button id="confirmUnheardAndClear" class="danger-button full">Bewertung entfernen & als ungehört markieren</button>
+    <button id="cancelHeardReset" class="subtle-button full">Abbrechen</button>
+  </article>
+</div>
+
+<div id="helpOverlay" class="overlay overlay-front hidden" aria-hidden="true">
+  <article class="detail-sheet help-sheet" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="sheet-handle"></div>
+    <header class="detail-header"><div><span class="eyebrow">Hilfe</span><h2 id="helpTitle">So funktioniert die App</h2></div><button id="closeHelp" class="icon-button" aria-label="Hilfe schließen">×</button></header>
+    <div class="help-list">
+      <details open><summary>Bewertungen & Hörstatus</summary><p>Minus, Neutral, Plus und Super sind gegenseitig exklusiv. Tippe erneut auf die aktive Bewertung, um sie zu entfernen. Jede Bewertung markiert die Folge automatisch als gehört. Beim Zurücksetzen auf ungehört kannst du die Bewertung direkt mit entfernen.</p></details>
+      <details><summary>Folgen finden</summary><p>Die Suche berücksichtigt Titel, Autor, Ära, Figuren, Handlung, Kapitel und versteckte Stichwörter. Filter und Sortierung lassen sich kombinieren.</p></details>
+      <details><summary>Playlists</summary><p>Unter Listen findest du goldene Essentials, Themenlisten und deine eigenen Playlists. Eigene Listen kannst du frei benennen, beschreiben, sortieren und mit automatischen Vorschlägen erweitern.</p></details>
+      <details><summary>Smart-Playlists</summary><p>Lege Dauer, Stimmung, Hörstatus und optional einen Autor fest. Zusammenhängende Fälle bleiben auf Wunsch in der richtigen Reihenfolge.</p></details>
+      <details><summary>Speicherung & Backup</summary><p>Alle Änderungen werden automatisch lokal auf diesem Gerät gespeichert. Das JSON-Backup brauchst du nur als zusätzliche Sicherung oder für einen Gerätewechsel.</p></details>
+    </div>
+    <button id="helpStartTutorial" class="primary-button full">Interaktives Tutorial starten</button>
+  </article>
+</div>
+
+<div id="tutorialOverlay" class="tutorial-overlay hidden" aria-hidden="true">
+  <div id="tutorialFocus" class="tutorial-focus" aria-hidden="true"></div>
+  <article id="tutorialCard" class="tutorial-card" role="dialog" aria-modal="true" aria-labelledby="tutorialTitle">
+    <div class="tutorial-card-top"><span id="tutorialProgress" class="eyebrow">1 von 9</span><button id="skipTutorial" class="tutorial-skip">Überspringen</button></div>
+    <h2 id="tutorialTitle">Willkommen</h2>
+    <p id="tutorialText"></p>
+    <div id="tutorialDemo" class="tutorial-demo hidden"></div>
+    <div class="tutorial-actions"><button id="tutorialBack" class="subtle-button">Zurück</button><button id="tutorialNext" class="primary-button">Weiter</button></div>
   </article>
 </div>
 
