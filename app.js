@@ -8,7 +8,7 @@
   const CATALOG_KEY = 'enrichedCatalogV10';
   const LEGACY_CATALOG_KEYS = ['enrichedCatalogV9', 'enrichedCatalogV8', 'enrichedCatalogV7', 'enrichedCatalogV6', 'enrichedCatalogV5', 'enrichedCatalogV4'];
   const LEGACY_USER_KEYS = ['user-state', 'userState', 'state'];
-  const APP_VERSION = 10.0;
+  const APP_VERSION = 10.1;
   const DEFAULT_STREAMING_SERVICE = 'spotify';
   const META_URL = 'https://dreimetadaten.de/data/Serie.json';
   const META_MAX_AGE = 1000 * 60 * 60 * 24 * 30;
@@ -1539,6 +1539,7 @@
 
   function openDetail(number) {
     state.detailNr = Number(number);
+    document.querySelectorAll('#detailOverlay details.detail-accordion').forEach((section) => { section.open = false; });
     refreshDetail();
     const detailOverlay = $('detailOverlay');
     const playlistIsOpen = !$('playlistDetailOverlay').classList.contains('hidden');
@@ -1578,18 +1579,84 @@
     return importantCharacters(episode, 14).filter((name) => adversaries.has(name));
   }
 
+  function connectionSignature(numbers = []) {
+    return [...new Set(numbers.map(Number).filter(Number.isFinite))].sort((a, b) => a - b).join('-');
+  }
+
   function storyConnections(episode) {
-    const output = [];
-    for (const block of STORY_BLOCKS) {
-      if (!block.numbers.includes(episode.nr) || block.numbers.length < 2) continue;
-      output.push({ title: block.title, episodes: episodesForNumbers(block.numbers) });
-    }
+    const bySignature = new Map();
+
+    // Kuratierte Reihen haben Vorrang, damit dieselbe Chronik nicht doppelt
+    // unter leicht unterschiedlichen Namen angezeigt wird.
     for (const definition of CURATED_PLAYLISTS) {
       if (!definition.sequence || definition.type !== 'numbers' || !definition.numbers.includes(episode.nr)) continue;
-      if (output.some((item) => item.title === definition.title)) continue;
-      output.push({ title: definition.title, episodes: episodesForNumbers(definition.numbers) });
+      const signature = connectionSignature(definition.numbers);
+      bySignature.set(signature, {
+        id: `curated:${definition.id}`,
+        curatedId: definition.id,
+        title: definition.title,
+        description: definition.description,
+        numbers: [...definition.numbers],
+        episodes: episodesForNumbers(definition.numbers),
+      });
     }
-    return output.slice(0, 4);
+
+    for (const block of STORY_BLOCKS) {
+      if (!block.numbers.includes(episode.nr) || block.numbers.length < 2) continue;
+      const signature = connectionSignature(block.numbers);
+      if (bySignature.has(signature)) continue;
+      bySignature.set(signature, {
+        id: `story:${block.id}`,
+        curatedId: null,
+        title: block.title,
+        description: 'Zusammenhängende Fälle und wichtige Rückbezüge in sinnvoller Reihenfolge.',
+        numbers: [...block.numbers],
+        episodes: episodesForNumbers(block.numbers),
+      });
+    }
+
+    return [...bySignature.values()].filter((item) => item.episodes.length > 1).slice(0, 4);
+  }
+
+  function currentConnection(connectionId) {
+    const base = state.catalog.find((episode) => episode.nr === state.detailNr);
+    if (!base) return null;
+    return storyConnections(merged(base)).find((connection) => connection.id === connectionId) || null;
+  }
+
+  function openConnectionPlaylist(connectionId) {
+    const connection = currentConnection(connectionId);
+    if (!connection) return;
+    if (connection.curatedId) {
+      closeDetail();
+      openPlaylistDetail(connection.curatedId, true);
+      return;
+    }
+    saveConnectionPlaylist(connectionId, true);
+  }
+
+  function saveConnectionPlaylist(connectionId, openAfterSave = false) {
+    const connection = currentConnection(connectionId);
+    if (!connection) return;
+    const signature = connectionSignature(connection.numbers);
+    let playlist = (state.user.playlists || []).find((item) => connectionSignature(item.episodeNumbers) === signature);
+    let created = false;
+    if (!playlist) {
+      playlist = normalizePlaylist({
+        title: connection.title,
+        description: connection.description || 'Zusammenhängende Fälle in empfohlener Reihenfolge.',
+        episodeNumbers: connection.numbers,
+        smartMeta: { source: 'story-connection', connectionId: connection.id },
+      });
+      state.user.playlists.push(playlist);
+      created = true;
+      persistPlaylists();
+    }
+    toast(created ? 'Reihenfolge als Playlist gespeichert ✓' : 'Diese Playlist ist bereits gespeichert.');
+    if (openAfterSave && playlist) {
+      closeDetail();
+      openPlaylistDetail(playlist.id, false);
+    }
   }
 
   function similarEpisodes(episode, limit = 4) {
@@ -1646,7 +1713,11 @@
 
     const connections = storyConnections(episode);
     $('detailConnectionsSection').classList.toggle('hidden', !connections.length);
-    $('detailConnections').innerHTML = connections.map((connection) => `<div class="connection-card"><strong>${esc(connection.title)}</strong><div>${connection.episodes.map((item) => `<button data-open="${item.nr}" class="relation-chip ${item.nr === episode.nr ? 'current' : ''}">${esc(episodeLabel(item))} · ${esc(item.titel)}</button>`).join('')}</div></div>`).join('');
+    $('detailConnections').innerHTML = connections.map((connection) => `<article class="connection-card">
+      <div class="connection-card-head"><span><strong>${esc(connection.title)}</strong><small>${connection.episodes.length} Folgen in empfohlener Reihenfolge</small></span></div>
+      <div class="connection-episodes">${connection.episodes.map((item, index) => `<button data-open="${item.nr}" class="relation-row ${item.nr === episode.nr ? 'current' : ''}"><span class="relation-index">${index + 1}</span><span><strong>${esc(episodeLabel(item))} · ${esc(item.titel)}</strong><small>${esc(fmtDuration(item.durationMin))}${item.nr === episode.nr ? ' · aktuelle Folge' : ''}</small></span><b>›</b></button>`).join('')}</div>
+      <div class="connection-actions"><button class="subtle-button" data-connection-open="${esc(connection.id)}">Playlist öffnen</button><button class="subtle-button" data-connection-save="${esc(connection.id)}">Als eigene Playlist speichern</button></div>
+    </article>`).join('');
 
     const similar = similarEpisodes(episode);
     $('detailSimilarSection').classList.toggle('hidden', !similar.length);
@@ -1683,6 +1754,7 @@
     $('detailCharacters').innerHTML = characters.map((character) => `<span>${esc(character)}</span>`).join('');
     $('detailThemesSection').classList.toggle('hidden', !episode.tags.length);
     $('detailThemes').innerHTML = episode.tags.slice(0, 10).map((tag) => `<span>${esc(tag)}</span>`).join('');
+    $('detailPeopleSection').classList.toggle('hidden', !characters.length && !episode.tags.length);
 
     document.querySelectorAll('#detailRating [data-rating]').forEach((button) => button.classList.toggle('active', button.dataset.rating === episode.rating));
     $('detailHeard').checked = episode.heard;
@@ -1707,6 +1779,7 @@
         version: APP_VERSION,
         exportedAt: new Date().toISOString(),
         episodes: state.user.episodes,
+        playlists: state.user.playlists,
         settings: state.user.settings,
       };
       const text = JSON.stringify(payload, null, 2);
@@ -2062,6 +2135,22 @@
       const suggestAdd=event.target.closest('[data-playlist-suggest-add]');if(suggestAdd){const [id,nr]=suggestAdd.dataset.playlistSuggestAdd.split(':');const pl=playlistById(id);const number=Number(nr);if(pl&&!pl.episodeNumbers.includes(number)){suggestAdd.disabled=true;suggestAdd.textContent='✓';pl.episodeNumbers.push(number);pl.updatedAt=new Date().toISOString();persistPlaylists();refreshOpenPlaylist({message:'Passende Folge hinzugefügt ✓'});}return;}
             const move=event.target.closest('[data-playlist-move]');if(move){const [id,indexText,deltaText]=move.dataset.playlistMove.split(':');const pl=playlistById(id),index=Number(indexText),next=index+Number(deltaText);if(pl&&next>=0&&next<pl.episodeNumbers.length){[pl.episodeNumbers[index],pl.episodeNumbers[next]]=[pl.episodeNumbers[next],pl.episodeNumbers[index]];pl.updatedAt=new Date().toISOString();persistPlaylists();refreshOpenPlaylist({message:'Reihenfolge aktualisiert'});}return;}
       const remove=event.target.closest('[data-playlist-remove]');if(remove){const [id,nr]=remove.dataset.playlistRemove.split(':');const pl=playlistById(id);if(pl){const row=remove.closest('[data-playlist-episode]');row?.classList.add('removing');setTimeout(()=>{pl.episodeNumbers=pl.episodeNumbers.filter(n=>n!==Number(nr));pl.updatedAt=new Date().toISOString();persistPlaylists();refreshOpenPlaylist({message:'Folge entfernt'});},160);}return;}
+      const connectionOpen = event.target.closest('[data-connection-open]');
+      if (connectionOpen) {
+        event.preventDefault();
+        event.stopPropagation();
+        openConnectionPlaylist(connectionOpen.dataset.connectionOpen);
+        return;
+      }
+      const connectionSave = event.target.closest('[data-connection-save]');
+      if (connectionSave) {
+        event.preventDefault();
+        event.stopPropagation();
+        saveConnectionPlaylist(connectionSave.dataset.connectionSave, false);
+        connectionSave.textContent = 'Gespeichert ✓';
+        connectionSave.disabled = true;
+        return;
+      }
       const streamButton = event.target.closest('[data-stream]');
       if (streamButton) {
         event.preventDefault();

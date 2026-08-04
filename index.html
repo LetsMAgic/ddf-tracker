@@ -242,7 +242,7 @@
           <strong>Folgen-Tracker</strong>
           <small id="storageInfo">Lade Daten …</small>
           <small id="metadataInfo">Folgenwissen wird geprüft …</small>
-          <small>Version 8.3 · Speicherung ausschließlich auf diesem Gerät</small>
+          <small>Version 10.1 · Speicherung ausschließlich auf diesem Gerät</small>
           <small class="source-note">Folgenmetadaten & Streaming-Links: dreimetadaten.de · Community-Wertungen: rocky-beach.com</small>
         </div>
       </div>
@@ -271,47 +271,7 @@
     </div>
     <p id="detailDescription" class="detail-description"></p>
 
-    <section class="detail-section knowledge-section">
-      <div class="knowledge-heading"><span class="field-label">Wissenskarte</span><small>Einordnung der Folge</small></div>
-      <div id="detailKnowledgeGrid" class="knowledge-grid"></div>
-    </section>
-    <section id="detailConnectionsSection" class="detail-section hidden">
-      <span class="field-label">Reihen & Rückbezüge</span>
-      <div id="detailConnections" class="connection-list"></div>
-    </section>
-    <section id="detailSimilarSection" class="detail-section hidden">
-      <span class="field-label">Passende Folgen</span>
-      <div id="detailSimilar" class="similar-list"></div>
-    </section>
-    <section id="detailTriviaSection" class="detail-section hidden">
-      <span class="field-label">Gut zu wissen</span>
-      <div id="detailTrivia" class="fact-note"></div>
-    </section>
-
-    <section class="detail-section detail-streaming-section">
-      <span class="field-label">Anhören</span>
-      <div id="detailStreamingButtons" class="streaming-buttons"></div>
-      <small class="streaming-note">Direktlinks öffnen nach Möglichkeit die installierte App. Bei noch nicht veröffentlichten Folgen öffnet sich die Suche.</small>
-    </section>
-
-    <section id="detailReasonsSection" class="detail-section hidden">
-      <span class="field-label">Warum passt sie?</span>
-      <div id="detailReasons" class="tag-cloud"></div>
-    </section>
-    <section id="detailCharactersSection" class="detail-section hidden">
-      <span class="field-label">Mit dabei</span>
-      <div id="detailCharacters" class="tag-cloud character-cloud"></div>
-    </section>
-    <section id="detailThemesSection" class="detail-section hidden">
-      <span class="field-label">Themen</span>
-      <div id="detailThemes" class="tag-cloud"></div>
-    </section>
-
-    <section class="detail-section add-list-section">
-      <button id="detailAddPlaylist" class="playlist-add-button"><span>＋</span><span><strong>Zu Playlist hinzufügen</strong><small>Eigene Liste auswählen oder neu erstellen</small></span><b>›</b></button>
-    </section>
-
-    <section class="detail-section">
+    <section class="detail-section detail-primary-actions">
       <span class="field-label">Deine Bewertung</span>
       <div id="detailRating" class="rating-control">
         <button data-rating="minus"><span>−</span>Minus</button>
@@ -322,15 +282,60 @@
       <button id="clearRating" class="clear-rating">Bewertung entfernen</button>
     </section>
 
-    <label class="heard-control">
+    <label class="heard-control detail-heard-control">
       <input id="detailHeard" type="checkbox">
       <span><strong>Schon gehört</strong><small id="detailHeardDate">Wird automatisch gespeichert</small></span>
     </label>
 
-    <label class="note-field">
-      <span class="field-label">Persönliche Notiz</span>
-      <textarea id="detailNote" maxlength="600" placeholder="Was ist dir an der Folge aufgefallen?"></textarea>
-    </label>
+    <section class="detail-section detail-streaming-section">
+      <span class="field-label">Anhören</span>
+      <div id="detailStreamingButtons" class="streaming-buttons"></div>
+      <small class="streaming-note">Direktlinks öffnen nach Möglichkeit die installierte App. Bei noch nicht veröffentlichten Folgen öffnet sich die Suche.</small>
+    </section>
+
+    <section class="detail-section add-list-section">
+      <button id="detailAddPlaylist" class="playlist-add-button"><span>＋</span><span><strong>Zu Playlist hinzufügen</strong><small>Eigene Liste auswählen oder neu erstellen</small></span><b>›</b></button>
+    </section>
+
+    <div class="detail-accordion-stack">
+      <details id="detailKnowledgeSection" class="detail-accordion">
+        <summary><span><strong>Wissenskarte</strong><small>Autor, Ära, Laufzeit und Einordnung</small></span><b aria-hidden="true"></b></summary>
+        <div class="detail-accordion-content"><div id="detailKnowledgeGrid" class="knowledge-grid"></div></div>
+      </details>
+
+      <details id="detailConnectionsSection" class="detail-accordion hidden">
+        <summary><span><strong>Reihen & Rückbezüge</strong><small>Chronologien und wichtige Vorgeschichten</small></span><b aria-hidden="true"></b></summary>
+        <div class="detail-accordion-content"><div id="detailConnections" class="connection-list"></div></div>
+      </details>
+
+      <details id="detailPeopleSection" class="detail-accordion hidden">
+        <summary><span><strong>Figuren & Themen</strong><small>Wichtige Personen und Motive der Folge</small></span><b aria-hidden="true"></b></summary>
+        <div class="detail-accordion-content detail-subsections">
+          <section id="detailCharactersSection" class="detail-subsection hidden"><span class="field-label">Mit dabei</span><div id="detailCharacters" class="tag-cloud character-cloud"></div></section>
+          <section id="detailThemesSection" class="detail-subsection hidden"><span class="field-label">Themen</span><div id="detailThemes" class="tag-cloud"></div></section>
+        </div>
+      </details>
+
+      <details id="detailSimilarSection" class="detail-accordion hidden">
+        <summary><span><strong>Passende Folgen</strong><small>Ähnliche Fälle zum Weiterhören</small></span><b aria-hidden="true"></b></summary>
+        <div class="detail-accordion-content"><div id="detailSimilar" class="similar-list"></div></div>
+      </details>
+
+      <details id="detailReasonsSection" class="detail-accordion hidden">
+        <summary><span><strong>Warum passt sie?</strong><small>Grund für die persönliche Empfehlung</small></span><b aria-hidden="true"></b></summary>
+        <div class="detail-accordion-content"><div id="detailReasons" class="tag-cloud"></div></div>
+      </details>
+
+      <details id="detailTriviaSection" class="detail-accordion hidden">
+        <summary><span><strong>Gut zu wissen</strong><small>Einordnung und Besonderheiten</small></span><b aria-hidden="true"></b></summary>
+        <div class="detail-accordion-content"><div id="detailTrivia" class="fact-note"></div></div>
+      </details>
+
+      <details id="detailNoteSection" class="detail-accordion note-accordion">
+        <summary><span><strong>Persönliche Notiz</strong><small>Deine Gedanken zu dieser Folge</small></span><b aria-hidden="true"></b></summary>
+        <div class="detail-accordion-content"><label class="note-field compact-note"><textarea id="detailNote" maxlength="600" placeholder="Was ist dir an der Folge aufgefallen?"></textarea></label></div>
+      </details>
+    </div>
   </article>
 </div>
 
