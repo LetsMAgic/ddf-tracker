@@ -1912,21 +1912,16 @@ const TUTORIAL_STEPS = [
       }
     },
     prePositionAsync: async () => {
-      // First render and move the page while the tutorial is still invisible.
-      // Only after the exact playlist card is in place do we freeze and highlight it.
       await waitForTutorialSettle(80);
       const card = tutorialCreatedPlaylistCard();
       if (!card) return;
       card.id = 'tutorialCreatedPlaylist';
       card.classList.add('tutorial-created-playlist');
-      const viewportHeight = window.visualViewport?.height || window.innerHeight;
-      const desiredTop = Math.max(500, Math.min(viewportHeight * 0.58, viewportHeight - 300));
-      const rect = card.getBoundingClientRect();
       state.tutorialProgrammaticScroll = true;
       document.documentElement.classList.add('tutorial-instant-scroll');
-      window.scrollTo(0, Math.max(0, window.scrollY + rect.top - desiredTop));
+      card.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'nearest' });
       void document.documentElement.offsetHeight;
-      await waitForTutorialSettle(90);
+      await waitForTutorialSettle(100);
       document.documentElement.classList.remove('tutorial-instant-scroll');
       state.tutorialLockedScrollY = window.scrollY;
       state.tutorialProgrammaticScroll = false;
@@ -1945,7 +1940,6 @@ const TUTORIAL_STEPS = [
     },
     skipReveal: true,
     focusPadding: 7,
-    focusShiftY: 350,
     verify: () => String(state.playlistDetailId || '') === String(state.tutorialPlaylistId || '') && !$('playlistDetailOverlay').classList.contains('hidden'),
     invalidMessage: 'Tippe direkt auf die hervorgehobene Playlist-Karte.',
     settle: 160,
@@ -2333,6 +2327,32 @@ function positionTutorialFocus(step = currentTutorialStep()) {
   const minHeight = step?.compact ? 150 : 190;
   card.style.maxHeight = `${Math.max(minHeight, Math.floor(viewport.height * heightRatio))}px`;
   card.style.overflowY = 'auto';
+
+  // The freshly created playlist sits close to the lower edge on iPhone.
+  // Handle this step explicitly so the focus hole always follows the actual
+  // playlist card instead of a surrounding section or a shifted virtual box.
+  if (step?.id === 'open-playlist') {
+    const playlistCard = tutorialCreatedPlaylistCard();
+    if (playlistCard) {
+      state.tutorialTarget = playlistCard;
+      overlay.classList.remove('no-focus');
+      const rect = playlistCard.getBoundingClientRect();
+      const pad = Number(step?.focusPadding ?? 7);
+      const metrics = tutorialViewportMetrics();
+      const left = Math.max(8, rect.left - pad);
+      const right = Math.min(window.innerWidth - 8, rect.right + pad);
+      const top = Math.max(metrics.top + 8, rect.top - pad);
+      const bottom = Math.min(metrics.bottom - 90, rect.bottom + pad);
+      if (right > left && bottom > top + 24) {
+        focus.style.left = `${left}px`;
+        focus.style.top = `${top}px`;
+        focus.style.width = `${right - left}px`;
+        focus.style.height = `${bottom - top}px`;
+        state.tutorialLockedScrollY = window.scrollY;
+        return true;
+      }
+    }
+  }
 
   if (!elements.length) {
     overlay.classList.add('no-focus');
