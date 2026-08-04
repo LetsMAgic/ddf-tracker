@@ -1,125 +1,128 @@
 <!doctype html>
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#0b1020" />
-  <link rel="manifest" href="./manifest.json" />
-  <meta name="apple-mobile-web-app-title" content="DDF Tracker" />
-  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
-  <title>Drei ??? Folgen-Tracker</title>
-  <link rel="stylesheet" href="./style.css" />
-  <script src="./data/episodes-seed.js" defer></script>
-  <script src="./app.js" defer></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#090b0f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Folgen-Tracker">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" href="icon-192.png">
+  <link rel="stylesheet" href="style.css">
+  <title>Die drei ??? – Folgen-Tracker</title>
+  <script src="episodes-seed.js" defer></script>
+  <script src="app.js" defer></script>
 </head>
 <body>
-  <div class="app-shell">
-    <header class="topbar">
-      <div>
-        <div class="eyebrow">Die drei ???</div>
-        <h1>Folgen-Tracker</h1>
+  <div class="app">
+    <header class="app-header">
+      <div class="brand">
+        <img src="icon-192.png" class="brand-icon" alt="">
+        <div><span class="eyebrow">Mein Hörspiel-Archiv</span><h1>Folgen-Tracker</h1></div>
       </div>
-      <button id="btnSettings" class="icon-btn" aria-label="Einstellungen">⚙️</button>
+      <button class="icon-button" id="quickSettings" aria-label="Einstellungen öffnen">⚙︎</button>
     </header>
 
-    <section class="hero card">
-      <div class="hero-main">
-        <div class="metric">
-          <div class="metric-value" id="heardCount">0</div>
-          <div class="metric-label">gehörte Folgen</div>
-        </div>
-        <div class="metric">
-          <div class="metric-value" id="unheardCount">0</div>
-          <div class="metric-label">ung gehört</div>
-        </div>
-        <div class="metric">
-          <div class="metric-value" id="plusCount">0</div>
-          <div class="metric-label">Plus</div>
-        </div>
-      </div>
-      <div class="hero-actions">
-        <button class="primary" id="btnRecommend">Empfohlene Folge</button>
-        <button class="secondary" id="btnRandomNew">Zufällige neue Folge</button>
-        <button class="secondary" id="btnRandomHeard">Zufällige bekannte Folge</button>
-      </div>
-      <div id="recommendationBox" class="recommendation hidden"></div>
-    </section>
-
-    <section class="controls card">
-      <input id="search" type="search" placeholder="Suche nach Titel, Stichwort, Tag …" autocomplete="off" />
-      <div class="filter-row" role="tablist" aria-label="Filter">
-        <button class="filter active" data-filter="all">Alle</button>
-        <button class="filter" data-filter="heard">Nur gehört</button>
-        <button class="filter" data-filter="unheard">Nur ungehört</button>
-        <button class="filter" data-filter="plus">Plus</button>
-        <button class="filter" data-filter="neutral">Neutral</button>
-        <button class="filter" data-filter="minus">Minus</button>
-      </div>
-      <div class="filter-row">
-        <button class="secondary" id="btnImportBackup">Import JSON</button>
-        <button class="secondary" id="btnExportBackup">Export JSON</button>
-        <button class="secondary" id="btnLoadCatalog">Katalog neu laden</button>
-      </div>
-      <input id="fileInput" type="file" accept=".json,application/json" hidden />
-    </section>
-
-    <section class="status card">
-      <div id="statusText">Lade …</div>
-      <div class="small" id="syncText"></div>
-    </section>
-
     <main>
-      <div class="list-head">
-        <div id="resultInfo">0 Folgen</div>
-        <select id="sortSelect" class="sort-select" aria-label="Sortierung">
-          <option value="nr">Nummer aufsteigend</option>
-          <option value="nr-desc">Nummer absteigend</option>
-          <option value="title">Titel A–Z</option>
-          <option value="rocky-best">Rocky-Beach: beste zuerst</option>
-          <option value="rocky-worst">Rocky-Beach: schlechteste zuerst</option>
-          <option value="rating">Eigene Bewertung</option>
-        </select>
-      </div>
-      <div id="episodeList" class="list"></div>
+      <section class="page active" data-page="home">
+        <div class="hero-card">
+          <div class="progress-copy"><span id="progressPercent">0 %</span><small>deines Katalogs gehört</small></div>
+          <div class="progress-track"><span id="progressBar"></span></div>
+          <div class="stats-grid">
+            <div><strong id="heardCount">0</strong><span>gehört</span></div>
+            <div><strong id="unheardCount">0</strong><span>offen</span></div>
+            <div><strong id="plusCount">0</strong><span>Plus</span></div>
+            <div><strong id="ratedCount">0</strong><span>bewertet</span></div>
+          </div>
+        </div>
+
+        <section class="section-block">
+          <div class="section-heading"><div><span class="eyebrow">Für dich</span><h2>Nächster Fall</h2></div></div>
+          <article id="recommendationCard" class="feature-card empty-state">
+            <div><span class="feature-kicker">Persönliche Empfehlung</span><h3>Noch keine Empfehlung gewählt</h3><p>Je mehr Plus-, Neutral- und Minus-Bewertungen du vergibst, desto besser wird die Auswahl.</p></div>
+            <button id="recommendButton" class="primary-button">Folge empfehlen</button>
+          </article>
+        </section>
+
+        <section class="section-block">
+          <div class="section-heading"><div><span class="eyebrow">Schnellauswahl</span><h2>Was möchtest du hören?</h2></div></div>
+          <div class="action-grid">
+            <button id="randomNewButton" class="action-card"><span class="action-icon">✦</span><strong>Neue Folge</strong><small>Zufällig aus ungehörten</small></button>
+            <button id="randomHeardButton" class="action-card"><span class="action-icon">↻</span><strong>Bekannte Folge</strong><small>Zufällig erneut hören</small></button>
+          </div>
+        </section>
+
+        <section class="section-block">
+          <div class="section-heading"><div><span class="eyebrow">Zuletzt geändert</span><h2>Deine Aktivität</h2></div><button class="text-button" data-go="episodes">Alle Folgen</button></div>
+          <div id="recentList" class="compact-list"></div>
+        </section>
+      </section>
+
+      <section class="page" data-page="episodes">
+        <div class="page-title"><span class="eyebrow">Katalog</span><h2>Alle Folgen</h2><p id="episodeResultCount">0 Folgen</p></div>
+        <div class="sticky-tools">
+          <label class="search-box"><span>⌕</span><input id="searchInput" type="search" placeholder="Titel, Nummer oder Stichwort" autocomplete="off"></label>
+          <div id="filterChips" class="chips-scroll">
+            <button class="chip active" data-filter="all">Alle</button><button class="chip" data-filter="unheard">Offen</button><button class="chip" data-filter="heard">Gehört</button><button class="chip" data-filter="plus">Plus</button><button class="chip" data-filter="neutral">Neutral</button><button class="chip" data-filter="minus">Minus</button><button class="chip" data-filter="unrated">Unbewertet</button>
+          </div>
+          <select id="episodeSort" class="select-control">
+            <option value="nr">Nummer aufsteigend</option><option value="nr-desc">Nummer absteigend</option><option value="title">Titel A–Z</option><option value="rocky-best">Rocky-Beach: beste zuerst</option><option value="rocky-worst">Rocky-Beach: schlechteste zuerst</option><option value="recommendation">Beste Empfehlung</option><option value="own">Eigene Bewertung</option>
+          </select>
+        </div>
+        <div id="episodeList" class="episode-list"></div>
+      </section>
+
+      <section class="page" data-page="ranking">
+        <div class="page-title"><span class="eyebrow">Vergleichen</span><h2>Ranking</h2><p>Externes Ranking und dein persönlicher Geschmack.</p></div>
+        <div class="segmented" id="rankingMode"><button class="active" data-ranking="rocky">Rocky-Beach</button><button data-ranking="mine">Mein Ranking</button><button data-ranking="match">Empfehlungen</button></div>
+        <div id="rankingInfo" class="info-card"></div>
+        <div id="rankingList" class="ranking-list"></div>
+      </section>
+
+      <section class="page" data-page="settings">
+        <div class="page-title"><span class="eyebrow">Verwaltung</span><h2>Einstellungen</h2><p>Backups, Katalog und lokale Daten.</p></div>
+        <div class="settings-group">
+          <h3>Backup</h3>
+          <button id="exportButton" class="settings-row"><span><strong>JSON exportieren</strong><small>Hörstatus und Bewertungen sichern</small></span><b>›</b></button>
+          <button id="importButton" class="settings-row"><span><strong>JSON importieren</strong><small>Vorhandenes Backup einlesen</small></span><b>›</b></button>
+          <input id="importFile" type="file" accept="application/json,.json" hidden>
+        </div>
+        <div class="settings-group">
+          <h3>Daten</h3>
+          <button id="reloadCatalogButton" class="settings-row"><span><strong>Katalog neu laden</strong><small>Folgendaten aus der eingebauten Datei übernehmen</small></span><b>↻</b></button>
+          <button id="resetButton" class="settings-row danger"><span><strong>Persönliche Daten zurücksetzen</strong><small>Gehört-Status und Bewertungen löschen</small></span><b>›</b></button>
+        </div>
+        <div class="settings-group app-info">
+          <img src="icon-192.png" alt="App-Icon"><div><strong>Folgen-Tracker</strong><small id="storageInfo">Lade Daten …</small><small>Version 3.0 · Speicherung ausschließlich auf diesem Gerät</small></div>
+        </div>
+      </section>
     </main>
+
+    <nav class="bottom-nav" aria-label="Hauptnavigation">
+      <button class="active" data-nav="home"><span>⌂</span><small>Start</small></button>
+      <button data-nav="episodes"><span>☷</span><small>Folgen</small></button>
+      <button data-nav="ranking"><span>♕</span><small>Ranking</small></button>
+      <button data-nav="settings"><span>⚙︎</span><small>Einstellungen</small></button>
+    </nav>
   </div>
 
-  <div id="editorOverlay" class="overlay hidden" aria-hidden="true">
-    <div class="sheet card">
-      <div class="sheet-head">
-        <div>
-          <div class="eyebrow" id="editNr">Folge</div>
-          <h2 id="editTitle">Bearbeiten</h2>
-        </div>
-        <button id="btnCloseEditor" class="icon-btn">✕</button>
+  <div id="detailOverlay" class="overlay hidden" aria-hidden="true">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header"><div><span id="detailNumber" class="eyebrow">Folge</span><h2 id="detailTitle"></h2></div><button id="closeDetail" class="icon-button">×</button></div>
+      <p id="detailDescription" class="detail-description"></p>
+      <div id="detailMeta" class="detail-meta"></div>
+      <div class="field-label">Deine Bewertung</div>
+      <div id="detailRating" class="rating-control">
+        <button data-rating="minus"><span>−</span>Minus</button><button data-rating="neutral"><span>●</span>Neutral</button><button data-rating="plus"><span>＋</span>Plus</button>
       </div>
-      <label>Bewertung</label>
-      <div class="rating-row">
-        <button data-rate="plus" class="rate-btn">Plus</button>
-        <button data-rate="neutral" class="rate-btn">Neutral</button>
-        <button data-rate="minus" class="rate-btn">Minus</button>
-      </div>
-
-      <label for="heardToggle" class="inline-check">
-        <input id="heardToggle" type="checkbox" />
-        schon gehört
-      </label>
-
-      <label for="tagsInput">Eigene Tags</label>
-      <input id="tagsInput" type="text" placeholder="z. B. grusel, insel, skinny" />
-
-      <label for="noteInput">Notiz</label>
-      <textarea id="noteInput" rows="4" placeholder="Dein kurzer Eindruck …"></textarea>
-
-      <div class="sheet-actions">
-        <button id="btnSaveEpisode" class="primary">Speichern</button>
-        <button id="btnResetEpisode" class="secondary">Zurücksetzen</button>
-      </div>
+      <label class="heard-control"><input id="detailHeard" type="checkbox"><span><strong>Schon gehört</strong><small>Wird sofort automatisch gespeichert</small></span></label>
+      <button id="clearRating" class="text-button centered">Bewertung entfernen</button>
     </div>
   </div>
 
-  <div id="toasts" class="toasts"></div>
+  <div id="toast" class="toast hidden" role="status"></div>
 </body>
 </html>

@@ -1,616 +1,260 @@
-
 (() => {
+  'use strict';
+
   const DB_NAME = 'ddf-tracker';
   const DB_VERSION = 1;
   const STORE = 'kv';
-  const STATE_KEY = 'appState';
-  const CATALOG_KEY = 'catalog';
+  const USER_KEY = 'appState';
+  const LEGACY_USER_KEYS = ['user-state', 'userState', 'state'];
+  const APP_VERSION = 3;
 
-  const els = {};
   const state = {
-    filter: 'all',
-    sort: 'nr',
-    search: '',
     catalog: [],
-    user: { episodes: {}, version: 1, updatedAt: null },
-    currentEdit: null,
-    catalogLoaded: false,
+    user: { version: APP_VERSION, episodes: {}, updatedAt: null },
+    page: 'home', filter: 'all', sort: 'nr', ranking: 'rocky', search: '', detailNr: null
   };
 
-  const ratingOrder = { plus: 2, neutral: 1, minus: 0, none: -1 };
+  const $ = id => document.getElementById(id);
+  const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const debounce = (fn, ms=150) => { let t; return (...args) => { clearTimeout(t); t=setTimeout(()=>fn(...args),ms); }; };
 
-  function $(id){ return document.getElementById(id); }
-
-  function toast(msg){
-    const wrap = $('toasts');
-    const t = document.createElement('div');
-    t.className = 'toast';
-    t.textContent = msg;
-    wrap.appendChild(t);
-    setTimeout(() => t.remove(), 2400);
-  }
-
-  function slugify(s){
-    return String(s || '')
-      .toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-      .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
-  }
-
-  function parseTags(value){
-    return String(value || '')
-      .split(/[,\n;]/)
-      .map(s => s.trim())
-      .filter(Boolean)
-      .filter((v, i, a) => a.indexOf(v) === i);
-  }
-
-  function fmtRating(r){
-    if (r === null || r === undefined || r === '') return '—';
-    const n = Number(r);
-    return Number.isFinite(n) ? n.toFixed(3).replace(/0+$/,'').replace(/\.$/,'') : '—';
-  }
-
-  function userStateFor(nr){
-    return state.user.episodes[String(nr)] || { heard:false, rating:'neutral', tags:[], note:'' };
-  }
-
-  function episodeMerged(ep){
-    const u = userStateFor(ep.nr);
-    const tags = [...(ep.tags || [])];
-    for (const t of (u.tags || [])) if (!tags.includes(t)) tags.push(t);
-    return { ...ep, ...u, tags };
-  }
-
-  function ratingLabel(r){
-    return r === 'plus' ? 'Plus' : r === 'minus' ? 'Minus' : 'Neutral';
-  }
-
-  function saveUserState(){
-    state.user.updatedAt = new Date().toISOString();
-    return idbSet(STATE_KEY, state.user).then(() => {
-      $('syncText').textContent = `Gespeichert ${new Date(state.user.updatedAt).toLocaleString('de-DE')}`;
+  let dbPromise;
+  function openDB(){
+    if (dbPromise) return dbPromise;
+    dbPromise = new Promise((resolve,reject)=>{
+      const req=indexedDB.open(DB_NAME,DB_VERSION);
+      req.onupgradeneeded=()=>{ if(!req.result.objectStoreNames.contains(STORE)) req.result.createObjectStore(STORE); };
+      req.onsuccess=()=>resolve(req.result); req.onerror=()=>reject(req.error);
     });
-  }
-
-  async function idbOpen(){
-    return new Promise((resolve, reject) => {
-      const req = indexedDB.open(DB_NAME, DB_VERSION);
-      req.onupgradeneeded = () => {
-        const db = req.result;
-        if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
-      };
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-  }
-
-  let dbPromise = null;
-  async function db(){
-    if (!dbPromise) dbPromise = idbOpen();
     return dbPromise;
   }
+  async function dbGet(key){ const db=await openDB(); return new Promise((res,rej)=>{const r=db.transaction(STORE).objectStore(STORE).get(key);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}); }
+  async function dbSet(key,val){ const db=await openDB(); return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(val,key);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);}); }
 
-  async function idbGet(key){
-    const database = await db();
-    return new Promise((resolve, reject) => {
-      const tx = database.transaction(STORE, 'readonly');
-      const store = tx.objectStore(STORE);
-      const req = store.get(key);
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
+  function normalizeCatalog(raw){
+    return (Array.isArray(raw)?raw:[]).map(x=>({
+      nr:Number(x.nr ?? x.number ?? x.NumberEuropa),
+      titel:String(x.titel ?? x.title ?? x.Title ?? '').trim(),
+      beschreibung:String(x.beschreibung ?? x.description ?? '').trim(),
+      tags:Array.isArray(x.tags)?x.tags.map(String):[],
+      rockyRanking:Number.isFinite(Number(x.rockyRanking ?? x.rocky ?? x.Rating)) ? Number(x.rockyRanking ?? x.rocky ?? x.Rating) : null,
+      collection:x.collection || 'main'
+    })).filter(x=>x.nr>0 && x.titel).sort((a,b)=>a.nr-b.nr);
   }
 
-  async function idbSet(key, value){
-    const database = await db();
-    return new Promise((resolve, reject) => {
-      const tx = database.transaction(STORE, 'readwrite');
-      const store = tx.objectStore(STORE);
-      const req = store.put(value, key);
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
-    });
-  }
-
-  async function idbClear(){
-    const database = await db();
-    return new Promise((resolve, reject) => {
-      const tx = database.transaction(STORE, 'readwrite');
-      const store = tx.objectStore(STORE);
-      const req = store.clear();
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
-    });
-  }
-
-  function normalizeImported(data){
-    if (Array.isArray(data)) {
-      return { catalog: data, user: null };
+  function normalizeUser(raw){
+    const out={version:APP_VERSION,episodes:{},updatedAt:raw?.updatedAt || null};
+    const source = raw?.user?.episodes || raw?.episodes || raw?.userData || {};
+    if (Array.isArray(source)) {
+      for (const item of source) if (item?.nr != null) out.episodes[String(item.nr)] = normalizeEpisodeState(item);
+    } else if (source && typeof source === 'object') {
+      for (const [nr,item] of Object.entries(source)) out.episodes[String(nr)] = normalizeEpisodeState(item);
     }
-    if (data && Array.isArray(data.catalog)) {
-      return { catalog: data.catalog, user: data.user || null };
+    return out;
+  }
+
+  function normalizeEpisodeState(item={}){
+    let rating=item.rating ?? item.bewertung ?? null;
+    if (rating==='+' || rating==='positive') rating='plus';
+    if (rating==='-' || rating==='negative') rating='minus';
+    if (rating==='0') rating='neutral';
+    if (!['plus','neutral','minus'].includes(rating)) rating=null;
+    return { heard:Boolean(item.heard ?? item.gehoert ?? item.listened), rating, updatedAt:item.updatedAt || null };
+  }
+
+  function userFor(nr){ return state.user.episodes[String(nr)] || {heard:false,rating:null,updatedAt:null}; }
+  function merged(ep){ return {...ep,...userFor(ep.nr)}; }
+  function ratingLabel(r){ return r==='plus'?'Plus':r==='neutral'?'Neutral':r==='minus'?'Minus':'Unbewertet'; }
+  function ratingSymbol(r){ return r==='plus'?'＋':r==='neutral'?'●':r==='minus'?'−':'—'; }
+  function fmtRocky(v){ return v==null?'—':Number(v).toFixed(2).replace('.',','); }
+
+  async function saveEpisode(nr, patch){
+    const old=userFor(nr);
+    state.user.episodes[String(nr)]={...old,...patch,updatedAt:new Date().toISOString()};
+    state.user.updatedAt=new Date().toISOString();
+    await dbSet(USER_KEY,state.user);
+    renderAll();
+  }
+
+  function profile(){
+    const weights={}; let rated=0;
+    for(const ep of state.catalog){
+      const u=userFor(ep.nr); if(!u.rating) continue; rated++;
+      const delta=u.rating==='plus'?2:u.rating==='neutral'?.25:-1.4;
+      for(const tag of ep.tags) weights[tag]=(weights[tag]||0)+delta;
     }
-    if (data && data.episodes && typeof data.episodes === 'object') {
-      return { catalog: null, user: data };
+    return {weights,rated};
+  }
+
+  function recommendationScore(ep){
+    const {weights,rated}=profile();
+    let tagScore=0, positive=0;
+    for(const tag of ep.tags){ const w=weights[tag]||0; tagScore+=w; if(w>0) positive++; }
+    const tagBase=ep.tags.length ? tagScore/Math.sqrt(ep.tags.length) : 0;
+    const rocky=ep.rockyRanking==null?0:Math.max(0,6-ep.rockyRanking)*0.26;
+    const freshness=Math.min(ep.nr/500,0.3);
+    const score=tagBase+rocky+freshness;
+    const match=rated===0 ? Math.round(55 + rocky*8) : Math.max(1,Math.min(99,Math.round(55+score*7)));
+    return {score,match,positive};
+  }
+
+  function getRecommendationPool(){
+    return state.catalog.map(merged).filter(e=>!e.heard).map(e=>({...e,...recommendationScore(e)})).sort((a,b)=>b.score-a.score || rockyCompare(a,b) || a.nr-b.nr);
+  }
+  function rockyCompare(a,b){ if(a.rockyRanking==null&&b.rockyRanking==null)return 0;if(a.rockyRanking==null)return 1;if(b.rockyRanking==null)return -1;return a.rockyRanking-b.rockyRanking; }
+
+  function weightedPick(list){
+    if(!list.length)return null;
+    const top=list.slice(0,Math.min(20,list.length));
+    const min=Math.min(...top.map(x=>x.score||0));
+    const weights=top.map(x=>Math.max(.15,(x.score||0)-min+.5));
+    let r=Math.random()*weights.reduce((a,b)=>a+b,0);
+    for(let i=0;i<top.length;i++){r-=weights[i];if(r<=0)return top[i];}
+    return top[0];
+  }
+
+  function showPage(page){
+    state.page=page;
+    document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.dataset.page===page));
+    document.querySelectorAll('[data-nav]').forEach(x=>x.classList.toggle('active',x.dataset.nav===page));
+    if(page==='episodes') renderEpisodes();
+    if(page==='ranking') renderRanking();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function stats(){
+    let heard=0,plus=0,rated=0;
+    for(const ep of state.catalog){const u=userFor(ep.nr);if(u.heard)heard++;if(u.rating)rated++;if(u.rating==='plus')plus++;}
+    return {total:state.catalog.length,heard,unheard:state.catalog.length-heard,plus,rated};
+  }
+
+  function renderHome(){
+    const s=stats(), pct=s.total?Math.round(s.heard/s.total*100):0;
+    $('progressPercent').textContent=`${pct} %`; $('progressBar').style.width=`${pct}%`;
+    $('heardCount').textContent=s.heard; $('unheardCount').textContent=s.unheard; $('plusCount').textContent=s.plus; $('ratedCount').textContent=s.rated;
+    const recent=state.catalog.map(merged).filter(e=>e.updatedAt).sort((a,b)=>new Date(b.updatedAt)-new Date(a.updatedAt)).slice(0,5);
+    $('recentList').innerHTML=recent.length?recent.map(e=>`<button class="compact-item" data-open="${e.nr}"><span><strong>${e.nr}. ${esc(e.titel)}</strong><small>${e.heard?'Gehört':'Offen'} · ${ratingLabel(e.rating)}</small></span><span>${ratingSymbol(e.rating)}</span></button>`).join(''):'<div class="empty-message">Noch keine Aktivität. Markiere eine Folge als gehört oder gib eine Bewertung ab.</div>';
+  }
+
+  function filteredEpisodes(){
+    let list=state.catalog.map(merged); const q=state.search.trim().toLowerCase();
+    if(state.filter==='heard')list=list.filter(e=>e.heard); if(state.filter==='unheard')list=list.filter(e=>!e.heard);
+    if(['plus','neutral','minus'].includes(state.filter))list=list.filter(e=>e.rating===state.filter); if(state.filter==='unrated')list=list.filter(e=>!e.rating);
+    if(q)list=list.filter(e=>[e.nr,e.titel,e.beschreibung,...e.tags].join(' ').toLowerCase().includes(q));
+    list.sort((a,b)=>{
+      if(state.sort==='nr-desc')return b.nr-a.nr; if(state.sort==='title')return a.titel.localeCompare(b.titel,'de');
+      if(state.sort==='rocky-best')return rockyCompare(a,b)||a.nr-b.nr; if(state.sort==='rocky-worst')return -rockyCompare(a,b)||a.nr-b.nr;
+      if(state.sort==='recommendation')return recommendationScore(b).score-recommendationScore(a).score||rockyCompare(a,b);
+      if(state.sort==='own'){const o={plus:3,neutral:2,minus:1};return (o[b.rating]||0)-(o[a.rating]||0)||a.nr-b.nr;} return a.nr-b.nr;
+    }); return list;
+  }
+
+  function episodeCard(e){
+    return `<article class="episode-card rating-${e.rating||'none'}" data-open="${e.nr}">
+      <div class="episode-top"><div><span class="episode-number">FOLGE ${e.nr}</span><h3 class="episode-title">${esc(e.titel)}</h3>${e.beschreibung?`<p class="episode-description">${esc(e.beschreibung)}</p>`:''}</div><button class="heard-button ${e.heard?'on':''}" data-heard="${e.nr}">${e.heard?'✓':'○'}</button></div>
+      <div class="episode-footer"><div class="badges"><span class="badge">Rocky ${fmtRocky(e.rockyRanking)}</span><span class="badge">${ratingLabel(e.rating)}</span></div><div class="rating-mini" aria-label="Bewertung"><button data-rate="${e.nr}:minus" class="${e.rating==='minus'?'active':''}">−</button><button data-rate="${e.nr}:neutral" class="${e.rating==='neutral'?'active':''}">●</button><button data-rate="${e.nr}:plus" class="${e.rating==='plus'?'active':''}">＋</button></div></div>
+    </article>`;
+  }
+
+  function renderEpisodes(){ const list=filteredEpisodes(); $('episodeResultCount').textContent=`${list.length} von ${state.catalog.length} Folgen`; $('episodeList').innerHTML=list.length?list.map(episodeCard).join(''):'<div class="empty-message">Keine passenden Folgen gefunden.</div>'; }
+
+  function renderRanking(){
+    const mode=state.ranking; let list=[],info='';
+    if(mode==='rocky'){
+      list=state.catalog.map(merged).filter(e=>e.rockyRanking!=null).sort((a,b)=>rockyCompare(a,b));
+      info=`Für <strong>${list.length}</strong> Folgen ist derzeit eine Rocky-Beach-Wertung in deinem Katalog hinterlegt. Kleinere Werte sind besser.`;
+    } else if(mode==='mine'){
+      const order={plus:3,neutral:2,minus:1}; list=state.catalog.map(merged).filter(e=>e.rating).sort((a,b)=>(order[b.rating]-order[a.rating])||rockyCompare(a,b)||a.nr-b.nr);
+      info=`Dein Ranking gruppiert Folgen nach <strong>Plus, Neutral und Minus</strong>. Innerhalb einer Gruppe entscheidet die Rocky-Beach-Wertung.`;
+    } else {
+      list=getRecommendationPool(); info=`Ungehörte Folgen werden aus deinem Bewertungsprofil berechnet. Das externe Ranking dient nur als zusätzlicher Faktor und Tiebreaker.`;
     }
-    return { catalog: null, user: null };
+    $('rankingInfo').innerHTML=info;
+    $('rankingList').innerHTML=list.length?list.map((e,i)=>`<button class="ranking-card" data-open="${e.nr}"><span class="rank-position">${i+1}</span><span class="rank-main"><strong>${e.nr}. ${esc(e.titel)}</strong><small>${mode==='mine'?ratingLabel(e.rating):e.tags.slice(0,3).map(esc).join(' · ')||'Keine Tags hinterlegt'}</small></span><span class="rank-score"><strong>${mode==='match'?`${e.match}%`:mode==='mine'?ratingSymbol(e.rating):fmtRocky(e.rockyRanking)}</strong><small>${mode==='match'?'Match':mode==='mine'?'deins':'Rocky'}</small></span></button>`).join(''):'<div class="empty-message">Für diese Ansicht sind noch keine Daten vorhanden.</div>';
   }
 
-  function autoEnhanceCatalog(raw){
-    return raw.map(item => {
-      const tags = Array.isArray(item.tags) ? item.tags.slice() : [];
-      const desc = item.beschreibung || item.description || '';
-      return {
-        nr: Number(item.nr ?? item.NumberEuropa ?? item.number ?? item.numberEuropa ?? 0),
-        titel: item.titel || item.Title || item.title || '',
-        beschreibung: desc,
-        tags,
-        rockyRanking: item.rockyRanking ?? item.rocky ?? item.Rating ?? null,
-        collection: item.collection || 'main'
-      };
-    }).filter(ep => ep.nr && ep.titel);
+  function renderSettings(){ const s=stats(); $('storageInfo').textContent=`${s.total} Folgen · ${s.heard} gehört · ${s.rated} bewertet`; }
+  function renderAll(){ renderHome(); renderEpisodes(); renderRanking(); renderSettings(); if(state.detailNr) refreshDetail(); }
+
+  function showRecommendation(ep){
+    if(!ep){toast('Keine passende Folge gefunden.');return;}
+    const score=recommendationScore(ep); const tags=ep.tags.slice(0,3).join(' · ');
+    $('recommendationCard').classList.remove('empty-state');
+    $('recommendationCard').innerHTML=`<div><span class="feature-kicker">${score.match}% passend</span><h3>${ep.nr}. ${esc(ep.titel)}</h3><p>${tags?`Passt zu deinem Profil: ${esc(tags)}.`:'Auswahl anhand deiner Bewertungen und des externen Rankings.'}</p></div><button class="primary-button" data-open="${ep.nr}">Folge ansehen</button>`;
   }
 
-  async function loadCatalogFromSeed(){
-    const seed = window.DDF_EPISODES_SEED || [];
-    state.catalog = autoEnhanceCatalog(seed).sort((a,b)=>a.nr-b.nr);
-    state.catalogLoaded = true;
-    await idbSet(CATALOG_KEY, state.catalog);
+  function openDetail(nr){ state.detailNr=Number(nr); refreshDetail(); $('detailOverlay').classList.remove('hidden'); $('detailOverlay').setAttribute('aria-hidden','false'); }
+  function closeDetail(){ state.detailNr=null; $('detailOverlay').classList.add('hidden'); $('detailOverlay').setAttribute('aria-hidden','true'); }
+  function refreshDetail(){
+    const ep=state.catalog.find(x=>x.nr===state.detailNr); if(!ep)return; const e=merged(ep);
+    $('detailNumber').textContent=`Folge ${e.nr}`; $('detailTitle').textContent=e.titel; $('detailDescription').textContent=e.beschreibung||'Keine Kurzbeschreibung vorhanden.';
+    $('detailMeta').innerHTML=`<span class="badge">Rocky-Beach ${fmtRocky(e.rockyRanking)}</span>${e.tags.slice(0,6).map(t=>`<span class="badge">${esc(t)}</span>`).join('')}`;
+    document.querySelectorAll('#detailRating [data-rating]').forEach(b=>b.classList.toggle('active',b.dataset.rating===e.rating)); $('detailHeard').checked=e.heard;
   }
 
-  async function tryLoadStoredCatalog(){
-    const stored = await idbGet(CATALOG_KEY);
-    if (Array.isArray(stored) && stored.length) {
-      state.catalog = stored;
-      state.catalogLoaded = true;
-      return true;
-    }
-    return false;
-  }
-
-  function computeStats(){
-    const total = state.catalog.length;
-    let heard = 0, plus = 0, minus = 0;
-    for (const ep of state.catalog) {
-      const u = userStateFor(ep.nr);
-      if (u.heard) heard++;
-      if (u.rating === 'plus') plus++;
-      if (u.rating === 'minus') minus++;
-    }
-    $('heardCount').textContent = heard;
-    $('unheardCount').textContent = total - heard;
-    $('plusCount').textContent = plus;
-    $('resultInfo').textContent = `${visibleEpisodes().length} von ${total} Folgen`;
-    $('statusText').textContent = state.catalogLoaded
-      ? `Katalog geladen: ${total} Folgen`
-      : 'Kein Katalog geladen';
-  }
-
-  function visibleEpisodes(){
-    const q = state.search.trim().toLowerCase();
-    let list = state.catalog.map(episodeMerged);
-    if (state.filter === 'heard') list = list.filter(e => e.heard);
-    if (state.filter === 'unheard') list = list.filter(e => !e.heard);
-    if (state.filter === 'plus') list = list.filter(e => e.rating === 'plus');
-    if (state.filter === 'neutral') list = list.filter(e => e.rating === 'neutral');
-    if (state.filter === 'minus') list = list.filter(e => e.rating === 'minus');
-    if (q) {
-      list = list.filter(e => {
-        const hay = [
-          e.titel,
-          e.beschreibung,
-          e.tags.join(' '),
-          e.note || '',
-          String(e.nr),
-          ratingLabel(e.rating),
-        ].join(' ').toLowerCase();
-        return hay.includes(q);
-      });
-    }
-    list.sort((a,b) => {
-      const rockyA = Number.isFinite(Number(a.rockyRanking)) ? Number(a.rockyRanking) : null;
-      const rockyB = Number.isFinite(Number(b.rockyRanking)) ? Number(b.rockyRanking) : null;
-      if (state.sort === 'nr-desc') return b.nr - a.nr;
-      if (state.sort === 'title') return a.titel.localeCompare(b.titel, 'de');
-      if (state.sort === 'rocky-best') {
-        if (rockyA === null && rockyB === null) return a.nr - b.nr;
-        if (rockyA === null) return 1;
-        if (rockyB === null) return -1;
-        return rockyA - rockyB || a.nr - b.nr;
-      }
-      if (state.sort === 'rocky-worst') {
-        if (rockyA === null && rockyB === null) return a.nr - b.nr;
-        if (rockyA === null) return 1;
-        if (rockyB === null) return -1;
-        return rockyB - rockyA || a.nr - b.nr;
-      }
-      if (state.sort === 'rating') {
-        return (ratingOrder[b.rating] ?? -1) - (ratingOrder[a.rating] ?? -1) || a.nr - b.nr;
-      }
-      return a.nr - b.nr;
-    });
-    return list;
-  }
-
-  function render(){
-    computeStats();
-    const list = $('episodeList');
-    list.innerHTML = '';
-    const items = visibleEpisodes();
-    for (const ep of items) {
-      const card = document.createElement('article');
-      card.className = `item rating-${ep.rating || 'neutral'}`;
-      card.dataset.nr = ep.nr;
-
-      const top = document.createElement('div');
-      top.className = 'item-top';
-
-      const left = document.createElement('div');
-      left.className = 'item-title-wrap';
-      const title = document.createElement('h3');
-      title.className = 'item-title';
-      title.textContent = `${ep.nr}. ${ep.titel}`;
-      const ratingBanner = document.createElement('div');
-      ratingBanner.className = `rating-banner ${ep.rating || 'neutral'}`;
-      ratingBanner.innerHTML = `<span>Deine Bewertung</span><strong>${ep.rating === 'plus' ? '＋ Plus' : ep.rating === 'minus' ? '－ Minus' : '• Neutral'}</strong>`;
-      const meta = document.createElement('div');
-      meta.className = 'item-meta';
-      const parts = [];
-      if (ep.collection !== 'main') parts.push(ep.collection);
-      if (ep.beschreibung) parts.push(ep.beschreibung);
-      if (ep.note) parts.push(`Notiz: ${ep.note}`);
-      meta.textContent = parts.join(' · ');
-      const rocky = document.createElement('div');
-      rocky.className = 'rocky-badge' + (ep.rockyRanking == null ? ' missing' : '');
-      rocky.textContent = ep.rockyRanking == null ? 'Rocky-Beach: keine Wertung' : `Rocky-Beach: ${fmtRating(ep.rockyRanking)} (1 = sehr gut)`;
-      left.append(ratingBanner, title, meta, rocky);
-
-      const heardBtn = document.createElement('button');
-      heardBtn.className = 'pill' + (ep.heard ? ' on' : '');
-      heardBtn.textContent = ep.heard ? '✓ gehört' : '○ offen';
-      heardBtn.addEventListener('click', async () => {
-        setUser(ep.nr, { heard: !ep.heard });
-      });
-
-      top.append(left, heardBtn);
-
-      const actions = document.createElement('div');
-      actions.className = 'item-actions rating-segment';
-
-      const ratingButtons = ['plus','neutral','minus'].map(rate => {
-        const b = document.createElement('button');
-        b.className = 'pill ' + rate + (ep.rating === rate ? ' on' : '');
-        b.textContent = rate === 'plus' ? '＋ Plus' : rate === 'neutral' ? '• Neutral' : '－ Minus';
-        b.addEventListener('click', () => setUser(ep.nr, { rating: rate }));
-        return b;
-      });
-      ratingButtons.forEach(b => actions.appendChild(b));
-
-      const edit = document.createElement('button');
-      edit.className = 'pill';
-      edit.textContent = '✎ Tags/Notiz';
-      edit.addEventListener('click', () => openEditor(ep.nr));
-      actions.appendChild(edit);
-
-      const tags = document.createElement('div');
-      tags.className = 'tags';
-      const allTags = (ep.tags || []).slice(0, 8);
-      for (const t of allTags) {
-        const chip = document.createElement('span');
-        chip.className = 'tag' + ((userStateFor(ep.nr).tags || []).includes(t) ? ' user' : '');
-        chip.textContent = t;
-        tags.appendChild(chip);
-      }
-      if ((ep.tags || []).length === 0) {
-        const chip = document.createElement('span');
-        chip.className = 'tag';
-        chip.textContent = 'keine Tags';
-        tags.appendChild(chip);
-      }
-
-      card.append(top, actions, tags);
-      list.appendChild(card);
-    }
-
-    if (!items.length) {
-      const empty = document.createElement('div');
-      empty.className = 'item';
-      empty.textContent = 'Keine Treffer.';
-      list.appendChild(empty);
-    }
-  }
-
-  async function setUser(nr, patch){
-    const key = String(nr);
-    const current = userStateFor(nr);
-    const updated = { ...current, ...patch };
-    if (updated.tags && !Array.isArray(updated.tags)) updated.tags = parseTags(updated.tags);
-    if (updated.note === undefined) updated.note = current.note || '';
-    state.user.episodes[key] = updated;
-    await saveUserState();
-    render();
-  }
-
-  function openEditor(nr){
-    const ep = episodeMerged(state.catalog.find(e => e.nr === nr));
-    state.currentEdit = nr;
-    $('editNr').textContent = `Folge ${ep.nr}`;
-    $('editTitle').textContent = ep.titel;
-    $('heardToggle').checked = !!ep.heard;
-    $('tagsInput').value = (state.user.episodes[String(nr)]?.tags || []).join(', ');
-    $('noteInput').value = state.user.episodes[String(nr)]?.note || '';
-    document.querySelectorAll('.rate-btn').forEach(btn => btn.classList.toggle('selected', btn.dataset.rate === ep.rating));
-    $('editorOverlay').classList.remove('hidden');
-    $('editorOverlay').setAttribute('aria-hidden', 'false');
-  }
-
-  function closeEditor(){
-    $('editorOverlay').classList.add('hidden');
-    $('editorOverlay').setAttribute('aria-hidden', 'true');
-    state.currentEdit = null;
-  }
-
-  async function saveEditor(){
-    if (!state.currentEdit) return;
-    const nr = state.currentEdit;
-    const current = userStateFor(nr);
-    const chosenRate = document.querySelector('.rate-btn.selected')?.dataset.rate || current.rating || 'neutral';
-    await setUser(nr, {
-      heard: $('heardToggle').checked,
-      rating: chosenRate,
-      tags: parseTags($('tagsInput').value),
-      note: $('noteInput').value.trim(),
-    });
-    closeEditor();
-  }
-
-  function clearEditorSelection(){
-    document.querySelectorAll('.rate-btn').forEach(btn => btn.classList.remove('selected'));
-  }
-
-  function scoreEpisode(ep){
-    const heardPlus = state.catalog
-      .map(episodeMerged)
-      .filter(e => e.heard && e.rating === 'plus');
-    const heardMinus = state.catalog
-      .map(episodeMerged)
-      .filter(e => e.heard && e.rating === 'minus');
-
-    const profile = new Map();
-    for (const e of heardPlus) {
-      const factor = 1 + Math.min(2, (e.tags || []).length * 0.15);
-      for (const tag of (e.tags || [])) profile.set(tag, (profile.get(tag) || 0) + factor);
-    }
-    for (const e of heardMinus) {
-      for (const tag of (e.tags || [])) profile.set(tag, (profile.get(tag) || 0) - 0.35);
-    }
-
-    const tags = ep.tags || [];
-    let tagScore = 0;
-    let maxPossible = 0;
-    for (const [tag, weight] of profile.entries()) {
-      if (weight > 0) maxPossible += weight;
-    }
-    for (const tag of tags) {
-      tagScore += profile.get(tag) || 0;
-    }
-    const tagNorm = maxPossible > 0 ? tagScore / maxPossible : 0;
-
-    const rocky = ep.rockyRanking;
-    const rockyNorm = rocky ? Math.max(0, (6 - Number(rocky)) / 5) : 0.3;
-
-    const directBonus = (ep.rating === 'plus' ? 0.2 : 0) + (ep.heard ? -0.1 : 0.1);
-    const buzz = (tags.length ? Math.min(tags.length / 8, 0.25) : 0);
-    return (tagNorm * 0.70) + (rockyNorm * 0.22) + directBonus + buzz;
-  }
-
-  function recommendation(mode = 'recommend'){
-    const pool = state.catalog.map(episodeMerged).filter(ep => !ep.heard);
-    if (!pool.length) return null;
-    if (mode === 'random-new') {
-      return pool[Math.floor(Math.random() * pool.length)];
-    }
-    const scored = pool.map(ep => ({
-      ep,
-      score: scoreEpisode(ep),
-      rocky: Number.isFinite(Number(ep.rockyRanking)) ? Number(ep.rockyRanking) : 9.9
-    })).sort((a,b) => b.score - a.score || a.rocky - b.rocky || a.ep.nr - b.ep.nr);
-    return scored[0]?.ep || null;
-  }
-
-  function heardRandom(){
-    const pool = state.catalog.map(episodeMerged).filter(ep => ep.heard);
-    if (!pool.length) return null;
-    return pool[Math.floor(Math.random() * pool.length)];
-  }
-
-  function showRecommendation(ep, reason){
-    const box = $('recommendationBox');
-    if (!ep) {
-      box.classList.remove('hidden');
-      box.innerHTML = '<h3>Keine passende Folge gefunden</h3><p>Vielleicht erst ein paar Folgen als gehört und bewertet markieren.</p>';
-      return;
-    }
-    const tags = ep.tags || [];
-    const text = reason || 'Gewichtet nach deinen Plus-Folgen und den Tags.';
-    box.classList.remove('hidden');
-    box.innerHTML = `
-      <h3>Empfehlung: ${ep.nr}. ${escapeHtml(ep.titel)}</h3>
-      <p>${escapeHtml(text)}</p>
-      <p><strong>Tags:</strong> ${tags.map(escapeHtml).join(', ') || '—'}</p>
-      <p><strong>Rocky-Beach:</strong> ${escapeHtml(fmtRating(ep.rockyRanking))}</p>
-      <p><button class="primary" id="openRecommended">Folge öffnen</button></p>
-    `;
-    $('openRecommended').addEventListener('click', () => openEditor(ep.nr));
-  }
-
-  function escapeHtml(s){
-    return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  }
+  function toast(msg){ const el=$('toast');el.textContent=msg;el.classList.remove('hidden');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.add('hidden'),2600); }
 
   async function exportBackup(){
-    const payload = {
-      app: 'ddf-tracker',
-      version: 1,
-      exportedAt: new Date().toISOString(),
-      user: state.user,
-    };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `ddf-tracker-backup-${new Date().toISOString().slice(0,10)}.json`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    toast('Backup exportiert.');
+    try{
+      const payload={app:'ddf-folgen-tracker',version:APP_VERSION,exportedAt:new Date().toISOString(),episodes:state.user.episodes};
+      const text=JSON.stringify(payload,null,2), name=`ddf-backup-${new Date().toISOString().slice(0,10)}.json`;
+      const file=new File([text],name,{type:'application/json'});
+      if(navigator.share && navigator.canShare?.({files:[file]})){ await navigator.share({title:'DDF Tracker Backup',files:[file]}); toast('Backup bereitgestellt.'); }
+      else { const url=URL.createObjectURL(file);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);toast('Backup wurde exportiert.'); }
+    }catch(err){ if(err?.name!=='AbortError'){console.error(err);toast('Export konnte nicht gestartet werden.');} }
   }
 
   async function importBackupFile(file){
-    const txt = await file.text();
-    let data;
-    try { data = JSON.parse(txt); }
-    catch { throw new Error('Ungültige JSON-Datei'); }
-
-    const { catalog, user } = normalizeImported(data);
-    if (catalog) {
-      state.catalog = autoEnhanceCatalog(catalog).sort((a,b)=>a.nr-b.nr);
-      state.catalogLoaded = true;
-      await idbSet(CATALOG_KEY, state.catalog);
-      toast(`Katalog importiert: ${state.catalog.length} Folgen`);
-    }
-    if (user) {
-      state.user = user;
-      state.user.episodes ||= {};
-      state.user.version ||= 1;
-      await idbSet(STATE_KEY, state.user);
-      toast('Benutzerdaten importiert.');
-    }
-    render();
+    try{
+      const text=await file.text(); const parsed=JSON.parse(text); const normalized=normalizeUser(parsed);
+      if(!Object.keys(normalized.episodes).length && !confirm('Das Backup enthält keine Folgenstände. Trotzdem importieren?'))return;
+      const count=Object.keys(normalized.episodes).length;
+      if(!confirm(`${count} gespeicherte Folgenstände importieren und vorhandene Daten ersetzen?`))return;
+      state.user=normalized; state.user.updatedAt=new Date().toISOString(); await dbSet(USER_KEY,state.user); renderAll(); toast(`${count} Folgenstände importiert.`);
+    }catch(err){console.error(err);toast('Die JSON-Datei ist ungültig oder nicht lesbar.');}
+    finally{$('importFile').value='';}
   }
 
-  async function reloadCatalog(){
-    try {
-      state.catalog = autoEnhanceCatalog(window.DDF_EPISODES_SEED || []).sort((a,b)=>a.nr-b.nr);
-      state.catalogLoaded = true;
-      await idbSet(CATALOG_KEY, state.catalog);
-      toast('Katalog neu geladen.');
-      render();
-    } catch (e) {
-      console.error(e);
-      toast('Katalog konnte nicht neu geladen werden.');
-    }
+  async function loadUser(){
+    let raw=await dbGet(USER_KEY);
+    if(!raw){for(const key of LEGACY_USER_KEYS){raw=await dbGet(key);if(raw)break;}}
+    if(raw)state.user=normalizeUser(raw); await dbSet(USER_KEY,state.user);
   }
 
-  function attachEvents(){
-    $('search').addEventListener('input', (e) => {
-      state.search = e.target.value;
-      render();
-    });
-
-    document.querySelectorAll('.filter').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter').forEach(x => x.classList.remove('active'));
-        btn.classList.add('active');
-        state.filter = btn.dataset.filter;
-        render();
-      });
-    });
-
-    $('sortSelect').addEventListener('change', (e) => {
-      state.sort = e.target.value;
-      render();
-    });
-
-    $('btnRecommend').addEventListener('click', () => {
-      const ep = recommendation('recommend');
-      if (ep) showRecommendation(ep);
-      else toast('Keine ungehörte Folge übrig.');
-    });
-
-    $('btnRandomNew').addEventListener('click', () => {
-      const ep = recommendation('random-new');
-      if (!ep) return toast('Keine ungehörte Folge übrig.');
-      showRecommendation(ep, 'Zufällig aus den ungehörten Folgen gewählt.');
-    });
-
-    $('btnRandomHeard').addEventListener('click', () => {
-      const ep = heardRandom();
-      if (!ep) return toast('Noch keine gehörte Folge markiert.');
-      openEditor(ep.nr);
-    });
-
-    $('btnExportBackup').addEventListener('click', exportBackup);
-    $('btnImportBackup').addEventListener('click', () => $('fileInput').click());
-    $('btnLoadCatalog').addEventListener('click', reloadCatalog);
-
-    $('fileInput').addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      try {
-        await importBackupFile(file);
-      } catch (err) {
-        console.error(err);
-        toast(err.message || 'Import fehlgeschlagen');
-      } finally {
-        e.target.value = '';
-      }
-    });
-
-    $('btnCloseEditor').addEventListener('click', closeEditor);
-    $('editorOverlay').addEventListener('click', (e) => {
-      if (e.target === $('editorOverlay')) closeEditor();
-    });
-    $('btnSaveEpisode').addEventListener('click', saveEditor);
-    $('btnResetEpisode').addEventListener('click', async () => {
-      if (!state.currentEdit) return;
-      state.user.episodes[String(state.currentEdit)] = { heard:false, rating:'neutral', tags:[], note:'' };
-      await saveUserState();
-      toast('Folge zurückgesetzt.');
-      closeEditor();
-      render();
-    });
-
-    document.querySelectorAll('.rate-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.rate-btn').forEach(x => x.classList.remove('selected'));
-        btn.classList.add('selected');
-      });
-    });
-
-    $('btnSettings').addEventListener('click', () => {
-      const info = `Katalog: ${state.catalog.length} Folgen · Datenbank: IndexedDB`;
-      toast(info);
+  function bind(){
+    document.querySelectorAll('[data-nav]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.nav)));
+    document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.go)));
+    $('quickSettings').addEventListener('click',()=>showPage('settings'));
+    $('searchInput').addEventListener('input',debounce(e=>{state.search=e.target.value;renderEpisodes();}));
+    $('filterChips').addEventListener('click',e=>{const b=e.target.closest('[data-filter]');if(!b)return;state.filter=b.dataset.filter;document.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('active',x===b));renderEpisodes();});
+    $('episodeSort').addEventListener('change',e=>{state.sort=e.target.value;renderEpisodes();});
+    $('rankingMode').addEventListener('click',e=>{const b=e.target.closest('[data-ranking]');if(!b)return;state.ranking=b.dataset.ranking;document.querySelectorAll('[data-ranking]').forEach(x=>x.classList.toggle('active',x===b));renderRanking();});
+    $('recommendButton').addEventListener('click',()=>showRecommendation(weightedPick(getRecommendationPool())));
+    $('randomNewButton').addEventListener('click',()=>{const a=state.catalog.map(merged).filter(e=>!e.heard);showRecommendation(a[Math.floor(Math.random()*a.length)]);});
+    $('randomHeardButton').addEventListener('click',()=>{const a=state.catalog.map(merged).filter(e=>e.heard);showRecommendation(a[Math.floor(Math.random()*a.length)]);});
+    $('exportButton').addEventListener('click',exportBackup);
+    $('importButton').addEventListener('click',()=>$('importFile').click());
+    $('importFile').addEventListener('change',e=>{const f=e.target.files?.[0];if(f)importBackupFile(f);});
+    $('reloadCatalogButton').addEventListener('click',()=>{state.catalog=normalizeCatalog(window.DDF_EPISODES_SEED||[]);renderAll();toast('Katalog wurde neu geladen.');});
+    $('resetButton').addEventListener('click',async()=>{if(!confirm('Wirklich alle persönlichen Hörstände und Bewertungen löschen?'))return;state.user={version:APP_VERSION,episodes:{},updatedAt:new Date().toISOString()};await dbSet(USER_KEY,state.user);renderAll();toast('Persönliche Daten wurden zurückgesetzt.');});
+    $('closeDetail').addEventListener('click',closeDetail); $('detailOverlay').addEventListener('click',e=>{if(e.target===$('detailOverlay'))closeDetail();});
+    $('detailRating').addEventListener('click',e=>{const b=e.target.closest('[data-rating]');if(b&&state.detailNr)saveEpisode(state.detailNr,{rating:b.dataset.rating});});
+    $('detailHeard').addEventListener('change',e=>{if(state.detailNr)saveEpisode(state.detailNr,{heard:e.target.checked});});
+    $('clearRating').addEventListener('click',()=>{if(state.detailNr)saveEpisode(state.detailNr,{rating:null});});
+    document.addEventListener('click',e=>{
+      const rate=e.target.closest('[data-rate]'); if(rate){e.preventDefault();e.stopPropagation();const[nr,rating]=rate.dataset.rate.split(':');saveEpisode(Number(nr),{rating});return;}
+      const heard=e.target.closest('[data-heard]'); if(heard){e.preventDefault();e.stopPropagation();const nr=Number(heard.dataset.heard);saveEpisode(nr,{heard:!userFor(nr).heard});return;}
+      const open=e.target.closest('[data-open]'); if(open)openDetail(open.dataset.open);
     });
   }
 
   async function init(){
-    els.heardCount = $('heardCount');
-    await db();
-
-    const storedState = await idbGet(STATE_KEY);
-    if (storedState && typeof storedState === 'object') {
-      state.user = storedState;
-      state.user.episodes ||= {};
-    }
-
-    const storedCatalog = await tryLoadStoredCatalog();
-    if (!storedCatalog) {
-      await loadCatalogFromSeed();
-    }
-
-    state.catalog = state.catalog.sort((a,b)=>a.nr-b.nr);
-    state.catalogLoaded = true;
-    attachEvents();
-    render();
-    toast('Bereit. Tipp: Katalog ist lokal geladen.');
-    if ('serviceWorker' in navigator) {
-      try { await navigator.serviceWorker.register('./sw.js'); } catch {}
-    }
-    if (navigator.storage?.persist) {
-      try { await navigator.storage.persist(); } catch {}
-    }
+    try{
+      state.catalog=normalizeCatalog(window.DDF_EPISODES_SEED||[]);
+      if(!state.catalog.length){const r=await fetch('episodes.json',{cache:'no-store'});state.catalog=normalizeCatalog(await r.json());}
+      await loadUser(); bind(); renderAll();
+      if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(console.warn);
+    }catch(err){console.error(err);toast('App-Daten konnten nicht geladen werden.');}
   }
-
-  document.addEventListener('DOMContentLoaded', init);
+  document.addEventListener('DOMContentLoaded',init);
 })();
