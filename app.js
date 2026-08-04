@@ -1945,6 +1945,7 @@ const TUTORIAL_STEPS = [
     },
     skipReveal: true,
     focusPadding: 7,
+    focusShiftY: 350,
     verify: () => String(state.playlistDetailId || '') === String(state.tutorialPlaylistId || '') && !$('playlistDetailOverlay').classList.contains('hidden'),
     invalidMessage: 'Tippe direkt auf die hervorgehobene Playlist-Karte.',
     settle: 160,
@@ -2359,10 +2360,11 @@ function positionTutorialFocus(step = currentTutorialStep()) {
 
   const viewportNow = tutorialViewportMetrics();
   const pad = Number(step?.focusPadding ?? 8);
+  const shiftY = Number(step?.focusShiftY || 0);
   const left = Math.max(6, rect.left - pad);
-  const top = Math.max(viewportNow.top + 6, rect.top - pad);
+  const top = Math.max(viewportNow.top + 6, rect.top - pad + shiftY);
   const right = Math.min(window.innerWidth - 6, rect.right + pad);
-  const bottom = Math.min(viewportNow.bottom - 6, rect.bottom + pad);
+  const bottom = Math.min(viewportNow.bottom - 6, rect.bottom + pad + shiftY);
   if (right <= left || bottom <= top) return false;
   focus.style.left = `${left}px`;
   focus.style.top = `${top}px`;
@@ -2432,10 +2434,11 @@ function refreshTutorialFocusRectOnly() {
   const focus = $('tutorialFocus');
   const viewport = tutorialViewportMetrics();
   const pad = Number(step?.focusPadding ?? 8);
+  const shiftY = Number(step?.focusShiftY || 0);
   const left = Math.max(6, rect.left - pad);
-  const top = Math.max(viewport.top + 6, rect.top - pad);
+  const top = Math.max(viewport.top + 6, rect.top - pad + shiftY);
   const right = Math.min(window.innerWidth - 6, rect.right + pad);
-  const bottom = Math.min(viewport.bottom - 6, rect.bottom + pad);
+  const bottom = Math.min(viewport.bottom - 6, rect.bottom + pad + shiftY);
   if (right <= left || bottom <= top) return;
   focus.style.left = `${left}px`;
   focus.style.top = `${top}px`;
