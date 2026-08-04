@@ -5,10 +5,10 @@
   const DB_VERSION = 1;
   const STORE = 'kv';
   const USER_KEY = 'appState';
-  const CATALOG_KEY = 'enrichedCatalogV9';
-  const LEGACY_CATALOG_KEYS = ['enrichedCatalogV8', 'enrichedCatalogV7', 'enrichedCatalogV6', 'enrichedCatalogV5', 'enrichedCatalogV4'];
+  const CATALOG_KEY = 'enrichedCatalogV10';
+  const LEGACY_CATALOG_KEYS = ['enrichedCatalogV9', 'enrichedCatalogV8', 'enrichedCatalogV7', 'enrichedCatalogV6', 'enrichedCatalogV5', 'enrichedCatalogV4'];
   const LEGACY_USER_KEYS = ['user-state', 'userState', 'state'];
-  const APP_VERSION = 9.0;
+  const APP_VERSION = 10.0;
   const DEFAULT_STREAMING_SERVICE = 'spotify';
   const META_URL = 'https://dreimetadaten.de/data/Serie.json';
   const META_MAX_AGE = 1000 * 60 * 60 * 24 * 30;
@@ -148,6 +148,25 @@
     { id: 'jubilaeum-175', title: 'Schattenwelt', numbers: [175] },
     { id: 'jubilaeum-200', title: 'Feuriges Auge', numbers: [200] },
   ];
+
+  const ERA_DEFINITIONS = [
+    { id: 'Originalserie / Klassiker', short: 'Originalserie', from: 1, to: 46, description: 'Amerikanische Originalserie vor den Crimebusters.' },
+    { id: 'Crimebusters-Ära', short: 'Crimebusters', from: 47, to: 56, description: 'Späte US-Fälle mit modernerem Crimebusters-Ton.' },
+    { id: 'Henkel-Waidhofer-Ära', short: 'Henkel-Waidhofer', from: 57, to: 72, description: 'Die sechzehn deutschen Fälle von Brigitte Johanna Henkel-Waidhofer.' },
+    { id: 'Triumvirats-Ära', short: 'Triumvirat', from: 73, to: 120, description: 'Die Phase ab 1997 mit jeweils drei gleichzeitig aktiven Hauptautoren.' },
+    { id: 'Neue Ära (Fälle nach 2005)', short: 'Neue Ära', from: 121, to: Infinity, description: 'Die breitere Multi-Autoren-Phase der Fälle nach 2005.' },
+  ];
+
+  function canonicalEra(value, nr, collection = 'main') {
+    if (collection === 'special' || Number(nr) >= 10000) return 'Spezialfolgen';
+    const number = Number(nr);
+    return ERA_DEFINITIONS.find((era) => number >= era.from && number <= era.to)?.id || String(value || '').trim() || 'Neue Ära (Fälle nach 2005)';
+  }
+
+  function eraInfo(episode) {
+    if (episode.collection === 'special' || episode.era === 'Spezialfolgen') return { id: 'Spezialfolgen', short: 'Spezial', description: 'Sonderformat außerhalb der regulären Nummerierung.' };
+    return ERA_DEFINITIONS.find((era) => era.id === episode.era) || { id: episode.era || '—', short: episode.era || '—', description: '' };
+  }
 
   const STOP_WORDS = new Set(['die', 'der', 'das', 'den', 'dem', 'des', 'ein', 'eine', 'einer', 'einem', 'einen', 'mit', 'und', 'oder', 'von', 'im', 'in', 'auf', 'bei', 'zu', 'zur', 'zum', 'folge', 'fall', 'wo', 'es', 'geht', 'um', 'drei', 'fragezeichen']);
   const MAIN_ROLE_PATTERNS = ['justus jonas', 'peter shaw', 'bob andrews', 'erster detektiv', 'zweiter detektiv', 'recherchen und archiv', 'erzähler', 'erzaehler', 'alfred hitchcock'];
@@ -320,6 +339,13 @@
     }
     if ([100, 125, 150, 175, 200, 225].includes(episode.nr)) keywords.push('jubiläum', 'jubiläumsfolge', 'dreiteiler', 'lange folge', 'spezialfolge');
     if ((episode.durationMin || 0) >= 120) keywords.push('extra lang', 'lange folge', 'spezialfolge');
+    const era = eraInfo(episode);
+    keywords.push(episode.author || '', episode.scriptAuthor || '', era.id, era.short, era.description);
+    if (era.id === 'Originalserie / Klassiker') keywords.push('klassiker', 'originalserie', 'amerikanische ära', 'us ära');
+    if (era.id === 'Crimebusters-Ära') keywords.push('crimebusters', 'crimebuster');
+    if (era.id === 'Henkel-Waidhofer-Ära') keywords.push('bjhw', 'brigitte johanna henkel waidhofer');
+    if (era.id === 'Triumvirats-Ära') keywords.push('triumvirat', 'triumpvirats ära', 'andré marx ben nevis andré minninger');
+    if (era.id === 'Neue Ära (Fälle nach 2005)') keywords.push('neue ära', 'neuzeit', 'moderne ära', 'fälle nach 2005', 'multi autoren ära');
     return uniqueStrings(keywords);
   }
 
@@ -367,7 +393,7 @@
       chapters,
       author: authorValue(raw.author || raw.buchautor || raw.buchautoren),
       scriptAuthor: authorValue(raw.scriptAuthor || raw.hörspielskriptautor || raw.hoerspielskriptautor),
-      era: String(raw.era || '').trim() || (raw.collection === 'special' ? 'Spezialfolgen' : nr <= 56 ? 'US-Klassiker' : nr <= 72 ? 'Henkel-Waidhofer-Ära' : nr <= 120 ? 'Frühe deutsche Ära' : 'Moderne Ära'),
+      era: canonicalEra(raw.era, nr, raw.collection || 'main'),
       searchKeywords: uniqueStrings(raw.searchKeywords || raw.keywords || []),
       spotifyUrl: directStreamingUrl(raw, 'spotify'),
       appleMusicUrl: directStreamingUrl(raw, 'appleMusic'),
@@ -1483,7 +1509,7 @@
 
   function populateAuthorControls() {
     const authors = uniqueStrings(state.catalog.map((episode) => episode.author).filter(Boolean)).sort((a,b)=>a.localeCompare(b,'de'));
-    const authorOptions = '<option value="all">Alle Autoren</option>' + authors.map((author)=>`<option value="${esc(author)}">${esc(author)}</option>`).join('');
+    const authorOptions = '<option value="all">Alle</option>' + authors.map((author)=>`<option value="${esc(author)}">${esc(author)}</option>`).join('');
     for (const id of ['authorFilter','planAuthor']) {
       const select = $(id);
       if (!select) continue;
@@ -1532,6 +1558,105 @@
     document.body.style.overflow = $('playlistDetailOverlay').classList.contains('hidden') ? '' : 'hidden';
   }
 
+  function formatReleaseDate(value) {
+    if (!value) return '—';
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
+  function episodeFormats(episode) {
+    const formats = [];
+    if (episode.collection === 'special') formats.push('Sonderfolge');
+    else formats.push('Reguläre Folge');
+    if ([100, 125, 150, 175, 200, 225].includes(episode.nr)) formats.push('Jubiläums-Dreiteiler');
+    if ((episode.durationMin || 0) >= 120 && !formats.includes('Jubiläums-Dreiteiler')) formats.push('Extra lang');
+    return formats;
+  }
+
+  function knownAdversaries(episode) {
+    const adversaries = new Set(['Victor Hugenay', 'Skinny Norris', 'Dick Perry']);
+    return importantCharacters(episode, 14).filter((name) => adversaries.has(name));
+  }
+
+  function storyConnections(episode) {
+    const output = [];
+    for (const block of STORY_BLOCKS) {
+      if (!block.numbers.includes(episode.nr) || block.numbers.length < 2) continue;
+      output.push({ title: block.title, episodes: episodesForNumbers(block.numbers) });
+    }
+    for (const definition of CURATED_PLAYLISTS) {
+      if (!definition.sequence || definition.type !== 'numbers' || !definition.numbers.includes(episode.nr)) continue;
+      if (output.some((item) => item.title === definition.title)) continue;
+      output.push({ title: definition.title, episodes: episodesForNumbers(definition.numbers) });
+    }
+    return output.slice(0, 4);
+  }
+
+  function similarEpisodes(episode, limit = 4) {
+    const tags = new Set((episode.tags || []).map(normalizeText));
+    const chars = new Set(importantCharacters(episode, 10).map(normalizeText));
+    return state.catalog.map(merged).filter((item) => item.nr !== episode.nr).map((item) => {
+      let score = 0;
+      const sharedTags = (item.tags || []).filter((tag) => tags.has(normalizeText(tag)));
+      const sharedChars = importantCharacters(item, 10).filter((name) => chars.has(normalizeText(name)));
+      score += sharedTags.length * 2.2 + sharedChars.length * 3.2;
+      if (item.author && item.author === episode.author) score += 1.25;
+      if (item.era && item.era === episode.era) score += .35;
+      if (item.rockyRanking != null) score += Math.max(0, 2.8 - item.rockyRanking) * .22;
+      return { item, score, reason: sharedChars[0] || sharedTags[0] || (item.author === episode.author ? `ebenfalls ${item.author}` : '') };
+    }).filter((entry) => entry.score > 0).sort((a,b) => b.score - a.score || rockyCompare(a.item,b.item)).slice(0, limit);
+  }
+
+  function knowledgeTrivia(episode) {
+    const facts = [];
+    const era = eraInfo(episode);
+    if (era.description) facts.push(era.description);
+    if ([100, 125, 150, 175, 200, 225].includes(episode.nr)) facts.push('Diese Folge ist ein großer Jubiläumsfall und als zusammenhängender Dreiteiler angelegt.');
+    if ((episode.durationMin || 0) >= 180) facts.push(`Mit ${fmtDuration(episode.durationMin)} gehört sie zu den besonders langen Hörspielen.`);
+    const connections = storyConnections(episode);
+    if (connections.length) facts.push(`Sie ist Teil der kuratierten Reihenfolge „${connections[0].title}“.`);
+    if (episode.scriptAuthor) facts.push(`Die Hörspielbearbeitung stammt von ${episode.scriptAuthor}.`);
+    return uniqueStrings(facts).slice(0, 3);
+  }
+
+  function knowledgeItem(label, value, hint = '') {
+    if (!value || value === '—') return '';
+    return `<div class="knowledge-item"><span>${esc(label)}</span><strong>${esc(value)}</strong>${hint ? `<small>${esc(hint)}</small>` : ''}</div>`;
+  }
+
+  function renderKnowledge(episode) {
+    const era = eraInfo(episode);
+    const moods = (episode.tags || []).slice(0, 4).join(' · ') || '—';
+    const formats = episodeFormats(episode).join(' · ');
+    $('detailKnowledgeGrid').innerHTML = [
+      knowledgeItem('Buchautor', episode.author || '—'),
+      knowledgeItem('Hörspielbearbeitung', episode.scriptAuthor || '—'),
+      knowledgeItem('Ära', era.short, era.id !== era.short ? era.id : ''),
+      knowledgeItem('Erstveröffentlichung', formatReleaseDate(episode.releaseDate)),
+      knowledgeItem('Laufzeit', fmtDuration(episode.durationMin)),
+      knowledgeItem('Format', formats),
+      knowledgeItem('Stimmung & Themen', moods),
+      knowledgeItem('Rocky-Beach', episode.rockyRanking == null ? 'Keine Wertung' : fmtRocky(episode.rockyRanking), episode.rockyRanking == null ? '' : 'kleiner ist besser'),
+    ].join('');
+
+    const adversaries = knownAdversaries(episode);
+    if (adversaries.length) {
+      $('detailKnowledgeGrid').insertAdjacentHTML('beforeend', knowledgeItem('Bekannte Gegenspieler', adversaries.join(' · ')));
+    }
+
+    const connections = storyConnections(episode);
+    $('detailConnectionsSection').classList.toggle('hidden', !connections.length);
+    $('detailConnections').innerHTML = connections.map((connection) => `<div class="connection-card"><strong>${esc(connection.title)}</strong><div>${connection.episodes.map((item) => `<button data-open="${item.nr}" class="relation-chip ${item.nr === episode.nr ? 'current' : ''}">${esc(episodeLabel(item))} · ${esc(item.titel)}</button>`).join('')}</div></div>`).join('');
+
+    const similar = similarEpisodes(episode);
+    $('detailSimilarSection').classList.toggle('hidden', !similar.length);
+    $('detailSimilar').innerHTML = similar.map(({ item, reason }) => `<button data-open="${item.nr}" class="similar-card"><span><strong>${esc(episodeLabel(item))} · ${esc(item.titel)}</strong><small>${esc(reason || fmtDuration(item.durationMin))}</small></span><b>›</b></button>`).join('');
+
+    const trivia = knowledgeTrivia(episode);
+    $('detailTriviaSection').classList.toggle('hidden', !trivia.length);
+    $('detailTrivia').innerHTML = trivia.map((fact) => `<p>${esc(fact)}</p>`).join('');
+  }
+
   function refreshDetail() {
     const base = state.catalog.find((episode) => episode.nr === state.detailNr);
     if (!base) return;
@@ -1542,15 +1667,15 @@
     $('detailNumber').textContent = episodeLabel(episode);
     $('detailTitle').textContent = episode.titel;
     $('detailMatch').textContent = `${result.match}%`;
-    $('detailDescription').textContent = description || 'Für diese Folge ist noch keine Kurzbeschreibung lokal gespeichert. Unter Einstellungen kannst du das Folgenwissen aktualisieren.';
+    $('detailDescription').textContent = episode.longDescription || description || 'Für diese Folge ist noch keine Kurzbeschreibung lokal gespeichert. Unter Einstellungen kannst du das Folgenwissen aktualisieren.';
+    renderKnowledge(episode);
     $('detailStreamingButtons').innerHTML = ['spotify', 'appleMusic'].map((service) => streamingButtonMarkup(episode, service)).join('');
     $('detailMeta').innerHTML = `
       <span class="badge">${fmtDuration(episode.durationMin)}</span>
       ${isSpecial(episode) ? '<span class="badge special-badge">✦ Spezial / extra lang</span>' : ''}
       <span class="badge">Rocky ${fmtRocky(episode.rockyRanking)}</span>
-      ${episode.author ? `<span class="badge author-badge">Text: ${esc(episode.author)}</span>` : ''}
-      ${episode.era ? `<span class="badge era-badge">${esc(episode.era)}</span>` : ''}
-      ${episode.releaseDate ? `<span class="badge">${esc(new Date(episode.releaseDate).toLocaleDateString('de-DE'))}</span>` : ''}`;
+      ${episode.author ? `<span class="badge author-badge">${esc(episode.author)}</span>` : ''}
+      ${episode.era ? `<span class="badge era-badge">${esc(eraInfo(episode).short)}</span>` : ''}`;
 
     $('detailReasonsSection').classList.toggle('hidden', !result.reasons.length);
     $('detailReasons').innerHTML = result.reasons.map((reason) => `<span>${esc(reason)}</span>`).join('');

@@ -192,3 +192,22 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .author-badge{max-width:13rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .era-badge{border-color:rgba(255,213,74,.35);color:#f7dda0}
 @media(max-width:520px){.catalog-select-grid{grid-template-columns:1fr}.author-badge{max-width:10rem}}
+
+
+/* v10 — compact catalog toolbar and episode knowledge cards */
+.catalog-control-bar{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1.15fr) minmax(0,.9fr);gap:7px;margin-top:2px}
+.compact-select{min-width:0;height:58px;padding:7px 10px 5px;border:1px solid #30353e;border-radius:16px;background:#181b20;display:flex;flex-direction:column;justify-content:center}
+.compact-select>span{display:block;color:#858b96;font-size:9px;font-weight:850;letter-spacing:.11em;text-transform:uppercase;line-height:1;margin-bottom:4px}
+.compact-select select{width:100%;min-width:0;height:26px;border:0;outline:0;background:transparent;color:var(--text);appearance:none;padding:0 18px 0 0;font-size:12.5px;font-weight:720;white-space:nowrap;text-overflow:ellipsis;background-image:linear-gradient(45deg,transparent 50%,#999 50%),linear-gradient(135deg,#999 50%,transparent 50%);background-position:calc(100% - 8px) 11px,calc(100% - 4px) 11px;background-size:4px 4px;background-repeat:no-repeat}
+.compact-select:focus-within{border-color:rgba(255,198,41,.65);box-shadow:0 0 0 2px rgba(255,198,41,.08)}
+.knowledge-section{padding:14px;border:1px solid rgba(255,255,255,.075);border-radius:21px;background:rgba(255,255,255,.025)}
+.knowledge-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.knowledge-heading .field-label{margin:0}.knowledge-heading small{color:var(--muted);font-size:11px}
+.knowledge-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:11px}
+.knowledge-item{min-width:0;padding:11px 12px;border:1px solid #2d323b;border-radius:15px;background:#15181e}
+.knowledge-item>span{display:block;color:#878d98;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.knowledge-item>strong{display:block;margin-top:4px;font-size:13px;line-height:1.25;overflow-wrap:anywhere}
+.knowledge-item>small{display:block;color:var(--muted);font-size:10px;line-height:1.3;margin-top:3px}
+.connection-list{display:grid;gap:9px}.connection-card{padding:12px;border-radius:16px;border:1px solid rgba(255,198,41,.22);background:rgba(255,198,41,.045)}.connection-card>strong{display:block;font-size:13px;margin-bottom:8px}.connection-card>div{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}.relation-chip{flex:0 0 auto;max-width:260px;padding:8px 10px;border-radius:11px;border:1px solid #343943;background:#191c22;color:#d9dce2;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.relation-chip.current{border-color:var(--gold);color:var(--gold);background:#28230f}
+.similar-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.similar-card{min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;padding:11px 12px;border-radius:14px;border:1px solid #2e333c;background:#171a20}.similar-card span{min-width:0}.similar-card strong,.similar-card small{display:block}.similar-card strong{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.similar-card small{color:var(--muted);font-size:10px;margin-top:3px}.similar-card b{color:var(--gold);font-size:17px}.fact-note{padding:13px 14px;border-radius:16px;background:#181b20;border:1px solid #2d323a}.fact-note p{margin:0;color:#c5c9d1;font-size:12px;line-height:1.55}.fact-note p+p{margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06)}
+@media(max-width:520px){.catalog-control-bar{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,.78fr);gap:6px}.compact-select{height:54px;padding:6px 8px 4px;border-radius:14px}.compact-select select{font-size:11.5px}.knowledge-grid,.similar-list{grid-template-columns:1fr 1fr}.detail-description{margin-bottom:14px}}
+@media(max-width:360px){.catalog-control-bar{grid-template-columns:1fr 1fr}.compact-sort{grid-column:1/-1;height:48px}.knowledge-grid,.similar-list{grid-template-columns:1fr}}

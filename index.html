@@ -112,7 +112,7 @@
           <input id="searchInput" type="search" placeholder="Titel, Autor, Figur, Handlung oder Kapitel" autocomplete="off" autocapitalize="none">
           <button id="clearSearch" class="clear-search hidden" type="button" aria-label="Suche löschen">×</button>
         </label>
-        <p class="search-hint">Zum Beispiel „André Marx“, „Peters Opa“, „Skinny“, „Zirkus“ oder „böser Franzose“.</p>
+        <p class="search-hint">Zum Beispiel „André Marx“, „Crimebusters“, „Peters Opa“, „Skinny“, „Zirkus“ oder „böser Franzose“.</p>
         <div id="filterChips" class="chips-scroll">
           <button class="chip active" data-filter="all">Alle</button>
           <button class="chip" data-filter="unheard">Offen</button>
@@ -125,29 +125,30 @@
           <button class="chip" data-filter="long">90+ Min.</button>
           <button class="chip" data-filter="special">Spezial</button>
         </div>
-        <div class="catalog-select-grid">
-          <select id="authorFilter" class="select-control" aria-label="Nach Autor filtern"><option value="all">Alle Autoren</option></select>
-          <select id="eraFilter" class="select-control" aria-label="Nach Ära filtern">
-            <option value="all">Alle Ären</option>
-            <option value="US-Klassiker">US-Klassiker</option>
+        <div class="catalog-control-bar" aria-label="Katalog filtern und sortieren">
+          <label class="compact-select"><span>Autor</span><select id="authorFilter" aria-label="Nach Autor filtern"><option value="all">Alle</option></select></label>
+          <label class="compact-select"><span>Ära</span><select id="eraFilter" aria-label="Nach Ära filtern">
+            <option value="all">Alle</option>
+            <option value="Originalserie / Klassiker">Originalserie / Klassiker</option>
+            <option value="Crimebusters-Ära">Crimebusters-Ära</option>
             <option value="Henkel-Waidhofer-Ära">Henkel-Waidhofer-Ära</option>
-            <option value="Frühe deutsche Ära">Frühe deutsche Ära</option>
-            <option value="Moderne Ära">Moderne Ära</option>
+            <option value="Triumvirats-Ära">Triumvirats-Ära</option>
+            <option value="Neue Ära (Fälle nach 2005)">Neue Ära</option>
             <option value="Spezialfolgen">Spezialfolgen</option>
-          </select>
+          </select></label>
+          <label class="compact-select compact-sort"><span>Sortierung</span><select id="episodeSort" aria-label="Folgen sortieren">
+            <option value="nr">Nummer ↑</option>
+            <option value="nr-desc">Nummer ↓</option>
+            <option value="title">Titel A–Z</option>
+            <option value="author">Autor A–Z</option>
+            <option value="duration-desc">Längste</option>
+            <option value="duration-asc">Kürzeste</option>
+            <option value="rocky-best">Rocky beste</option>
+            <option value="rocky-worst">Rocky schlechteste</option>
+            <option value="recommendation">Empfehlung</option>
+            <option value="own">Eigene Wertung</option>
+          </select></label>
         </div>
-        <select id="episodeSort" class="select-control" aria-label="Folgen sortieren">
-          <option value="nr">Nummer aufsteigend</option>
-          <option value="nr-desc">Nummer absteigend</option>
-          <option value="title">Titel A–Z</option>
-          <option value="author">Autor A–Z</option>
-          <option value="duration-desc">Längste zuerst</option>
-          <option value="duration-asc">Kürzeste zuerst</option>
-          <option value="rocky-best">Rocky-Beach: beste zuerst</option>
-          <option value="rocky-worst">Rocky-Beach: schlechteste zuerst</option>
-          <option value="recommendation">Beste Empfehlung</option>
-          <option value="own">Eigene Bewertung</option>
-        </select>
       </div>
       <div id="activeCollection" class="active-collection hidden"></div>
       <div id="episodeList" class="episode-list"></div>
@@ -269,6 +270,23 @@
       <div id="detailMeta" class="detail-meta"></div>
     </div>
     <p id="detailDescription" class="detail-description"></p>
+
+    <section class="detail-section knowledge-section">
+      <div class="knowledge-heading"><span class="field-label">Wissenskarte</span><small>Einordnung der Folge</small></div>
+      <div id="detailKnowledgeGrid" class="knowledge-grid"></div>
+    </section>
+    <section id="detailConnectionsSection" class="detail-section hidden">
+      <span class="field-label">Reihen & Rückbezüge</span>
+      <div id="detailConnections" class="connection-list"></div>
+    </section>
+    <section id="detailSimilarSection" class="detail-section hidden">
+      <span class="field-label">Passende Folgen</span>
+      <div id="detailSimilar" class="similar-list"></div>
+    </section>
+    <section id="detailTriviaSection" class="detail-section hidden">
+      <span class="field-label">Gut zu wissen</span>
+      <div id="detailTrivia" class="fact-note"></div>
+    </section>
 
     <section class="detail-section detail-streaming-section">
       <span class="field-label">Anhören</span>
