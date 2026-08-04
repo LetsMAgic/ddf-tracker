@@ -271,3 +271,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 /* v11.3: prevent repeated tutorial-card fly-in during measurement/repositioning */
 .tutorial-overlay.tutorial-positioning .tutorial-card,.tutorial-overlay.tutorial-positioning .tutorial-focus{transition:none!important}
 .tutorial-overlay.tutorial-positioning .tutorial-card{opacity:0}
+
+
+/* v11.4: fully stable tutorial placement on iOS Safari */
+.tutorial-focus{transition:none!important;animation:tutorialFocusPulse 1.8s ease-in-out infinite}
+.tutorial-card{transition:none!important;left:16px;right:16px;margin:0 auto}
+.tutorial-card.tutorial-card-top-fixed{top:calc(env(safe-area-inset-top, 0px) + 14px)!important;bottom:auto!important}
+.tutorial-card.tutorial-card-bottom-fixed{top:auto!important;bottom:calc(env(safe-area-inset-bottom, 0px) + 88px)!important}
+.tutorial-card.tutorial-card-top-fixed:before,.tutorial-card.tutorial-card-top-fixed:after,.tutorial-card.tutorial-card-bottom-fixed:before,.tutorial-card.tutorial-card-bottom-fixed:after{display:none!important}
+.tutorial-overlay.tutorial-positioning .tutorial-card{opacity:0}
+@media(max-height:650px){.tutorial-card{font-size:.92rem}.tutorial-card h2{font-size:1.18rem;margin:7px 0 5px}.tutorial-actions{margin-top:10px}.tutorial-demo{margin-top:9px;padding:10px}}

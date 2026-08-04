@@ -1629,7 +1629,7 @@ function findVisibleTutorialTarget(selector) {
 
 function resetTutorialCardPosition() {
   const card = $('tutorialCard');
-  card.classList.remove('top', 'is-above', 'is-below', 'is-scrollable');
+  card.classList.remove('top', 'is-above', 'is-below', 'is-scrollable', 'tutorial-card-top-fixed', 'tutorial-card-bottom-fixed');
   card.style.removeProperty('top');
   card.style.removeProperty('bottom');
   card.style.removeProperty('max-height');
@@ -1647,6 +1647,7 @@ function positionTutorialFocus() {
 
   if (!target) {
     overlay.classList.add('no-focus');
+    card.classList.add('tutorial-card-bottom-fixed');
     return;
   }
 
@@ -1654,15 +1655,26 @@ function positionTutorialFocus() {
   const viewportTop = window.visualViewport?.offsetTop || 0;
   const viewportHeight = window.visualViewport?.height || window.innerHeight;
   const viewportBottom = viewportTop + viewportHeight;
-  const safeEdge = 12;
-  const gap = 14;
+  const safeEdge = 14;
   const pad = 8;
-  let rect = target.getBoundingClientRect();
 
-  // The selected control must be fully inside the visible viewport before the
-  // spotlight and tutorial card are positioned around it.
-  if (rect.top < viewportTop + safeEdge || rect.bottom > viewportBottom - safeEdge) {
-    target.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'nearest' });
+  // The card uses one of two fixed positions. This avoids Safari repeatedly
+  // moving it while the visual viewport, scroll position and page layout settle.
+  let rect = target.getBoundingClientRect();
+  const targetInitiallyLow = (rect.top + rect.bottom) / 2 > viewportTop + viewportHeight / 2;
+  const cardAtTop = targetInitiallyLow;
+  card.classList.add(cardAtTop ? 'tutorial-card-top-fixed' : 'tutorial-card-bottom-fixed');
+  card.style.maxHeight = `${Math.max(170, Math.floor(viewportHeight * 0.42))}px`;
+  card.style.overflowY = 'auto';
+
+  // Move the highlighted control once into the half not occupied by the card.
+  const desiredCenter = cardAtTop
+    ? viewportTop + viewportHeight * 0.68
+    : viewportTop + viewportHeight * 0.30;
+  const currentCenter = (rect.top + rect.bottom) / 2;
+  const delta = currentCenter - desiredCenter;
+  if (Math.abs(delta) > 24) {
+    window.scrollBy({ top: delta, left: 0, behavior: 'auto' });
     rect = target.getBoundingClientRect();
   }
 
@@ -1674,42 +1686,6 @@ function positionTutorialFocus() {
   focus.style.top = `${focusTop}px`;
   focus.style.width = `${Math.max(8, focusRight - focusLeft)}px`;
   focus.style.height = `${Math.max(8, focusBottom - focusTop)}px`;
-
-  // Measure the card without forcing it to overlap the highlighted control.
-  card.style.visibility = 'hidden';
-  card.style.top = `${viewportTop + safeEdge}px`;
-  card.style.bottom = 'auto';
-  card.style.maxHeight = 'none';
-  card.style.overflowY = 'visible';
-  const naturalHeight = card.offsetHeight;
-  card.style.visibility = '';
-
-  const availableAbove = Math.max(0, rect.top - gap - (viewportTop + safeEdge));
-  const availableBelow = Math.max(0, (viewportBottom - safeEdge) - (rect.bottom + gap));
-  let placement;
-  if (availableBelow >= naturalHeight) placement = 'below';
-  else if (availableAbove >= naturalHeight) placement = 'above';
-  else placement = availableBelow >= availableAbove ? 'below' : 'above';
-
-  const available = placement === 'below' ? availableBelow : availableAbove;
-  const maxHeight = Math.max(96, Math.floor(available));
-  card.style.maxHeight = `${maxHeight}px`;
-  if (naturalHeight > maxHeight) {
-    card.style.overflowY = 'auto';
-    card.classList.add('is-scrollable');
-  }
-
-  const cardHeight = Math.min(card.offsetHeight, maxHeight);
-  if (placement === 'above') {
-    card.classList.add('is-above');
-    card.style.top = `${Math.max(viewportTop + safeEdge, rect.top - gap - cardHeight)}px`;
-    card.style.bottom = 'auto';
-  } else {
-    card.classList.add('is-below');
-    const desiredTop = rect.bottom + gap;
-    card.style.top = `${Math.min(desiredTop, viewportBottom - safeEdge - cardHeight)}px`;
-    card.style.bottom = 'auto';
-  }
 }
 
 function renderTutorialStep() {
@@ -1728,18 +1704,8 @@ function renderTutorialStep() {
   const overlay = $('tutorialOverlay');
   overlay.classList.add('tutorial-positioning');
   state.tutorialPositionFrame = requestAnimationFrame(() => {
-    const target = findVisibleTutorialTarget(step.target);
-    target?.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'nearest' });
-    state.tutorialPositionFrame = requestAnimationFrame(() => {
-      positionTutorialFocus();
-      overlay.classList.remove('tutorial-positioning');
-      state.tutorialPositionTimer = setTimeout(() => {
-        // One silent correction for late Safari layout changes.
-        overlay.classList.add('tutorial-positioning');
-        positionTutorialFocus();
-        requestAnimationFrame(() => overlay.classList.remove('tutorial-positioning'));
-      }, 180);
-    });
+    positionTutorialFocus();
+    overlay.classList.remove('tutorial-positioning');
   });
 }
 
@@ -2418,11 +2384,9 @@ function closeHelp() {
     });
     const scheduleTutorialPosition = debounce(() => {
       if ($('tutorialOverlay').classList.contains('hidden')) return;
-      cancelAnimationFrame(state.tutorialPositionFrame);
-      state.tutorialPositionFrame = requestAnimationFrame(positionTutorialFocus);
-    }, 90);
+      positionTutorialFocus();
+    }, 140);
     window.addEventListener('resize', scheduleTutorialPosition);
-    window.addEventListener('scroll', scheduleTutorialPosition, true);
     $('closeHeardReset').addEventListener('click', closeHeardReset);
     $('cancelHeardReset').addEventListener('click', closeHeardReset);
     $('confirmUnheardAndClear').addEventListener('click', confirmUnheardAndClear);
