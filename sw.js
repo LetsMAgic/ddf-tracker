@@ -1,4 +1,4 @@
-const CACHE = 'ddf-v12-4-search-position';
+const CACHE = 'ddf-v12-5-search-natural-position';
 const ASSETS = [
   './',
   './index.html',

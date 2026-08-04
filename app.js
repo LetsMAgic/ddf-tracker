@@ -1655,8 +1655,19 @@ const TUTORIAL_STEPS = [
     },
     verify: (event) => String(event?.target?.value || '').trim().length >= 3 && Boolean(document.querySelector('.episode-card')),
     invalidMessage: 'Gib mindestens drei Zeichen ein und bestätige die Suche mit Enter.',
-    revealAlign: 'top',
-    revealOffsetY: 115,
+    // Keep the episodes page at its natural top position. Scrolling the search
+    // field into the generic focus band pulled it underneath the iOS status bar.
+    // At scroll position 0 the page title remains visible and the search field
+    // sits comfortably lower on every viewport size.
+    skipReveal: true,
+    beforePosition: () => {
+      document.documentElement.classList.add('tutorial-instant-scroll');
+      window.scrollTo(0, 0);
+      const page = document.querySelector('#episodesPage, [data-page="episodes"]');
+      if (page && 'scrollTop' in page) page.scrollTop = 0;
+      void document.documentElement.offsetHeight;
+      document.documentElement.classList.remove('tutorial-instant-scroll');
+    },
     settle: 180,
   },
   {
