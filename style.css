@@ -89,3 +89,56 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 @media(max-width:390px){.dashboard-card{grid-template-columns:94px minmax(0,1fr)}.progress-ring{width:90px;height:90px}.mini-insights div:nth-child(2){display:none}.mini-insights{grid-template-columns:repeat(2,1fr)}.rating-control{gap:5px}.rating-control button{font-size:10px}.ranking-card{grid-template-columns:24px minmax(0,1fr) 54px}.rank-main strong{font-size:14.5px}}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
 .subtle-link{display:block;width:100%;margin-top:7px;padding:8px;background:none;color:#8d939e;font-size:12px;font-weight:700}
+
+/* Streaming – Version 7 */
+.stream-icon{width:23px;height:23px;flex:0 0 auto;overflow:visible}
+.spotify .stream-icon circle{fill:currentColor;stroke:none}.spotify .stream-icon path{fill:none;stroke:#0d1410;stroke-width:1.55;stroke-linecap:round}
+.apple-music .stream-icon rect{fill:currentColor;stroke:none}.apple-music .stream-icon path{fill:none;stroke:#fff;stroke-width:1.55;stroke-linecap:round;stroke-linejoin:round}
+
+.recommendation-actions{align-items:stretch;flex-wrap:wrap}
+.recommendation-actions .stream-service-button{flex:1 1 220px}
+.recommendation-actions .secondary-button{flex:0 0 auto;min-width:104px}
+.stream-service-button{display:flex;align-items:center;justify-content:flex-start;gap:11px;min-height:52px;padding:10px 14px;border-radius:16px;text-align:left;background:#22262e;border:1px solid #343a45;color:#eef0f3;font-weight:750;transition:transform .15s ease,border-color .15s ease,background .15s ease}
+.stream-service-button:active,.stream-icon-button:active{transform:scale(.97)}
+.stream-service-button>span{min-width:0}.stream-service-button strong,.stream-service-button small{display:block}.stream-service-button strong{font-size:13px;line-height:1.15}.stream-service-button small{margin-top:3px;color:#aab0ba;font-size:10.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stream-service-button.spotify{color:#1ed760}.stream-service-button.apple-music{color:#fa4864}
+.stream-service-button strong,.stream-service-button small{color:var(--text)}.stream-service-button small{color:var(--muted)}
+.stream-service-button.preferred.spotify{background:linear-gradient(145deg,#1ed760,#18ba54);border-color:#40e27b;color:#101812;box-shadow:0 8px 24px rgba(30,215,96,.16)}
+.stream-service-button.preferred.apple-music{background:linear-gradient(145deg,#fa4864,#d92d4a);border-color:#ff6980;color:#fff;box-shadow:0 8px 24px rgba(250,72,100,.16)}
+.stream-service-button.preferred strong,.stream-service-button.preferred small{color:inherit}.stream-service-button.preferred small{opacity:.78}
+.stream-service-button.preferred.spotify .stream-icon{color:#0d1710}.stream-service-button.preferred.spotify .stream-icon circle{fill:#0d1710}.stream-service-button.preferred.spotify .stream-icon path{stroke:#1ed760}
+.stream-service-button.preferred.apple-music .stream-icon{color:#fff}.stream-service-button.preferred.apple-music .stream-icon rect{fill:rgba(255,255,255,.18)}
+
+.episode-card-actions{display:flex;align-items:center;gap:7px}
+.stream-icon-button{display:grid;place-items:center;width:43px;height:43px;border-radius:15px;background:#22262e;border:1px solid #343a44;transition:transform .15s ease}
+.stream-icon-button.spotify{color:#1ed760}.stream-icon-button.apple-music{color:#fa4864}
+.stream-icon-button .stream-icon{width:22px;height:22px}
+
+.streaming-settings{overflow:visible}
+.stream-preference{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:8px 14px 14px}
+.stream-preference button{display:flex;align-items:center;gap:10px;min-width:0;min-height:65px;padding:11px 12px;border-radius:17px;text-align:left;background:#111419;border:1px solid #2e333c;color:#8e949f}
+.stream-preference button svg{width:26px;height:26px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.stream-preference button[data-service="spotify"] svg circle{fill:currentColor;stroke:none}.stream-preference button[data-service="spotify"] svg path{stroke:#0f1511}
+.stream-preference button[data-service="appleMusic"] svg rect{fill:currentColor;stroke:none}.stream-preference button[data-service="appleMusic"] svg path{stroke:#fff}
+.stream-preference button span{min-width:0}.stream-preference button strong,.stream-preference button small{display:block}.stream-preference button strong{font-size:13px;color:#d5d8dd}.stream-preference button small{font-size:10px;color:#777e89;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stream-preference button.active[data-service="spotify"]{color:#1ed760;border-color:rgba(30,215,96,.55);background:rgba(30,215,96,.09);box-shadow:inset 0 0 0 1px rgba(30,215,96,.08)}
+.stream-preference button.active[data-service="appleMusic"]{color:#fa4864;border-color:rgba(250,72,100,.55);background:rgba(250,72,100,.09);box-shadow:inset 0 0 0 1px rgba(250,72,100,.08)}
+.stream-preference button.active strong{color:var(--text)}
+.stream-setting-note{margin:0;padding:0 17px 15px;color:var(--muted);font-size:11.5px;line-height:1.45}
+
+.detail-streaming-section{padding:14px;border-radius:20px;background:#15181e;border:1px solid #2b3039}
+.streaming-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.streaming-buttons .stream-service-button{width:100%;min-width:0}
+.streaming-note{display:block;margin-top:9px;color:#777d88;font-size:10.5px;line-height:1.45}
+
+@media(max-width:620px){
+  .episode-card-actions{gap:6px}.stream-icon-button,.heard-button{width:40px;height:40px;border-radius:14px}
+  .recommendation-actions .stream-service-button{flex-basis:100%}.recommendation-actions .secondary-button{flex:1 1 auto}
+  .streaming-buttons{grid-template-columns:1fr 1fr}.streaming-buttons .stream-service-button{padding:10px}.streaming-buttons .stream-service-button strong{font-size:12px}.streaming-buttons .stream-service-button small{font-size:9.5px}
+}
+@media(max-width:380px){
+  .stream-preference{grid-template-columns:1fr}.streaming-buttons{grid-template-columns:1fr}
+}
+.stream-icon-button::before{content:"";display:block;width:23px;height:23px;background-repeat:no-repeat;background-position:center;background-size:contain}
+.stream-icon-button.spotify::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%231ed760'/%3E%3Cpath d='M6.8 9.1c3.8-1.1 7.9-.8 11.2.8M7.5 12.3c3.2-.8 6.7-.5 9.5.7M8.2 15.2c2.6-.6 5.4-.3 7.6.6' fill='none' stroke='%230d1410' stroke-width='1.55' stroke-linecap='round'/%3E%3C/svg%3E")}
+.stream-icon-button.apple-music::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='18' height='18' rx='5' fill='%23fa4864'/%3E%3Cpath d='M15.5 7.2v8.1a2.2 2.2 0 1 1-1.2-2V9.1l-5.8 1.2v6.1a2.2 2.2 0 1 1-1.2-2V8.8l8.2-1.6Z' fill='none' stroke='white' stroke-width='1.55' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}

@@ -158,6 +158,20 @@
       <div class="page-title">
         <span class="eyebrow">Verwaltung</span><h2>Einstellungen</h2><p>Backups, Folgenwissen und lokale Daten.</p>
       </div>
+      <div class="settings-group streaming-settings">
+        <h3>Bevorzugter Streamingdienst</h3>
+        <div class="stream-preference" id="streamingPreference" role="group" aria-label="Bevorzugten Streamingdienst auswählen">
+          <button type="button" data-service="spotify" aria-pressed="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M6.8 9.1c3.8-1.1 7.9-.8 11.2.8M7.5 12.3c3.2-.8 6.7-.5 9.5.7M8.2 15.2c2.6-.6 5.4-.3 7.6.6"></path></svg>
+            <span><strong>Spotify</strong><small>Als Standard öffnen</small></span>
+          </button>
+          <button type="button" data-service="appleMusic" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><path d="M15.5 7.2v8.1a2.2 2.2 0 1 1-1.2-2V9.1l-5.8 1.2v6.1a2.2 2.2 0 1 1-1.2-2V8.8l8.2-1.6Z"></path></svg>
+            <span><strong>Apple Music</strong><small>Als Standard öffnen</small></span>
+          </button>
+        </div>
+        <p class="stream-setting-note" id="streamingPreferenceInfo">Schnellbuttons öffnen Spotify. In den Folgendetails bleiben beide Dienste sichtbar.</p>
+      </div>
       <div class="settings-group">
         <h3>Backup</h3>
         <button id="exportButton" class="settings-row"><span><strong>JSON exportieren</strong><small>Hörstatus, Bewertungen und Notizen sichern</small></span><b>›</b></button>
@@ -166,7 +180,7 @@
       </div>
       <div class="settings-group">
         <h3>Folgenwissen</h3>
-        <button id="updateMetadataButton" class="settings-row"><span><strong>Folgenwissen aktualisieren</strong><small>Laufzeiten, Beschreibungen, Kapitel und Figuren laden</small></span><b>↓</b></button>
+        <button id="updateMetadataButton" class="settings-row"><span><strong>Folgenwissen aktualisieren</strong><small>Laufzeiten, Beschreibungen, Figuren und Streaming-Links laden</small></span><b>↓</b></button>
         <button id="reloadCatalogButton" class="settings-row"><span><strong>Eingebauten Katalog neu laden</strong><small>Rocky-Ranking und Grunddaten zurücksetzen</small></span><b>↻</b></button>
       </div>
       <div class="settings-group">
@@ -179,8 +193,8 @@
           <strong>Folgen-Tracker</strong>
           <small id="storageInfo">Lade Daten …</small>
           <small id="metadataInfo">Folgenwissen wird geprüft …</small>
-          <small>Version 6.0 · Speicherung ausschließlich auf diesem Gerät</small>
-          <small class="source-note">Folgenmetadaten: dreimetadaten.de · Community-Wertungen: rocky-beach.com</small>
+          <small>Version 7.0 · Speicherung ausschließlich auf diesem Gerät</small>
+          <small class="source-note">Folgenmetadaten & Streaming-Links: dreimetadaten.de · Community-Wertungen: rocky-beach.com</small>
         </div>
       </div>
     </section>
@@ -206,6 +220,12 @@
       <div id="detailMeta" class="detail-meta"></div>
     </div>
     <p id="detailDescription" class="detail-description"></p>
+
+    <section class="detail-section detail-streaming-section">
+      <span class="field-label">Anhören</span>
+      <div id="detailStreamingButtons" class="streaming-buttons"></div>
+      <small class="streaming-note">Direktlinks öffnen nach Möglichkeit die installierte App. Bei noch nicht veröffentlichten Folgen öffnet sich die Suche.</small>
+    </section>
 
     <section id="detailReasonsSection" class="detail-section hidden">
       <span class="field-label">Warum passt sie?</span>

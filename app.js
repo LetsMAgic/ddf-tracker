@@ -5,16 +5,17 @@
   const DB_VERSION = 1;
   const STORE = 'kv';
   const USER_KEY = 'appState';
-  const CATALOG_KEY = 'enrichedCatalogV6';
-  const LEGACY_CATALOG_KEYS = ['enrichedCatalogV5', 'enrichedCatalogV4'];
+  const CATALOG_KEY = 'enrichedCatalogV7';
+  const LEGACY_CATALOG_KEYS = ['enrichedCatalogV6', 'enrichedCatalogV5', 'enrichedCatalogV4'];
   const LEGACY_USER_KEYS = ['user-state', 'userState', 'state'];
-  const APP_VERSION = 6;
+  const APP_VERSION = 7;
+  const DEFAULT_STREAMING_SERVICE = 'spotify';
   const META_URL = 'https://dreimetadaten.de/data/Serie.json';
   const META_MAX_AGE = 1000 * 60 * 60 * 24 * 30;
 
   const state = {
     catalog: [],
-    user: { version: APP_VERSION, episodes: {}, updatedAt: null },
+    user: { version: APP_VERSION, episodes: {}, settings: { preferredService: DEFAULT_STREAMING_SERVICE }, updatedAt: null },
     page: 'home',
     filter: 'all',
     sort: 'nr',
@@ -169,6 +170,40 @@
       .trim();
   }
 
+  function normalizeStreamingService(value) {
+    return value === 'appleMusic' ? 'appleMusic' : DEFAULT_STREAMING_SERVICE;
+  }
+
+  function safeStreamingUrl(value, service) {
+    const text = String(value || '').trim();
+    if (!text) return null;
+    try {
+      const url = new URL(text);
+      const validHost = service === 'spotify'
+        ? url.hostname === 'open.spotify.com'
+        : url.hostname === 'music.apple.com';
+      return url.protocol === 'https:' && validHost ? url.href : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function directStreamingUrl(raw, service) {
+    const linkValue = service === 'spotify'
+      ? raw?.spotifyUrl || raw?.links?.spotify
+      : raw?.appleMusicUrl || raw?.links?.appleMusic;
+    const direct = safeStreamingUrl(linkValue, service);
+    if (direct) return direct;
+    const id = service === 'spotify'
+      ? raw?.spotifyId || raw?.idSpotify || raw?.ids?.spotify
+      : raw?.appleMusicId || raw?.idAppleMusic || raw?.ids?.appleMusic;
+    const cleanId = String(id || '').trim();
+    if (!cleanId) return null;
+    return service === 'spotify'
+      ? `https://open.spotify.com/intl-de/album/${encodeURIComponent(cleanId)}`
+      : `https://music.apple.com/de/album/${encodeURIComponent(cleanId)}`;
+  }
+
   function uniqueStrings(values) {
     const seen = new Set();
     const output = [];
@@ -298,6 +333,8 @@
       author: authorValue(raw.author || raw.buchautor || raw.buchautoren),
       scriptAuthor: authorValue(raw.scriptAuthor || raw.hörspielskriptautor || raw.hoerspielskriptautor),
       searchKeywords: uniqueStrings(raw.searchKeywords || raw.keywords || []),
+      spotifyUrl: directStreamingUrl(raw, 'spotify'),
+      appleMusicUrl: directStreamingUrl(raw, 'appleMusic'),
     };
     const built = buildSearchFields(episode);
     episode.searchKeywords = built.hidden;
@@ -332,7 +369,17 @@
   }
 
   function normalizeUser(raw) {
-    const output = { version: APP_VERSION, episodes: {}, updatedAt: raw?.updatedAt || null };
+    const preferredService = normalizeStreamingService(
+      raw?.settings?.preferredService
+      || raw?.user?.settings?.preferredService
+      || raw?.preferredService,
+    );
+    const output = {
+      version: APP_VERSION,
+      episodes: {},
+      settings: { preferredService },
+      updatedAt: raw?.updatedAt || null,
+    };
     const source = raw?.user?.episodes || raw?.episodes || raw?.userData || {};
     if (Array.isArray(source)) {
       for (const item of source) {
@@ -370,6 +417,69 @@
     const remaining = minutes % 60;
     if (!hours) return `${remaining} Min.`;
     return `${hours} Std.${remaining ? ` ${remaining} Min.` : ''}`;
+  }
+
+  function preferredStreamingService() {
+    return normalizeStreamingService(state.user?.settings?.preferredService);
+  }
+
+  function streamingServiceLabel(service) {
+    return service === 'appleMusic' ? 'Apple Music' : 'Spotify';
+  }
+
+  function streamingIcon(service) {
+    if (service === 'appleMusic') {
+      return '<svg class="stream-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><path d="M15.5 7.2v8.1a2.2 2.2 0 1 1-1.2-2V9.1l-5.8 1.2v6.1a2.2 2.2 0 1 1-1.2-2V8.8l8.2-1.6Z"></path></svg>';
+    }
+    return '<svg class="stream-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M6.8 9.1c3.8-1.1 7.9-.8 11.2.8M7.5 12.3c3.2-.8 6.7-.5 9.5.7M8.2 15.2c2.6-.6 5.4-.3 7.6.6"></path></svg>';
+  }
+
+  function streamingDestination(episode, service) {
+    const normalizedService = normalizeStreamingService(service);
+    const direct = normalizedService === 'appleMusic' ? episode.appleMusicUrl : episode.spotifyUrl;
+    if (direct) return { url: direct, exact: true, service: normalizedService };
+    const query = encodeURIComponent(`Die drei ??? Folge ${episode.nr} ${episode.titel}`);
+    const url = normalizedService === 'appleMusic'
+      ? `https://music.apple.com/de/search?term=${query}`
+      : `https://open.spotify.com/search/${query}`;
+    return { url, exact: false, service: normalizedService };
+  }
+
+  function streamingButtonMarkup(episode, service, options = {}) {
+    const destination = streamingDestination(episode, service);
+    const label = streamingServiceLabel(destination.service);
+    const serviceClass = destination.service === 'appleMusic' ? 'apple-music' : 'spotify';
+    const data = `${episode.nr}:${destination.service}`;
+    if (options.compact) {
+      return `<button type="button" class="stream-icon-button ${serviceClass}" data-stream="${data}" aria-label="${destination.exact ? `${label} öffnen` : `${label} durchsuchen`}" title="${destination.exact ? `Bei ${label} hören` : `Auf ${label} suchen`}"></button>`;
+    }
+    return `<button type="button" class="stream-service-button ${serviceClass}${options.primary ? ' preferred' : ''}" data-stream="${data}">${streamingIcon(destination.service)}<span><strong>${destination.exact ? `Bei ${label} hören` : `Auf ${label} suchen`}</strong><small>${destination.exact ? 'Direkt zur Folge' : 'Noch kein Direktlink verfügbar'}</small></span></button>`;
+  }
+
+  function openStreaming(number, service = preferredStreamingService()) {
+    const episode = state.catalog.find((item) => item.nr === Number(number));
+    if (!episode) {
+      toast('Die Folge wurde im Katalog nicht gefunden.');
+      return;
+    }
+    const destination = streamingDestination(episode, service);
+    window.location.assign(destination.url);
+  }
+
+  function setPreferredStreamingService(service) {
+    const normalized = normalizeStreamingService(service);
+    if (preferredStreamingService() === normalized) return;
+    state.user.settings = { ...(state.user.settings || {}), preferredService: normalized };
+    state.user.updatedAt = new Date().toISOString();
+    pageDirty.home = true;
+    pageDirty.episodes = true;
+    pageDirty.settings = true;
+    queueUserPersist();
+    if (state.page === 'home') renderHome();
+    if (state.page === 'episodes') renderEpisodes();
+    if (state.page === 'settings') renderSettings();
+    if (state.detailNr) refreshDetail();
+    toast(`${streamingServiceLabel(normalized)} ist jetzt dein Standard.`);
   }
 
   function isSpecial(episode) {
@@ -708,7 +818,10 @@
         <div class="match-badge"><strong>${result.match}%</strong><span>Match</span></div>
       </div>
       <div class="recommend-reasons">${reasons.slice(0, 6).map((reason) => `<span>${esc(reason)}</span>`).join('')}</div>
-      <div class="recommendation-actions"><button class="primary-button" data-open="${episode.nr}">Folge ansehen</button></div>`;
+      <div class="recommendation-actions">
+        ${streamingButtonMarkup(episode, preferredStreamingService(), { primary: true })}
+        <button class="secondary-button" data-open="${episode.nr}">Details</button>
+      </div>`;
   }
 
   function renderHome() {
@@ -826,7 +939,10 @@
             <h3 class="episode-title">${esc(episode.titel)}</h3>
             ${description ? `<p class="episode-description">${esc(description)}</p>` : ''}
           </div>
-          <button class="heard-button ${episode.heard ? 'on' : ''}" data-heard="${episode.nr}" aria-label="${episode.heard ? 'Als ungehört markieren' : 'Als gehört markieren'}">${episode.heard ? '✓' : '○'}</button>
+          <div class="episode-card-actions">
+            ${streamingButtonMarkup(episode, preferredStreamingService(), { compact: true })}
+            <button class="heard-button ${episode.heard ? 'on' : ''}" data-heard="${episode.nr}" aria-label="${episode.heard ? 'Als ungehört markieren' : 'Als gehört markieren'}">${episode.heard ? '✓' : '○'}</button>
+          </div>
         </div>
         <div class="episode-footer">
           <div class="badges">
@@ -920,12 +1036,21 @@
   }
 
   function renderSettings() {
+    const preferred = preferredStreamingService();
+    document.querySelectorAll('#streamingPreference [data-service]').forEach((button) => {
+      const active = button.dataset.service === preferred;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    $('streamingPreferenceInfo').textContent = `Schnellbuttons öffnen ${streamingServiceLabel(preferred)}. In den Folgendetails bleiben beide Dienste sichtbar.`;
     const states = Object.keys(state.user.episodes).length;
     const roles = state.catalog.reduce((sum, episode) => sum + (episode.characters?.length || 0), 0);
+    const spotifyLinks = state.catalog.filter((episode) => episode.spotifyUrl).length;
+    const appleLinks = state.catalog.filter((episode) => episode.appleMusicUrl).length;
     $('storageInfo').textContent = `${state.catalog.length} Folgen · ${states} persönliche Einträge · ${state.catalog.filter((episode) => episode.rockyRanking != null).length} Rocky-Wertungen`;
     $('metadataInfo').textContent = state.metadataUpdatedAt
-      ? `Folgenwissen: ${roles.toLocaleString('de-DE')} Rollen · aktualisiert ${new Date(state.metadataUpdatedAt).toLocaleDateString('de-DE')}`
-      : 'Laufzeiten, Figuren und Kapitel werden beim ersten Online-Start ergänzt.';
+      ? `${roles.toLocaleString('de-DE')} Rollen · ${spotifyLinks} Spotify- und ${appleLinks} Apple-Music-Direktlinks · aktualisiert ${new Date(state.metadataUpdatedAt).toLocaleDateString('de-DE')}`
+      : `${spotifyLinks} Spotify- und ${appleLinks} Apple-Music-Direktlinks eingebaut; weiteres Folgenwissen wird online ergänzt.`;
     markRendered('settings');
   }
 
@@ -971,6 +1096,7 @@
     $('detailTitle').textContent = episode.titel;
     $('detailMatch').textContent = `${result.match}%`;
     $('detailDescription').textContent = description || 'Für diese Folge ist noch keine Kurzbeschreibung lokal gespeichert. Unter Einstellungen kannst du das Folgenwissen aktualisieren.';
+    $('detailStreamingButtons').innerHTML = ['spotify', 'appleMusic'].map((service) => streamingButtonMarkup(episode, service)).join('');
     $('detailMeta').innerHTML = `
       <span class="badge">${fmtDuration(episode.durationMin)}</span>
       ${isSpecial(episode) ? '<span class="badge special-badge">✦ Spezial / extra lang</span>' : ''}
@@ -1007,6 +1133,7 @@
         version: APP_VERSION,
         exportedAt: new Date().toISOString(),
         episodes: state.user.episodes,
+        settings: state.user.settings,
       };
       const text = JSON.stringify(payload, null, 2);
       const name = `ddf-backup-${new Date().toISOString().slice(0, 10)}.json`;
@@ -1101,6 +1228,8 @@
       chapters: chapters.length ? chapters : existing.chapters || [],
       author: authorValue(meta.autor || meta.buchautor || meta.buchautoren) || existing.author || '',
       scriptAuthor: authorValue(meta.hörspielskriptautor || meta.hoerspielskriptautor) || existing.scriptAuthor || '',
+      spotifyUrl: directStreamingUrl(meta, 'spotify') || existing.spotifyUrl || null,
+      appleMusicUrl: directStreamingUrl(meta, 'appleMusic') || existing.appleMusicUrl || null,
     };
   }
 
@@ -1146,6 +1275,8 @@
           nr,
           rockyRanking: existing.rockyRanking ?? item.rockyRanking ?? null,
           searchKeywords: uniqueStrings([existing.searchKeywords || [], item.searchKeywords || []]),
+          spotifyUrl: item.spotifyUrl || existing.spotifyUrl || null,
+          appleMusicUrl: item.appleMusicUrl || existing.appleMusicUrl || null,
         };
       map.set(nr, normalizeEpisode(enriched));
     }
@@ -1154,7 +1285,7 @@
 
   async function updateMetadata(manual = false) {
     try {
-      if (manual) toast('Laufzeiten, Figuren und Kapitel werden geladen …');
+      if (manual) toast('Laufzeiten, Figuren, Kapitel und Streaming-Links werden geladen …');
       const response = await fetch(META_URL, { cache: 'no-store', mode: 'cors' });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
@@ -1268,6 +1399,11 @@
     $('randomHeardButton').addEventListener('click', () => showRecommendation(replayPick(), 'Zum Wiederhören'));
     $('randomSpecialButton').addEventListener('click', () => showRecommendation(weightedPick(recommendationPool('special', 'any')), 'Lange Spezialfolge'));
 
+    $('streamingPreference').addEventListener('click', (event) => {
+      const button = event.target.closest('[data-service]');
+      if (button) setPreferredStreamingService(button.dataset.service);
+    });
+
     $('exportButton').addEventListener('click', exportBackup);
     $('importButton').addEventListener('click', () => $('importFile').click());
     $('importFile').addEventListener('change', (event) => {
@@ -1287,7 +1423,7 @@
     });
     $('resetButton').addEventListener('click', async () => {
       if (!confirm('Wirklich alle persönlichen Hörstände, Bewertungen und Notizen löschen?')) return;
-      state.user = { version: APP_VERSION, episodes: {}, updatedAt: new Date().toISOString() };
+      state.user = { version: APP_VERSION, episodes: {}, settings: { preferredService: preferredStreamingService() }, updatedAt: new Date().toISOString() };
       invalidateDerived();
       await dbSet(USER_KEY, state.user);
       renderAll();
@@ -1318,6 +1454,14 @@
     });
 
     document.addEventListener('click', (event) => {
+      const streamButton = event.target.closest('[data-stream]');
+      if (streamButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        const [number, service] = streamButton.dataset.stream.split(':');
+        openStreaming(Number(number), service);
+        return;
+      }
       const ratingButton = event.target.closest('[data-rate]');
       if (ratingButton) {
         event.preventDefault();
