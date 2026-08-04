@@ -1,4 +1,4 @@
-const CACHE = 'ddf-v12-3-robust-tutorial';
+const CACHE = 'ddf-v12-4-search-position';
 const ASSETS = [
   './',
   './index.html',

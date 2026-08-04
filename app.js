@@ -1656,6 +1656,7 @@ const TUTORIAL_STEPS = [
     verify: (event) => String(event?.target?.value || '').trim().length >= 3 && Boolean(document.querySelector('.episode-card')),
     invalidMessage: 'Gib mindestens drei Zeichen ein und bestätige die Suche mit Enter.',
     revealAlign: 'top',
+    revealOffsetY: 115,
     settle: 180,
   },
   {
@@ -2234,6 +2235,8 @@ function revealTutorialTarget(elements, cardSide, step = {}) {
   } else {
     desiredTop = band.top + Math.max(0, (bandHeight - targetHeight) / 2);
   }
+  desiredTop += Number(step.revealOffsetY || 0);
+  desiredTop = Math.max(band.top, Math.min(desiredTop, band.bottom - targetHeight));
   const delta = rect.top - desiredTop;
   if (Math.abs(delta) < 1) return true;
 
