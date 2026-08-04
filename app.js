@@ -8,7 +8,7 @@
   const CATALOG_KEY = 'enrichedCatalogV10';
   const LEGACY_CATALOG_KEYS = ['enrichedCatalogV9', 'enrichedCatalogV8', 'enrichedCatalogV7', 'enrichedCatalogV6', 'enrichedCatalogV5', 'enrichedCatalogV4'];
   const LEGACY_USER_KEYS = ['user-state', 'userState', 'state'];
-  const APP_VERSION = 12.1;
+  const APP_VERSION = 12.2;
   const DEFAULT_STREAMING_SERVICE = 'spotify';
   const META_URL = 'https://dreimetadaten.de/data/Serie.json';
   const META_MAX_AGE = 1000 * 60 * 60 * 24 * 30;
@@ -49,6 +49,7 @@
     tutorialPlaylistId: null,
     tutorialSmartPlaylistId: null,
     tutorialInputTimer: 0,
+    tutorialLockedScrollY: 0,
     pendingUnheardNr: null,
   };
 
@@ -1295,7 +1296,7 @@ function renderPlaylists() {
     pageDirty.settings = true;
     queueUserPersist();
     if (state.page === 'playlists') renderPlaylists();
-    if (message) toast(message);
+    if (message && !state.tutorialActive) toast(message);
   }
 
   function openPlaylistEditor(id = null, seedNr = null) {
@@ -1367,6 +1368,7 @@ function renderPlaylists() {
   }
 
   function showPlaylistInlineStatus(message, tone = 'success') {
+    if (state.tutorialActive) return;
     const node = $('playlistInlineStatus');
     if (!node) return;
     node.textContent = message;
@@ -1377,6 +1379,7 @@ function renderPlaylists() {
   }
 
   function pulsePlaylistCard(id) {
+    if (state.tutorialActive) return;
     requestAnimationFrame(() => {
       const card = document.querySelector(`[data-playlist-open="${CSS.escape(String(id))}"]`);
       if (!card) return;
@@ -1588,15 +1591,20 @@ function renderPlaylists() {
     $('planContinuity').checked = true;
     const status=$('planSavedStatus');
     if(status){
-      status.innerHTML=`<span>✓</span><div><strong>„${esc(savedTitle)}“ gespeichert</strong><small>Die Playlist findest du jetzt direkt unter „Meine Playlists“.</small></div>`;
-      status.classList.remove('hidden');
-      status.scrollIntoView({behavior:state.tutorialActive?'auto':'smooth',block:'nearest'});
-      setTimeout(() => {
-        pulsePlaylistCard(savedPlaylist.id);
-        document.querySelector('[data-playlist-open="' + savedPlaylist.id + '"]')?.scrollIntoView({ behavior: state.tutorialActive ? 'auto' : 'smooth', block: 'center' });
-      }, 80);
       clearTimeout(state.planSavedTimer);
-      state.planSavedTimer=setTimeout(()=>status.classList.add('hidden'),5000);
+      if (state.tutorialActive) {
+        status.classList.add('hidden');
+        status.innerHTML = '';
+      } else {
+        status.innerHTML=`<span>✓</span><div><strong>„${esc(savedTitle)}“ gespeichert</strong><small>Die Playlist findest du jetzt direkt unter „Meine Playlists“.</small></div>`;
+        status.classList.remove('hidden');
+        status.scrollIntoView({behavior:'smooth',block:'nearest'});
+        setTimeout(() => {
+          pulsePlaylistCard(savedPlaylist.id);
+          document.querySelector('[data-playlist-open="' + savedPlaylist.id + '"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 80);
+        state.planSavedTimer=setTimeout(()=>status.classList.add('hidden'),5000);
+      }
     }
   }
 
@@ -1614,6 +1622,7 @@ const TUTORIAL_STEPS = [
     action: 'Tippe unten auf „Folgen“.',
     event: 'click',
     verify: () => state.page === 'episodes',
+    skipReveal: true,
     settle: 90,
   },
   {
@@ -1823,7 +1832,7 @@ const TUTORIAL_STEPS = [
   },
   {
     id: 'create-playlist',
-    focus: '#playlistEditorOverlay .mini-sheet',
+    focus: ['#playlistNameInput', '#savePlaylistButton'],
     actionTarget: '#savePlaylistButton',
     allowedTargets: ['#playlistEditorOverlay .note-field', '#savePlaylistButton'],
     allowScroll: '#playlistEditorOverlay .mini-sheet',
@@ -1838,6 +1847,10 @@ const TUTORIAL_STEPS = [
     invalidMessage: () => String($('playlistNameInput')?.value || '').trim().length < 3
       ? 'Gib zuerst einen Titel mit mindestens drei Zeichen ein und tippe dann auf „Playlist speichern“.'
       : 'Die Playlist konnte noch nicht gespeichert werden. Tippe erneut auf „Playlist speichern“.',
+    beforePosition: () => {
+      const sheet = document.querySelector('#playlistEditorOverlay .mini-sheet');
+      if (sheet) sheet.scrollTop = 0;
+    },
     settle: 260,
   },
   {
@@ -1858,8 +1871,11 @@ const TUTORIAL_STEPS = [
       state.playlistTab = 'mine';
       state.user.settings = { ...(state.user.settings || {}), playlistTab: 'mine' };
       pageDirty.playlists = true;
+      $('planSavedStatus')?.classList.add('hidden');
       renderPlaylists();
     },
+    revealAlign: 'top',
+    focusPadding: 5,
     verify: () => state.playlistDetailId === state.tutorialPlaylistId,
     settle: 310,
   },
@@ -1872,6 +1888,11 @@ const TUTORIAL_STEPS = [
     text: 'Du kannst innerhalb einer Playlist direkt nach Folgen suchen und sie mit einem Tipp ergänzen.',
     action: 'Tippe auf „Folge hinzufügen“.',
     event: 'click',
+    beforePosition: () => {
+      const sheet = document.querySelector('#playlistDetailOverlay .playlist-sheet');
+      const button = $('playlistAddEpisodeButton');
+      if (sheet && button) sheet.scrollTop = Math.max(0, button.offsetTop - 160);
+    },
     verify: () => !$('playlistAddPanel').classList.contains('hidden'),
     settle: 180,
   },
@@ -2008,6 +2029,11 @@ const TUTORIAL_STEPS = [
     text: 'Hier findest du Streamingdienst, Backup, Katalog-Updates und dieses Tutorial.',
     action: 'Tippe unten auf „Einstellungen“.',
     event: 'click',
+    skipReveal: true,
+    prepare: () => {
+      $('planSavedStatus')?.classList.add('hidden');
+      clearTimeout(state.planSavedTimer);
+    },
     verify: () => state.page === 'settings',
     settle: 160,
   },
@@ -2119,6 +2145,15 @@ function tutorialScrollableAncestor(element) {
   return null;
 }
 
+function tutorialHasFixedAncestor(element) {
+  let node = element;
+  while (node && node !== document.documentElement) {
+    if (getComputedStyle(node).position === 'fixed') return true;
+    node = node.parentElement;
+  }
+  return false;
+}
+
 function resetTutorialCardPosition() {
   const card = $('tutorialCard');
   card.classList.remove('top', 'is-above', 'is-below', 'is-scrollable', 'tutorial-card-top-fixed', 'tutorial-card-bottom-fixed');
@@ -2128,18 +2163,42 @@ function resetTutorialCardPosition() {
   card.style.removeProperty('overflow-y');
 }
 
-function revealTutorialTarget(elements, cardAtTop) {
+function tutorialVisibleBand(cardAtTop) {
+  const viewportTop = window.visualViewport?.offsetTop || 0;
+  const viewportHeight = window.visualViewport?.height || window.innerHeight;
+  const viewportBottom = viewportTop + viewportHeight;
+  const cardRect = $('tutorialCard').getBoundingClientRect();
+  const navRect = document.querySelector('.bottom-nav')?.getBoundingClientRect();
+  const safeBottom = navRect?.top && navRect.top < viewportBottom ? navRect.top - 12 : viewportBottom - 14;
+  if (cardAtTop) {
+    return { top: Math.max(viewportTop + 12, cardRect.bottom + 18), bottom: safeBottom };
+  }
+  return { top: viewportTop + 14, bottom: Math.min(cardRect.top - 18, safeBottom) };
+}
+
+function revealTutorialTarget(elements, cardAtTop, step = {}) {
   if (!elements.length) return;
   const rect = tutorialRectFor(elements);
   if (!rect) return;
-  const viewportTop = window.visualViewport?.offsetTop || 0;
-  const viewportHeight = window.visualViewport?.height || window.innerHeight;
-  const desiredCenter = cardAtTop
-    ? viewportTop + viewportHeight * 0.68
-    : viewportTop + viewportHeight * 0.28;
   const primary = elements[0];
   const scrollParent = tutorialScrollableAncestor(primary);
-  const delta = (rect.top + rect.bottom) / 2 - desiredCenter;
+  if (!scrollParent && tutorialHasFixedAncestor(primary)) return;
+
+  const band = tutorialVisibleBand(cardAtTop);
+  const bandHeight = Math.max(80, band.bottom - band.top);
+  const targetHeight = rect.bottom - rect.top;
+  let delta = 0;
+  if (step.revealAlign === 'top' || targetHeight > bandHeight) {
+    delta = rect.top - band.top;
+  } else if (step.revealAlign === 'bottom') {
+    delta = rect.bottom - band.bottom;
+  } else if (rect.top < band.top) {
+    delta = rect.top - band.top;
+  } else if (rect.bottom > band.bottom) {
+    delta = rect.bottom - band.bottom;
+  }
+
+  if (Math.abs(delta) < 1) return;
   document.documentElement.classList.add('tutorial-instant-scroll');
   if (scrollParent) {
     scrollParent.scrollTop = Math.max(0, scrollParent.scrollTop + delta);
@@ -2162,18 +2221,20 @@ function positionTutorialFocus(step = currentTutorialStep()) {
   card.style.maxHeight = `${Math.max(180, Math.floor(viewportHeight * 0.44))}px`;
   card.style.overflowY = 'auto';
 
-  const elements = tutorialFocusElements(step);
+  step?.beforePosition?.();
+  let elements = tutorialFocusElements(step);
   state.tutorialTarget = elements[0] || null;
   if (!elements.length) {
     overlay.classList.add('no-focus');
     focus.style.width = '0px';
     focus.style.height = '0px';
+    state.tutorialLockedScrollY = window.scrollY;
     return true;
   }
 
   overlay.classList.remove('no-focus');
-  if (!step?.skipReveal) revealTutorialTarget(elements, cardAtTop);
-  step?.beforePosition?.();
+  if (!step?.skipReveal) revealTutorialTarget(elements, cardAtTop, step);
+  elements = tutorialFocusElements(step);
   const rect = tutorialRectFor(elements);
   if (!rect) return false;
   const viewportTop = window.visualViewport?.offsetTop || 0;
@@ -2187,6 +2248,7 @@ function positionTutorialFocus(step = currentTutorialStep()) {
   focus.style.top = `${top}px`;
   focus.style.width = `${Math.max(8, right - left)}px`;
   focus.style.height = `${Math.max(8, bottom - top)}px`;
+  state.tutorialLockedScrollY = window.scrollY;
   return true;
 }
 
@@ -2278,16 +2340,13 @@ function completeTutorialAction(event = null) {
     }
     step.after?.(event);
     state.tutorialAdvancing = true;
-    const action = $('tutorialAction');
-    action.textContent = 'Erledigt ✓';
-    action.classList.remove('warning');
-    action.classList.add('success');
+    $('tutorialAction').classList.remove('warning', 'success');
     setTimeout(() => {
       if (!state.tutorialActive) return;
       state.tutorialStep += 1;
       state.tutorialPreparedStep = -1;
       renderTutorialStep();
-    }, 360);
+    }, 120);
   }, delay);
 }
 
@@ -2367,6 +2426,14 @@ function tutorialScrollCapture(event) {
   const allowed = tutorialAllowScrollElements();
   if (allowed.length && elementMatchesAny(event.target, allowed)) return;
   event.preventDefault();
+}
+
+function tutorialWindowScrollGuard() {
+  if (!state.tutorialActive) return;
+  const overlay = $('tutorialOverlay');
+  if (!overlay || overlay.classList.contains('tutorial-positioning')) return;
+  if (Math.abs(window.scrollY - state.tutorialLockedScrollY) < 1) return;
+  window.scrollTo(0, state.tutorialLockedScrollY);
 }
 
 
@@ -2454,11 +2521,11 @@ function startTutorial({ fromSettings = false } = {}) {
 }
 
 function finishTutorial() {
-  restoreTutorialSession({ completed: true, message: 'Einführung abgeschlossen – viel Spaß beim Hören!' });
+  restoreTutorialSession({ completed: true });
 }
 
 function skipTutorial() {
-  restoreTutorialSession({ completed: true, message: 'Tutorial übersprungen. Du findest es jederzeit in den Einstellungen.' });
+  restoreTutorialSession({ completed: true });
 }
 
 function tutorialNext() {
@@ -2759,6 +2826,7 @@ function closeHelp() {
   }
 
   function toast(message) {
+    if (state.tutorialActive) return;
     const element = $('toast');
     element.textContent = message;
     element.classList.remove('hidden');
@@ -3105,6 +3173,7 @@ function closeHelp() {
     document.addEventListener('change', tutorialChangeCapture, true);
     document.addEventListener('wheel', tutorialScrollCapture, { capture: true, passive: false });
     document.addEventListener('touchmove', tutorialScrollCapture, { capture: true, passive: false });
+    window.addEventListener('scroll', tutorialWindowScrollGuard, { passive: true });
     $('closeHeardReset').addEventListener('click', closeHeardReset);
     $('cancelHeardReset').addEventListener('click', closeHeardReset);
     $('confirmUnheardAndClear').addEventListener('click', confirmUnheardAndClear);

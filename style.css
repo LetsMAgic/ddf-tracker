@@ -398,3 +398,12 @@ body.tutorial-running .tutorial-overlay.tutorial-positioning .tutorial-focus{
   body.tutorial-reading-plan #planPreview{max-height:46dvh}
   body.tutorial-running .tutorial-card{max-height:40dvh!important}
 }
+
+
+/* v12.2: stable, restrained tutorial feedback. The page is positioned before
+   the spotlight appears; normal app success toasts stay hidden during the tour. */
+body.tutorial-running #toast,
+body.tutorial-running #planSavedStatus,
+body.tutorial-running #playlistInlineStatus{display:none!important}
+.tutorial-action.success{border-color:rgba(245,196,65,.28);background:rgba(245,196,65,.075);color:#f1d985}
+.tutorial-action.success:before{content:"›";background:var(--accent);color:#181307}
