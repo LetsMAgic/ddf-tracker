@@ -1,4 +1,4 @@
-const CACHE = 'ddf-v11-4-tutorial-static';
+const CACHE = 'ddf-v11-5-stable-tour';
 const ASSETS = [
   './',
   './index.html',
