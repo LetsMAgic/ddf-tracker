@@ -1,4 +1,4 @@
-const CACHE = 'ddf-v12-7-playlist-open-target';
+const CACHE = 'ddf-v12-8-keyboard-scroll';
 const ASSETS = [
   './',
   './index.html',

@@ -1902,13 +1902,13 @@ const TUTORIAL_STEPS = [
         card.classList.add('tutorial-created-playlist');
       }
     },
-    beforePosition: () => {
+    prePosition: async () => {
       const card = tutorialCreatedPlaylistCard();
       if (!card) return;
-      document.documentElement.classList.add('tutorial-instant-scroll');
-      card.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'nearest' });
-      void document.documentElement.offsetHeight;
-      document.documentElement.classList.remove('tutorial-instant-scroll');
+      // First move the page while the tutorial is fully hidden. Only after the
+      // card has reached its stable position is scrolling locked and the
+      // spotlight drawn around it.
+      await tutorialScrollElementIntoStage(card, { top: Math.max(260, window.innerHeight * 0.50), settle: 180 });
     },
     onAction: (event) => {
       const card = event?.target?.closest?.('#userPlaylists .playlist-card[data-playlist-open]') || tutorialCreatedPlaylistCard();
@@ -2359,6 +2359,46 @@ function waitForTutorialSettle(milliseconds = 100) {
   });
 }
 
+async function tutorialScrollElementIntoStage(element, options = {}) {
+  if (!element?.isConnected) return false;
+  const overlay = $('tutorialOverlay');
+  overlay?.classList.add('tutorial-positioning');
+  const viewport = tutorialViewportMetrics();
+  const desiredTop = Number(options.top ?? Math.max(viewport.topGuard + 18, viewport.height * 0.42));
+  const rect = element.getBoundingClientRect();
+  const scrollParent = tutorialScrollableAncestor(element);
+  document.documentElement.classList.add('tutorial-instant-scroll');
+  if (scrollParent) {
+    const parentRect = scrollParent.getBoundingClientRect();
+    const targetInsideParent = rect.top - parentRect.top + scrollParent.scrollTop;
+    const desiredInsideParent = Math.max(0, desiredTop - parentRect.top);
+    scrollParent.scrollTop = Math.max(0, targetInsideParent - desiredInsideParent);
+  } else {
+    window.scrollTo(0, Math.max(0, window.scrollY + rect.top - desiredTop));
+  }
+  void document.documentElement.offsetHeight;
+  document.documentElement.classList.remove('tutorial-instant-scroll');
+  await waitForTutorialSettle(Number(options.settle ?? 120));
+  state.tutorialLockedScrollY = window.scrollY;
+  return element.isConnected;
+}
+
+function scheduleTutorialAfterKeyboard() {
+  if (!state.tutorialActive) return;
+  clearTimeout(state.tutorialKeyboardTimer);
+  state.tutorialKeyboardTimer = setTimeout(async () => {
+    if (!state.tutorialActive || state.tutorialInputFocused) return;
+    const step = currentTutorialStep();
+    const overlay = $('tutorialOverlay');
+    if (!step || !overlay) return;
+    overlay.classList.add('tutorial-positioning');
+    await waitForTutorialSettle(180);
+    if (!state.tutorialActive || state.tutorialInputFocused || currentTutorialStep() !== step) return;
+    positionTutorialFocus(step);
+    overlay.classList.remove('tutorial-positioning');
+  }, 260);
+}
+
 async function renderTutorialStep() {
   const step = currentTutorialStep();
   if (!step) return finishTutorial();
@@ -2388,6 +2428,11 @@ async function renderTutorialStep() {
   const token = ++state.tutorialPositionFrame;
   await waitForTutorialSettle(Number(step.settle ?? 110));
   if (!state.tutorialActive || token !== state.tutorialPositionFrame || currentTutorialStep() !== step) return;
+
+  if (step.prePosition) {
+    await step.prePosition();
+    if (!state.tutorialActive || token !== state.tutorialPositionFrame || currentTutorialStep() !== step) return;
+  }
 
   let positioned = false;
   const expectsTarget = Boolean(step.focus ?? step.target);
@@ -2482,6 +2527,7 @@ function tutorialInputCapture(event) {
   if (!step || step.event !== 'input') return;
   if (!elementMatchesAny(event.target, tutorialActionElements(step))) return;
   clearTimeout(state.tutorialInputTimer);
+  clearTimeout(state.tutorialKeyboardTimer);
   state.tutorialInputTimer = setTimeout(() => completeTutorialAction(event), step.verifyDelay || 100);
 }
 
@@ -2514,6 +2560,20 @@ function tutorialChangeCapture(event) {
   completeTutorialAction(event);
 }
 
+function tutorialFocusInCapture(event) {
+  if (!state.tutorialActive) return;
+  if (!event.target?.matches?.('input, textarea, select, [contenteditable="true"]')) return;
+  state.tutorialInputFocused = true;
+  clearTimeout(state.tutorialKeyboardTimer);
+}
+
+function tutorialFocusOutCapture(event) {
+  if (!state.tutorialActive) return;
+  if (!event.target?.matches?.('input, textarea, select, [contenteditable="true"]')) return;
+  state.tutorialInputFocused = false;
+  scheduleTutorialAfterKeyboard();
+}
+
 function tutorialScrollCapture(event) {
   if (!state.tutorialActive) return;
   if ($('tutorialCard')?.contains(event.target)) return;
@@ -2523,7 +2583,7 @@ function tutorialScrollCapture(event) {
 }
 
 function tutorialWindowScrollGuard() {
-  if (!state.tutorialActive) return;
+  if (!state.tutorialActive || state.tutorialInputFocused) return;
   const overlay = $('tutorialOverlay');
   if (!overlay || overlay.classList.contains('tutorial-positioning')) return;
   if (Math.abs(window.scrollY - state.tutorialLockedScrollY) < 1) return;
@@ -2552,6 +2612,7 @@ function snapshotTutorialSession() {
 
 function closeTutorialSurfaces() {
   clearTimeout(state.tutorialInputTimer);
+  clearTimeout(state.tutorialKeyboardTimer);
   clearTutorialStepClasses();
   $('heardResetOverlay').classList.add('hidden');
   $('heardResetOverlay').setAttribute('aria-hidden', 'true');
@@ -3265,6 +3326,8 @@ function closeHelp() {
     document.addEventListener('keydown', tutorialKeydownCapture, true);
     document.addEventListener('search', tutorialSearchCapture, true);
     document.addEventListener('change', tutorialChangeCapture, true);
+    document.addEventListener('focusin', tutorialFocusInCapture, true);
+    document.addEventListener('focusout', tutorialFocusOutCapture, true);
     document.addEventListener('wheel', tutorialScrollCapture, { capture: true, passive: false });
     document.addEventListener('touchmove', tutorialScrollCapture, { capture: true, passive: false });
     window.addEventListener('scroll', tutorialWindowScrollGuard, { passive: true });
