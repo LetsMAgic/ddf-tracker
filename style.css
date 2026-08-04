@@ -355,3 +355,46 @@ html.tutorial-instant-scroll,html.tutorial-instant-scroll body{scroll-behavior:a
   .tutorial-card h2{font-size:1.22rem}
   .tutorial-action{font-size:.79rem;padding:10px 11px}
 }
+
+/* v12.1: clarity-first onboarding. Each step is positioned before it becomes
+   visible, the page stays still afterwards, and readable modal content remains
+   bright while only the required action advances the tour. */
+body.tutorial-running{
+  overscroll-behavior:none;
+}
+body.tutorial-running .overlay,
+body.tutorial-running .detail-sheet,
+body.tutorial-running .mini-sheet{
+  animation:none!important;
+  scroll-behavior:auto!important;
+}
+body.tutorial-running .tutorial-card,
+body.tutorial-running .tutorial-focus{
+  transition:none!important;
+}
+body.tutorial-reading-detail #detailOverlay .detail-header{
+  position:sticky;
+  top:-8px;
+  z-index:8;
+  margin:0 -2px;
+  padding:10px 2px 12px;
+  background:linear-gradient(180deg,#1b1e24 0%,#1b1e24 82%,rgba(27,30,36,.92) 100%);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+body.tutorial-reading-detail #detailOverlay .detail-sheet{
+  overscroll-behavior:contain;
+}
+body.tutorial-reading-plan #planPreview{
+  max-height:54dvh;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scroll-behavior:auto!important;
+}
+body.tutorial-running .tutorial-overlay.tutorial-positioning .tutorial-card,
+body.tutorial-running .tutorial-overlay.tutorial-positioning .tutorial-focus{
+  opacity:0!important;
+}
+@media(max-height:700px){
+  body.tutorial-reading-plan #planPreview{max-height:46dvh}
+  body.tutorial-running .tutorial-card{max-height:40dvh!important}
+}
