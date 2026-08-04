@@ -382,7 +382,64 @@
     return description;
   }
 
-  async function saveEpisode(number, patch) {
+  let persistTimer = null;
+  let persistChain = Promise.resolve();
+  let homeRefreshTimer = null;
+
+  function queueUserPersist() {
+    clearTimeout(persistTimer);
+    persistTimer = setTimeout(() => {
+      const snapshot = typeof structuredClone === 'function'
+        ? structuredClone(state.user)
+        : JSON.parse(JSON.stringify(state.user));
+      persistChain = persistChain
+        .then(() => dbSet(USER_KEY, snapshot))
+        .catch((error) => {
+          console.error('Speichern fehlgeschlagen:', error);
+          toast('Speichern fehlgeschlagen. Bitte erneut versuchen.');
+        });
+    }, 80);
+  }
+
+  function patchVisibleEpisode(number) {
+    const user = userFor(number);
+    const card = document.querySelector(`.episode-card[data-open="${number}"]`);
+    if (card) {
+      card.classList.remove('rating-none', 'rating-minus', 'rating-neutral', 'rating-plus', 'rating-super');
+      card.classList.add(`rating-${user.rating || 'none'}`);
+      card.querySelectorAll('[data-rate]').forEach((button) => {
+        button.classList.toggle('active', button.dataset.value === user.rating);
+      });
+      const heardButton = card.querySelector('[data-heard]');
+      if (heardButton) {
+        heardButton.classList.toggle('on', user.heard);
+        heardButton.textContent = user.heard ? '✓' : '○';
+        heardButton.setAttribute('aria-label', user.heard ? 'Als ungehört markieren' : 'Als gehört markieren');
+      }
+      const badges = card.querySelectorAll('.badges .badge');
+      const statusBadge = badges[badges.length - 1];
+      if (statusBadge) {
+        statusBadge.textContent = ratingLabel(user.rating);
+        statusBadge.classList.remove('match');
+      }
+    }
+
+    document.querySelectorAll(`.ranking-card[data-open="${number}"] .own-pill`).forEach((pill) => {
+      pill.className = `own-pill ${user.rating || ''}`;
+      pill.textContent = user.rating ? `${ratingSymbol(user.rating)} ${ratingLabel(user.rating)}` : '';
+    });
+  }
+
+  function scheduleSecondaryRefresh() {
+    clearTimeout(homeRefreshTimer);
+    homeRefreshTimer = setTimeout(() => {
+      if (state.page === 'home') renderHome();
+      if (state.page === 'ranking') renderRanking();
+      renderSettings();
+    }, 180);
+  }
+
+  function saveEpisode(number, patch) {
     const old = userFor(number);
     const now = new Date().toISOString();
     const next = { ...old, ...patch, updatedAt: now };
@@ -395,7 +452,7 @@
       if (patch.heard && !old.heard) next.heardAt = now;
       if (!patch.heard && old.rating) {
         toast('Bewertete Folgen bleiben als gehört markiert. Entferne zuerst die Bewertung.');
-        renderAll();
+        patchVisibleEpisode(number);
         return;
       }
       if (!patch.heard) next.heardAt = null;
@@ -403,9 +460,12 @@
 
     state.user.episodes[String(number)] = next;
     state.user.updatedAt = now;
-    await dbSet(USER_KEY, state.user);
-    renderAll();
+
+    // Sofortige, optimistische UI-Aktualisierung. IndexedDB läuft danach im Hintergrund.
+    patchVisibleEpisode(number);
     if (state.detailNr === number) refreshDetail();
+    queueUserPersist();
+    scheduleSecondaryRefresh();
   }
 
   function episodeFeatures(episode) {
