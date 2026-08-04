@@ -154,6 +154,40 @@
       <div id="rankingList" class="ranking-list"></div>
     </section>
 
+    <section class="page" data-page="playlists">
+      <div class="page-title">
+        <span class="eyebrow">Hörpläne</span><h2>Listen</h2><p>Eigene Playlists, kuratierte Reihenfolgen und automatisch geplante Hörsessions.</p>
+      </div>
+
+      <section class="playlist-hero">
+        <div><span class="eyebrow">Deine Sammlung</span><h3>Was möchtest du hören?</h3><p>Erstelle freie Listen oder lasse eine Fahrt, einen Abend oder ein Wochenende automatisch füllen.</p></div>
+        <button id="newPlaylistButton" class="primary-button">＋ Neue Playlist</button>
+      </section>
+
+      <section class="section-block smart-planner">
+        <div class="section-heading"><div><span class="eyebrow">Smart Playlist</span><h2>Hörzeit automatisch planen</h2></div></div>
+        <div class="planner-form">
+          <label><span>Name</span><input id="planName" value="Autofahrt" maxlength="50"></label>
+          <label><span>Dauer</span><div class="duration-input"><input id="planHours" type="number" min="0" max="12" value="5"><b>Std.</b><input id="planMinutes" type="number" min="0" max="59" step="5" value="0"><b>Min.</b></div></label>
+          <label><span>Stimmung</span><select id="planMood"><option value="any">Bunte Mischung</option><option value="grusel">Grusel & Mystery</option><option value="klassiker">Klassiker</option><option value="meer">Meer & Insel</option><option value="familie">Familie</option><option value="skinny">Skinny Norris</option><option value="hugenay">Victor Hugenay</option><option value="kunst">Kunst & Rätsel</option></select></label>
+          <label><span>Hörstatus</span><select id="planStatus"><option value="mixed">Gemischt</option><option value="unheard">Nur ungehört</option><option value="heard">Nur bekannt</option></select></label>
+        </div>
+        <label class="planner-toggle"><input id="planContinuity" type="checkbox" checked><span><strong>Zusammenhänge beachten</strong><small>Mehrteiler, Vorgeschichten und Rückbezüge bleiben in sinnvoller Reihenfolge zusammen.</small></span></label>
+        <button id="generatePlanButton" class="primary-button full">Smart Playlist erstellen</button>
+        <div id="planPreview" class="plan-preview hidden"></div>
+      </section>
+
+      <section class="section-block">
+        <div class="section-heading"><div><span class="eyebrow">Persönlich</span><h2>Meine Playlists</h2></div><button id="newPlaylistTextButton" class="text-button">Neu</button></div>
+        <div id="userPlaylists" class="playlist-grid"></div>
+      </section>
+
+      <section class="section-block">
+        <div class="section-heading"><div><span class="eyebrow">Fertig zusammengestellt</span><h2>Entdecken</h2></div></div>
+        <div id="curatedPlaylists" class="curated-grid"></div>
+      </section>
+    </section>
+
     <section class="page" data-page="settings">
       <div class="page-title">
         <span class="eyebrow">Verwaltung</span><h2>Einstellungen</h2><p>Backups, Folgenwissen und lokale Daten.</p>
@@ -193,7 +227,7 @@
           <strong>Folgen-Tracker</strong>
           <small id="storageInfo">Lade Daten …</small>
           <small id="metadataInfo">Folgenwissen wird geprüft …</small>
-          <small>Version 7.0 · Speicherung ausschließlich auf diesem Gerät</small>
+          <small>Version 8.0 · Speicherung ausschließlich auf diesem Gerät</small>
           <small class="source-note">Folgenmetadaten & Streaming-Links: dreimetadaten.de · Community-Wertungen: rocky-beach.com</small>
         </div>
       </div>
@@ -204,6 +238,7 @@
     <button class="active" data-nav="home"><span>⌂</span><small>Start</small></button>
     <button data-nav="episodes"><span>☷</span><small>Folgen</small></button>
     <button data-nav="ranking"><span>♕</span><small>Ranking</small></button>
+    <button data-nav="playlists"><span>≡</span><small>Listen</small></button>
     <button data-nav="settings"><span>⚙︎</span><small>Einstellungen</small></button>
   </nav>
 </div>
@@ -240,6 +275,10 @@
       <div id="detailThemes" class="tag-cloud"></div>
     </section>
 
+    <section class="detail-section add-list-section">
+      <button id="detailAddPlaylist" class="playlist-add-button"><span>＋</span><span><strong>Zu Playlist hinzufügen</strong><small>Eigene Liste auswählen oder neu erstellen</small></span><b>›</b></button>
+    </section>
+
     <section class="detail-section">
       <span class="field-label">Deine Bewertung</span>
       <div id="detailRating" class="rating-control">
@@ -260,6 +299,36 @@
       <span class="field-label">Persönliche Notiz</span>
       <textarea id="detailNote" maxlength="600" placeholder="Was ist dir an der Folge aufgefallen?"></textarea>
     </label>
+  </article>
+</div>
+
+<div id="playlistEditorOverlay" class="overlay hidden" aria-hidden="true">
+  <article class="mini-sheet" role="dialog" aria-modal="true" aria-labelledby="playlistEditorTitle">
+    <div class="sheet-handle"></div>
+    <header class="detail-header"><div><span class="eyebrow">Persönliche Liste</span><h2 id="playlistEditorTitle">Neue Playlist</h2></div><button id="closePlaylistEditor" class="icon-button">×</button></header>
+    <label class="note-field"><span class="field-label">Name</span><input id="playlistNameInput" maxlength="60" placeholder="z. B. 5-Stunden-Autofahrt"></label>
+    <label class="note-field"><span class="field-label">Beschreibung</span><textarea id="playlistDescriptionInput" maxlength="300" placeholder="Wofür ist diese Liste gedacht?"></textarea></label>
+    <button id="savePlaylistButton" class="primary-button full">Playlist speichern</button>
+  </article>
+</div>
+
+<div id="playlistPickerOverlay" class="overlay hidden" aria-hidden="true">
+  <article class="mini-sheet" role="dialog" aria-modal="true" aria-labelledby="playlistPickerTitle">
+    <div class="sheet-handle"></div>
+    <header class="detail-header"><div><span class="eyebrow">Merken</span><h2 id="playlistPickerTitle">Zu Playlist hinzufügen</h2></div><button id="closePlaylistPicker" class="icon-button">×</button></header>
+    <div id="playlistPickerList" class="picker-list"></div>
+    <button id="pickerNewPlaylist" class="subtle-button full">＋ Neue Playlist erstellen</button>
+  </article>
+</div>
+
+<div id="playlistDetailOverlay" class="overlay hidden" aria-hidden="true">
+  <article class="detail-sheet playlist-sheet" role="dialog" aria-modal="true" aria-labelledby="playlistDetailTitle">
+    <div class="sheet-handle"></div>
+    <header class="detail-header"><div><span id="playlistDetailKicker" class="eyebrow">Playlist</span><h2 id="playlistDetailTitle"></h2></div><button id="closePlaylistDetail" class="icon-button">×</button></header>
+    <p id="playlistDetailDescription" class="detail-description"></p>
+    <div id="playlistDetailStats" class="playlist-detail-stats"></div>
+    <div class="playlist-detail-actions"><button id="playlistPlayFirst" class="primary-button">▶ Erste Folge öffnen</button><button id="playlistEditButton" class="subtle-button">Bearbeiten</button><button id="playlistDeleteButton" class="danger-button">Löschen</button></div>
+    <div id="playlistEpisodeList" class="playlist-episode-list"></div>
   </article>
 </div>
 

@@ -1,4 +1,4 @@
-const CACHE = 'ddf-tracker-v7.0.0-streaming';
+const CACHE = 'ddf-tracker-v8-playlists';
 const ASSETS = [
   './',
   './index.html',
