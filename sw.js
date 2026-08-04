@@ -1,4 +1,4 @@
-const CACHE = 'ddf-v12-5-search-natural-position';
+const CACHE = 'ddf-v12-6-playlist-tutorial-layout';
 const ASSETS = [
   './',
   './index.html',

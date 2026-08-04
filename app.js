@@ -1232,7 +1232,8 @@
 
 function playlistCardMarkup(playlist) {
   const duration = playlistDuration(playlist.episodeNumbers);
-  return `<button class="playlist-card personal" data-playlist-open="${esc(playlist.id)}">
+  const tutorialCreated = state.tutorialActive && state.tutorialPlaylistId === playlist.id;
+  return `<button class="playlist-card personal${tutorialCreated ? ' tutorial-created-playlist' : ''}" ${tutorialCreated ? 'id="tutorialCreatedPlaylist"' : ''} data-playlist-open="${esc(playlist.id)}">
     <span class="playlist-category-label">Meine Liste</span>
     <div class="playlist-card-head"><div><h3>${esc(playlist.title)}</h3><p>${esc(playlist.description || 'Eigene Playlist')}</p></div><span class="playlist-icon">☰</span></div>
     <div class="playlist-meta"><span>${playlist.episodeNumbers.length} Folgen</span><span>${fmtDuration(duration)}</span>${playlist.smartMeta ? '<span>Smart</span>' : ''}</div>
@@ -1873,12 +1874,8 @@ const TUTORIAL_STEPS = [
   {
     id: 'open-playlist',
     contextPage: 'playlists',
-    focus: () => state.tutorialPlaylistId
-      ? document.querySelector(`[data-playlist-open="${CSS.escape(String(state.tutorialPlaylistId))}"]`)
-      : null,
-    actionTarget: () => state.tutorialPlaylistId
-      ? document.querySelector(`[data-playlist-open="${CSS.escape(String(state.tutorialPlaylistId))}"]`)
-      : null,
+    focus: '#tutorialCreatedPlaylist',
+    actionTarget: '#tutorialCreatedPlaylist',
     card: 'top',
     title: 'Playlist öffnen',
     text: 'In der Playlist kannst du Folgen hinzufügen, sortieren, entfernen und passende Vorschläge ansehen.',
@@ -1892,15 +1889,27 @@ const TUTORIAL_STEPS = [
       renderPlaylists();
     },
     beforePosition: () => {
-      const card = state.tutorialPlaylistId
-        ? document.querySelector(`[data-playlist-open="${CSS.escape(String(state.tutorialPlaylistId))}"]`)
-        : null;
-      card?.scrollIntoView({ behavior: 'auto', block: 'center' });
+      const card = document.getElementById('tutorialCreatedPlaylist');
+      if (!card) return;
+      const scrollParent = tutorialScrollableAncestor(card);
+      document.documentElement.classList.add('tutorial-instant-scroll');
+      if (scrollParent) {
+        const parentRect = scrollParent.getBoundingClientRect();
+        const cardRect = card.getBoundingClientRect();
+        scrollParent.scrollTop += cardRect.top - parentRect.top - Math.max(18, (scrollParent.clientHeight - cardRect.height) * 0.5);
+      } else {
+        const viewport = tutorialViewportMetrics();
+        const desiredTop = viewport.top + viewport.topGuard + 36;
+        const cardRect = card.getBoundingClientRect();
+        window.scrollTo(0, Math.max(0, window.scrollY + cardRect.top - desiredTop));
+      }
+      void document.documentElement.offsetHeight;
+      document.documentElement.classList.remove('tutorial-instant-scroll');
     },
     revealAlign: 'center',
     focusPadding: 6,
-    verify: () => state.playlistDetailId === state.tutorialPlaylistId,
-    settle: 280,
+    verify: () => String(state.playlistDetailId || '') === String(state.tutorialPlaylistId || '') && !$('playlistDetailOverlay').classList.contains('hidden'),
+    settle: 220,
   },
   {
     id: 'open-add-panel',

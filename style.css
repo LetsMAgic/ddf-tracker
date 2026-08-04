@@ -472,3 +472,32 @@ body.tutorial-running .tutorial-card.tutorial-card-compact{max-height:26dvh!impo
   body.tutorial-running .tutorial-card{max-height:34dvh!important}
   body.tutorial-running .tutorial-card.tutorial-card-compact{max-height:24dvh!important}
 }
+
+
+/* v12.6 — reliable tutorial playlist target and mobile connection rows */
+.tutorial-created-playlist{scroll-margin-top:120px;scroll-margin-bottom:220px}
+.connection-card > .connection-episodes{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:7px!important;
+  overflow:visible!important;
+  width:100%;
+}
+.connection-card > .connection-episodes > .relation-row{
+  display:grid!important;
+  grid-template-columns:28px minmax(0,1fr) 18px!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  flex:none!important;
+}
+.connection-card > .connection-episodes .relation-row strong{
+  word-break:normal;
+  overflow-wrap:anywhere;
+  hyphens:auto;
+}
+@media(max-width:520px){
+  .connection-card > .connection-episodes{gap:8px!important}
+  .connection-card > .connection-episodes > .relation-row{padding:10px;grid-template-columns:27px minmax(0,1fr) 16px!important}
+  .connection-card > .connection-episodes .relation-row strong{font-size:12px;line-height:1.32}
+}
