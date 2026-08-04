@@ -328,8 +328,17 @@
     <header class="detail-header"><div><span id="playlistDetailKicker" class="eyebrow">Playlist</span><h2 id="playlistDetailTitle"></h2></div><button id="closePlaylistDetail" class="icon-button">×</button></header>
     <p id="playlistDetailDescription" class="detail-description"></p>
     <div id="playlistDetailStats" class="playlist-detail-stats"></div>
-    <div class="playlist-detail-actions"><button id="playlistPlayFirst" class="primary-button">▶ Erste Folge öffnen</button><button id="playlistEditButton" class="subtle-button">Bearbeiten</button><button id="playlistDeleteButton" class="danger-button">Löschen</button></div>
+    <div class="playlist-detail-actions"><button id="playlistPlayFirst" class="primary-button">▶ Erste Folge öffnen</button><button id="playlistAddEpisodeButton" class="subtle-button">＋ Folge hinzufügen</button><button id="playlistEditButton" class="subtle-button">Bearbeiten</button><button id="playlistDeleteButton" class="danger-button">Löschen</button></div>
+    <section id="playlistAddPanel" class="playlist-add-panel hidden">
+      <div class="playlist-add-search"><input id="playlistAddSearch" type="search" placeholder="Folge suchen …" autocomplete="off"><button id="playlistAddClose" class="icon-button" aria-label="Suche schließen">×</button></div>
+      <div id="playlistAddResults" class="playlist-add-results"></div>
+    </section>
     <div id="playlistEpisodeList" class="playlist-episode-list"></div>
+    <section id="playlistSuggestionsSection" class="playlist-suggestions hidden">
+      <div class="section-heading compact"><div><span class="eyebrow">Automatisch passend</span><h3>Passt zu dieser Playlist</h3></div><div class="suggestion-controls"><button id="playlistSuggestionMode" class="mini-toggle" data-mode="similar">Ähnlich</button><button id="playlistSuggestionRefresh" class="icon-button" aria-label="Neue Vorschläge">↻</button></div></div>
+      <p id="playlistSuggestionSummary" class="playlist-suggestion-summary"></p>
+      <div id="playlistSuggestions" class="playlist-suggestion-list"></div>
+    </section>
   </article>
 </div>
 
