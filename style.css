@@ -98,3 +98,35 @@ main{padding-top:14px}
   .sheet{padding:20px}
   .item{padding:14px}
 }
+
+
+/* Update: deutlichere Bewertung, Rocky-Beach-Sortierung und ruhigeres Mobile-UI */
+.sort-select{
+  appearance:none;-webkit-appearance:none;min-height:44px;max-width:64vw;
+  padding:10px 34px 10px 12px;border-radius:14px;border:1px solid var(--border);
+  color:var(--text);background:rgba(255,255,255,.055);
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 16px) 18px,calc(100% - 11px) 18px;background-size:5px 5px;background-repeat:no-repeat
+}
+.item{position:relative;overflow:hidden;transition:transform .15s ease,border-color .15s ease,background .15s ease}
+.item:active{transform:scale(.992)}
+.item.rating-plus{border-color:rgba(110,231,183,.35);background:linear-gradient(135deg,rgba(110,231,183,.08),rgba(255,255,255,.035))}
+.item.rating-neutral{border-color:rgba(251,191,36,.26)}
+.item.rating-minus{border-color:rgba(248,113,113,.34);background:linear-gradient(135deg,rgba(248,113,113,.07),rgba(255,255,255,.035))}
+.rating-banner{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-2px 0 10px;padding:9px 11px;border-radius:13px;font-size:13px;font-weight:800}
+.rating-banner.plus{color:#d5fff0;background:rgba(110,231,183,.13);border:1px solid rgba(110,231,183,.27)}
+.rating-banner.neutral{color:#fff1bd;background:rgba(251,191,36,.11);border:1px solid rgba(251,191,36,.24)}
+.rating-banner.minus{color:#ffe0e0;background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.25)}
+.rating-segment{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%;margin-top:10px;padding:5px;border-radius:15px;background:rgba(0,0,0,.14);border:1px solid var(--border)}
+.rating-segment .pill{justify-content:center;border-color:transparent;background:transparent;min-height:42px;padding:9px 8px}
+.rating-segment .pill.on.plus{background:rgba(110,231,183,.2);border-color:rgba(110,231,183,.4);box-shadow:0 0 0 1px rgba(110,231,183,.08) inset}
+.rating-segment .pill.on.neutral{background:rgba(251,191,36,.17);border-color:rgba(251,191,36,.38);box-shadow:0 0 0 1px rgba(251,191,36,.07) inset}
+.rating-segment .pill.on.minus{background:rgba(248,113,113,.18);border-color:rgba(248,113,113,.39);box-shadow:0 0 0 1px rgba(248,113,113,.07) inset}
+.rocky-badge{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:7px 9px;border-radius:12px;background:rgba(139,211,255,.08);border:1px solid rgba(139,211,255,.2);font-size:12px;font-weight:750;color:#dff3ff}
+.rocky-badge.missing{color:var(--muted);background:rgba(255,255,255,.035);border-color:var(--border)}
+.item-title-wrap{min-width:0;flex:1}.item-title{line-height:1.25}
+.item-meta{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+@media(max-width:480px){
+  .app-shell{padding-left:10px;padding-right:10px}.hero,.controls,.status{border-radius:19px}.item{border-radius:17px;padding:11px}
+  .item-top{align-items:flex-start}.pill{min-height:42px}.sort-select{font-size:13px;max-width:68vw}.filter-row{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}.filter-row::-webkit-scrollbar{display:none}.filter{white-space:nowrap}
+}

@@ -54,6 +54,7 @@
         <button class="filter" data-filter="heard">Nur gehört</button>
         <button class="filter" data-filter="unheard">Nur ungehört</button>
         <button class="filter" data-filter="plus">Plus</button>
+        <button class="filter" data-filter="neutral">Neutral</button>
         <button class="filter" data-filter="minus">Minus</button>
       </div>
       <div class="filter-row">
@@ -72,7 +73,14 @@
     <main>
       <div class="list-head">
         <div id="resultInfo">0 Folgen</div>
-        <button id="btnSort" class="ghost">Sort: Nummer</button>
+        <select id="sortSelect" class="sort-select" aria-label="Sortierung">
+          <option value="nr">Nummer aufsteigend</option>
+          <option value="nr-desc">Nummer absteigend</option>
+          <option value="title">Titel A–Z</option>
+          <option value="rocky-best">Rocky-Beach: beste zuerst</option>
+          <option value="rocky-worst">Rocky-Beach: schlechteste zuerst</option>
+          <option value="rating">Eigene Bewertung</option>
+        </select>
       </div>
       <div id="episodeList" class="list"></div>
     </main>

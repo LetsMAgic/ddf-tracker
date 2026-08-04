@@ -193,6 +193,7 @@
     if (state.filter === 'heard') list = list.filter(e => e.heard);
     if (state.filter === 'unheard') list = list.filter(e => !e.heard);
     if (state.filter === 'plus') list = list.filter(e => e.rating === 'plus');
+    if (state.filter === 'neutral') list = list.filter(e => e.rating === 'neutral');
     if (state.filter === 'minus') list = list.filter(e => e.rating === 'minus');
     if (q) {
       list = list.filter(e => {
@@ -208,7 +209,25 @@
       });
     }
     list.sort((a,b) => {
+      const rockyA = Number.isFinite(Number(a.rockyRanking)) ? Number(a.rockyRanking) : null;
+      const rockyB = Number.isFinite(Number(b.rockyRanking)) ? Number(b.rockyRanking) : null;
+      if (state.sort === 'nr-desc') return b.nr - a.nr;
       if (state.sort === 'title') return a.titel.localeCompare(b.titel, 'de');
+      if (state.sort === 'rocky-best') {
+        if (rockyA === null && rockyB === null) return a.nr - b.nr;
+        if (rockyA === null) return 1;
+        if (rockyB === null) return -1;
+        return rockyA - rockyB || a.nr - b.nr;
+      }
+      if (state.sort === 'rocky-worst') {
+        if (rockyA === null && rockyB === null) return a.nr - b.nr;
+        if (rockyA === null) return 1;
+        if (rockyB === null) return -1;
+        return rockyB - rockyA || a.nr - b.nr;
+      }
+      if (state.sort === 'rating') {
+        return (ratingOrder[b.rating] ?? -1) - (ratingOrder[a.rating] ?? -1) || a.nr - b.nr;
+      }
       return a.nr - b.nr;
     });
     return list;
@@ -221,25 +240,31 @@
     const items = visibleEpisodes();
     for (const ep of items) {
       const card = document.createElement('article');
-      card.className = 'item';
+      card.className = `item rating-${ep.rating || 'neutral'}`;
       card.dataset.nr = ep.nr;
 
       const top = document.createElement('div');
       top.className = 'item-top';
 
       const left = document.createElement('div');
+      left.className = 'item-title-wrap';
       const title = document.createElement('h3');
       title.className = 'item-title';
       title.textContent = `${ep.nr}. ${ep.titel}`;
+      const ratingBanner = document.createElement('div');
+      ratingBanner.className = `rating-banner ${ep.rating || 'neutral'}`;
+      ratingBanner.innerHTML = `<span>Deine Bewertung</span><strong>${ep.rating === 'plus' ? '＋ Plus' : ep.rating === 'minus' ? '－ Minus' : '• Neutral'}</strong>`;
       const meta = document.createElement('div');
       meta.className = 'item-meta';
       const parts = [];
       if (ep.collection !== 'main') parts.push(ep.collection);
       if (ep.beschreibung) parts.push(ep.beschreibung);
       if (ep.note) parts.push(`Notiz: ${ep.note}`);
-      parts.push(`Rocky-Beach: ${fmtRating(ep.rockyRanking)}`);
       meta.textContent = parts.join(' · ');
-      left.append(title, meta);
+      const rocky = document.createElement('div');
+      rocky.className = 'rocky-badge' + (ep.rockyRanking == null ? ' missing' : '');
+      rocky.textContent = ep.rockyRanking == null ? 'Rocky-Beach: keine Wertung' : `Rocky-Beach: ${fmtRating(ep.rockyRanking)} (1 = sehr gut)`;
+      left.append(ratingBanner, title, meta, rocky);
 
       const heardBtn = document.createElement('button');
       heardBtn.className = 'pill' + (ep.heard ? ' on' : '');
@@ -251,7 +276,7 @@
       top.append(left, heardBtn);
 
       const actions = document.createElement('div');
-      actions.className = 'item-actions';
+      actions.className = 'item-actions rating-segment';
 
       const ratingButtons = ['plus','neutral','minus'].map(rate => {
         const b = document.createElement('button');
@@ -492,9 +517,8 @@
       });
     });
 
-    $('btnSort').addEventListener('click', () => {
-      state.sort = state.sort === 'nr' ? 'title' : 'nr';
-      $('btnSort').textContent = `Sort: ${state.sort === 'nr' ? 'Nummer' : 'Titel'}`;
+    $('sortSelect').addEventListener('change', (e) => {
+      state.sort = e.target.value;
       render();
     });
 
