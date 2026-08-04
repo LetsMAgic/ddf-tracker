@@ -16,113 +16,126 @@
   <script src="app.js" defer></script>
 </head>
 <body>
-  <div class="app">
-    <header class="app-header">
-      <div class="brand">
-        <img src="icon-192.png" class="brand-icon" alt="">
-        <div><span class="eyebrow">Mein Hörspiel-Archiv</span><h1>Folgen-Tracker</h1></div>
+<div class="app">
+  <header class="app-header">
+    <div class="brand"><img src="icon-192.png" class="brand-icon" alt=""><div><span class="eyebrow">Mein Hörspiel-Archiv</span><h1>Folgen-Tracker</h1></div></div>
+    <button class="icon-button" id="quickSettings" aria-label="Einstellungen öffnen">⚙︎</button>
+  </header>
+
+  <main>
+    <section class="page active" data-page="home">
+      <div class="hero-card">
+        <div class="progress-copy"><span id="progressPercent">0 %</span><small>deines Katalogs gehört</small></div>
+        <div class="progress-track"><span id="progressBar"></span></div>
+        <div class="stats-grid five">
+          <div><strong id="heardCount">0</strong><span>gehört</span></div>
+          <div><strong id="unheardCount">0</strong><span>offen</span></div>
+          <div><strong id="superCount">0</strong><span>Super</span></div>
+          <div><strong id="plusCount">0</strong><span>Plus</span></div>
+          <div><strong id="heardHours">0 h</strong><span>Hörzeit</span></div>
+        </div>
       </div>
-      <button class="icon-button" id="quickSettings" aria-label="Einstellungen öffnen">⚙︎</button>
-    </header>
 
-    <main>
-      <section class="page active" data-page="home">
-        <div class="hero-card">
-          <div class="progress-copy"><span id="progressPercent">0 %</span><small>deines Katalogs gehört</small></div>
-          <div class="progress-track"><span id="progressBar"></span></div>
-          <div class="stats-grid">
-            <div><strong id="heardCount">0</strong><span>gehört</span></div>
-            <div><strong id="unheardCount">0</strong><span>offen</span></div>
-            <div><strong id="plusCount">0</strong><span>Plus</span></div>
-            <div><strong id="ratedCount">0</strong><span>bewertet</span></div>
-          </div>
-        </div>
-
-        <section class="section-block">
-          <div class="section-heading"><div><span class="eyebrow">Für dich</span><h2>Nächster Fall</h2></div></div>
-          <article id="recommendationCard" class="feature-card empty-state">
-            <div><span class="feature-kicker">Persönliche Empfehlung</span><h3>Noch keine Empfehlung gewählt</h3><p>Je mehr Plus-, Neutral- und Minus-Bewertungen du vergibst, desto besser wird die Auswahl.</p></div>
-            <button id="recommendButton" class="primary-button">Folge empfehlen</button>
-          </article>
-        </section>
-
-        <section class="section-block">
-          <div class="section-heading"><div><span class="eyebrow">Schnellauswahl</span><h2>Was möchtest du hören?</h2></div></div>
-          <div class="action-grid">
-            <button id="randomNewButton" class="action-card"><span class="action-icon">✦</span><strong>Neue Folge</strong><small>Zufällig aus ungehörten</small></button>
-            <button id="randomHeardButton" class="action-card"><span class="action-icon">↻</span><strong>Bekannte Folge</strong><small>Zufällig erneut hören</small></button>
-          </div>
-        </section>
-
-        <section class="section-block">
-          <div class="section-heading"><div><span class="eyebrow">Zuletzt geändert</span><h2>Deine Aktivität</h2></div><button class="text-button" data-go="episodes">Alle Folgen</button></div>
-          <div id="recentList" class="compact-list"></div>
-        </section>
+      <section class="section-block">
+        <div class="section-heading"><div><span class="eyebrow">Für dich</span><h2>Nächster Fall</h2></div></div>
+        <article id="recommendationCard" class="feature-card empty-state">
+          <div><span class="feature-kicker">Persönliche Empfehlung</span><h3>Noch keine Empfehlung gewählt</h3><p>Super-Folgen prägen dein Profil doppelt. Plus, Minus, Laufzeit und Rocky-Beach fließen ebenfalls ein.</p></div>
+          <button id="recommendButton" class="primary-button">Folge empfehlen</button>
+        </article>
       </section>
 
-      <section class="page" data-page="episodes">
-        <div class="page-title"><span class="eyebrow">Katalog</span><h2>Alle Folgen</h2><p id="episodeResultCount">0 Folgen</p></div>
-        <div class="sticky-tools">
-          <label class="search-box"><span>⌕</span><input id="searchInput" type="search" placeholder="Titel, Nummer oder Stichwort" autocomplete="off"></label>
-          <div id="filterChips" class="chips-scroll">
-            <button class="chip active" data-filter="all">Alle</button><button class="chip" data-filter="unheard">Offen</button><button class="chip" data-filter="heard">Gehört</button><button class="chip" data-filter="plus">Plus</button><button class="chip" data-filter="neutral">Neutral</button><button class="chip" data-filter="minus">Minus</button><button class="chip" data-filter="unrated">Unbewertet</button>
-          </div>
-          <select id="episodeSort" class="select-control">
-            <option value="nr">Nummer aufsteigend</option><option value="nr-desc">Nummer absteigend</option><option value="title">Titel A–Z</option><option value="rocky-best">Rocky-Beach: beste zuerst</option><option value="rocky-worst">Rocky-Beach: schlechteste zuerst</option><option value="recommendation">Beste Empfehlung</option><option value="own">Eigene Bewertung</option>
-          </select>
+      <section class="section-block">
+        <div class="section-heading"><div><span class="eyebrow">Zeit & Stimmung</span><h2>Was passt gerade?</h2></div></div>
+        <div class="time-picker" id="timePicker">
+          <button data-time="any" class="active"><strong>Egal</strong><small>beste Empfehlung</small></button>
+          <button data-time="short"><strong>≤ 60</strong><small>Minuten</small></button>
+          <button data-time="normal"><strong>60–90</strong><small>Minuten</small></button>
+          <button data-time="long"><strong>90+</strong><small>lang</small></button>
+          <button data-time="special"><strong>✦ Spezial</strong><small>extra lang</small></button>
         </div>
-        <div id="episodeList" class="episode-list"></div>
+        <button id="timeRecommendButton" class="wide-secondary">Passende ungehörte Folge finden</button>
       </section>
 
-      <section class="page" data-page="ranking">
-        <div class="page-title"><span class="eyebrow">Vergleichen</span><h2>Ranking</h2><p>Externes Ranking und dein persönlicher Geschmack.</p></div>
-        <div class="segmented" id="rankingMode"><button class="active" data-ranking="rocky">Rocky-Beach</button><button data-ranking="mine">Mein Ranking</button><button data-ranking="match">Empfehlungen</button></div>
-        <div id="rankingInfo" class="info-card"></div>
-        <div id="rankingList" class="ranking-list"></div>
-      </section>
-
-      <section class="page" data-page="settings">
-        <div class="page-title"><span class="eyebrow">Verwaltung</span><h2>Einstellungen</h2><p>Backups, Katalog und lokale Daten.</p></div>
-        <div class="settings-group">
-          <h3>Backup</h3>
-          <button id="exportButton" class="settings-row"><span><strong>JSON exportieren</strong><small>Hörstatus und Bewertungen sichern</small></span><b>›</b></button>
-          <button id="importButton" class="settings-row"><span><strong>JSON importieren</strong><small>Vorhandenes Backup einlesen</small></span><b>›</b></button>
-          <input id="importFile" type="file" accept="application/json,.json" hidden>
-        </div>
-        <div class="settings-group">
-          <h3>Daten</h3>
-          <button id="reloadCatalogButton" class="settings-row"><span><strong>Katalog neu laden</strong><small>Folgendaten aus der eingebauten Datei übernehmen</small></span><b>↻</b></button>
-          <button id="resetButton" class="settings-row danger"><span><strong>Persönliche Daten zurücksetzen</strong><small>Gehört-Status und Bewertungen löschen</small></span><b>›</b></button>
-        </div>
-        <div class="settings-group app-info">
-          <img src="icon-192.png" alt="App-Icon"><div><strong>Folgen-Tracker</strong><small id="storageInfo">Lade Daten …</small><small>Version 3.0 · Speicherung ausschließlich auf diesem Gerät</small></div>
+      <section class="section-block">
+        <div class="section-heading"><div><span class="eyebrow">Schnellauswahl</span><h2>Direkt loshören</h2></div></div>
+        <div class="action-grid three">
+          <button id="randomNewButton" class="action-card"><span class="action-icon">✦</span><strong>Neue Folge</strong><small>Zufällig ungehört</small></button>
+          <button id="randomHeardButton" class="action-card"><span class="action-icon">↻</span><strong>Wiederhören</strong><small>lange nicht gehört</small></button>
+          <button id="randomSpecialButton" class="action-card"><span class="action-icon">◈</span><strong>Spezial</strong><small>lange Folge</small></button>
         </div>
       </section>
-    </main>
 
-    <nav class="bottom-nav" aria-label="Hauptnavigation">
-      <button class="active" data-nav="home"><span>⌂</span><small>Start</small></button>
-      <button data-nav="episodes"><span>☷</span><small>Folgen</small></button>
-      <button data-nav="ranking"><span>♕</span><small>Ranking</small></button>
-      <button data-nav="settings"><span>⚙︎</span><small>Einstellungen</small></button>
-    </nav>
-  </div>
+      <section class="section-block">
+        <div class="section-heading"><div><span class="eyebrow">Zuletzt geändert</span><h2>Deine Aktivität</h2></div><button class="text-button" data-go="episodes">Alle Folgen</button></div>
+        <div id="recentList" class="compact-list"></div>
+      </section>
+    </section>
 
-  <div id="detailOverlay" class="overlay hidden" aria-hidden="true">
-    <div class="sheet">
-      <div class="sheet-handle"></div>
-      <div class="sheet-header"><div><span id="detailNumber" class="eyebrow">Folge</span><h2 id="detailTitle"></h2></div><button id="closeDetail" class="icon-button">×</button></div>
-      <p id="detailDescription" class="detail-description"></p>
-      <div id="detailMeta" class="detail-meta"></div>
-      <div class="field-label">Deine Bewertung</div>
-      <div id="detailRating" class="rating-control">
-        <button data-rating="minus"><span>−</span>Minus</button><button data-rating="neutral"><span>●</span>Neutral</button><button data-rating="plus"><span>＋</span>Plus</button>
+    <section class="page" data-page="episodes">
+      <div class="page-title"><span class="eyebrow">Katalog</span><h2>Alle Folgen</h2><p id="episodeResultCount">0 Folgen</p></div>
+      <div class="sticky-tools">
+        <label class="search-box"><span>⌕</span><input id="searchInput" type="search" placeholder="Titel, Nummer oder Stichwort" autocomplete="off"></label>
+        <div id="filterChips" class="chips-scroll">
+          <button class="chip active" data-filter="all">Alle</button><button class="chip" data-filter="unheard">Offen</button><button class="chip" data-filter="heard">Gehört</button><button class="chip" data-filter="super">★ Super</button><button class="chip" data-filter="plus">Plus</button><button class="chip" data-filter="neutral">Neutral</button><button class="chip" data-filter="minus">Minus</button><button class="chip" data-filter="unrated">Unbewertet</button><button class="chip" data-filter="long">90+ Min.</button><button class="chip" data-filter="special">Spezial</button>
+        </div>
+        <select id="episodeSort" class="select-control">
+          <option value="nr">Nummer aufsteigend</option><option value="nr-desc">Nummer absteigend</option><option value="title">Titel A–Z</option><option value="duration-desc">Längste zuerst</option><option value="duration-asc">Kürzeste zuerst</option><option value="rocky-best">Rocky-Beach: beste zuerst</option><option value="rocky-worst">Rocky-Beach: schlechteste zuerst</option><option value="recommendation">Beste Empfehlung</option><option value="own">Eigene Bewertung</option>
+        </select>
       </div>
-      <label class="heard-control"><input id="detailHeard" type="checkbox"><span><strong>Schon gehört</strong><small>Wird sofort automatisch gespeichert</small></span></label>
-      <button id="clearRating" class="text-button centered">Bewertung entfernen</button>
+      <div id="episodeList" class="episode-list"></div>
+    </section>
+
+    <section class="page" data-page="ranking">
+      <div class="page-title"><span class="eyebrow">Vergleichen</span><h2>Ranking</h2><p>Externes Ranking, deine Favoriten und passende nächste Folgen.</p></div>
+      <div class="segmented" id="rankingMode"><button class="active" data-ranking="rocky">Rocky-Beach</button><button data-ranking="mine">Mein Ranking</button><button data-ranking="match">Empfehlungen</button></div>
+      <div id="rankingInfo" class="info-card"></div>
+      <div id="rankingList" class="ranking-list"></div>
+    </section>
+
+    <section class="page" data-page="settings">
+      <div class="page-title"><span class="eyebrow">Verwaltung</span><h2>Einstellungen</h2><p>Backups, Metadaten und lokale Daten.</p></div>
+      <div class="settings-group">
+        <h3>Backup</h3>
+        <button id="exportButton" class="settings-row"><span><strong>JSON exportieren</strong><small>Hörstatus, Bewertungen und Notizen sichern</small></span><b>›</b></button>
+        <button id="importButton" class="settings-row"><span><strong>JSON importieren</strong><small>Vorhandenes Backup einlesen</small></span><b>›</b></button>
+        <input id="importFile" type="file" accept="application/json,.json" hidden>
+      </div>
+      <div class="settings-group">
+        <h3>Katalog</h3>
+        <button id="updateMetadataButton" class="settings-row"><span><strong>Laufzeiten aktualisieren</strong><small>Exakte Laufzeiten und Beschreibungen einmal online laden</small></span><b>↓</b></button>
+        <button id="reloadCatalogButton" class="settings-row"><span><strong>Eingebauten Katalog neu laden</strong><small>Nur verwenden, wenn Katalogdaten fehlerhaft sind</small></span><b>↻</b></button>
+      </div>
+      <div class="settings-group">
+        <h3>Persönliche Daten</h3>
+        <button id="resetButton" class="settings-row danger"><span><strong>Persönliche Daten zurücksetzen</strong><small>Hörstatus, Bewertungen und Notizen löschen</small></span><b>›</b></button>
+      </div>
+      <div class="settings-group app-info"><img src="icon-192.png" alt="App-Icon"><div><strong>Folgen-Tracker</strong><small id="storageInfo">Lade Daten …</small><small id="metadataInfo">Laufzeiten werden geprüft …</small><small>Version 4.0 · Speicherung ausschließlich auf diesem Gerät</small></div></div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Hauptnavigation">
+    <button class="active" data-nav="home"><span>⌂</span><small>Start</small></button>
+    <button data-nav="episodes"><span>☷</span><small>Folgen</small></button>
+    <button data-nav="ranking"><span>♕</span><small>Ranking</small></button>
+    <button data-nav="settings"><span>⚙︎</span><small>Einstellungen</small></button>
+  </nav>
+</div>
+
+<div id="detailOverlay" class="overlay hidden" aria-hidden="true">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header"><div><span id="detailNumber" class="eyebrow">Folge</span><h2 id="detailTitle"></h2></div><button id="closeDetail" class="icon-button">×</button></div>
+    <p id="detailDescription" class="detail-description"></p>
+    <div id="detailMeta" class="detail-meta"></div>
+    <div class="field-label">Deine Bewertung</div>
+    <div id="detailRating" class="rating-control four">
+      <button data-rating="minus"><span>−</span>Minus</button><button data-rating="neutral"><span>●</span>Neutral</button><button data-rating="plus"><span>＋</span>Plus</button><button data-rating="super"><span>★</span>Super</button>
     </div>
+    <label class="heard-control"><input id="detailHeard" type="checkbox"><span><strong>Schon gehört</strong><small id="detailHeardDate">Wird sofort automatisch gespeichert</small></span></label>
+    <label class="note-field"><span class="field-label">Persönliche Notiz</span><textarea id="detailNote" maxlength="600" placeholder="Was hat dir gefallen? Atmosphäre, Ende, Sprecher …"></textarea><small>Wird automatisch gespeichert</small></label>
+    <button id="clearRating" class="text-button centered">Bewertung entfernen</button>
   </div>
-
-  <div id="toast" class="toast hidden" role="status"></div>
+</div>
+<div id="toast" class="toast hidden" role="status"></div>
 </body>
 </html>
