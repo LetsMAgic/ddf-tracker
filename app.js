@@ -1104,6 +1104,34 @@
     };
   }
 
+
+  function applyCanonicalCorrections(catalog) {
+    return catalog.map((episode) => {
+      if (episode.nr === 29) return normalizeEpisode({
+        ...episode,
+        titel: 'Die Originalmusik',
+        beschreibung: 'Eine reine Musikfolge mit Melodien aus der EUROPA-Hörspielserie. Die Stücke wurden als Hintergrundmusik in verschiedenen Fällen verwendet; eine eigentliche Detektivhandlung gibt es nicht.',
+        tags: uniqueStrings([episode.tags || [], ['musik', 'sonderfolge']]),
+        searchKeywords: uniqueStrings([episode.searchKeywords || [], ['originalmusik', 'musikfolge', 'soundtrack', 'melodien', 'europa musik', 'keine handlung', 'sonderfolge']]),
+      });
+      if (episode.nr === 240) return normalizeEpisode({
+        ...episode,
+        titel: 'Die schwarze Rose',
+        beschreibung: 'Wer schickt Justus eine schwarze Rose? Die drei ??? suchen nach dem unbekannten Absender und geraten dabei in einen neuen rätselhaften Fall.',
+        rockyRanking: 2.2593,
+        searchKeywords: uniqueStrings([episode.searchKeywords || [], ['schwarze rose', 'rose', 'justus', 'unbekannter absender']]),
+      });
+      if (episode.nr === 241) return normalizeEpisode({
+        ...episode,
+        titel: 'Meister des Lichts',
+        beschreibung: 'Die drei ??? ermitteln in einem Fall rund um einen geheimnisvollen Meister des Lichts.',
+        rockyRanking: 2.7727,
+        searchKeywords: uniqueStrings([episode.searchKeywords || [], ['meister des lichts', 'licht', 'magier']]),
+      });
+      return episode;
+    });
+  }
+
   function mergeCatalogs(base, enrichment) {
     const map = new Map(base.map((episode) => [episode.nr, episode]));
     for (const item of enrichment || []) {
@@ -1121,7 +1149,7 @@
         };
       map.set(nr, normalizeEpisode(enriched));
     }
-    return [...map.values()].filter((episode) => episode.nr <= 248).sort((a, b) => a.nr - b.nr);
+    return applyCanonicalCorrections([...map.values()].filter((episode) => episode.nr <= 248).sort((a, b) => a.nr - b.nr));
   }
 
   async function updateMetadata(manual = false) {
@@ -1249,7 +1277,7 @@
     $('updateMetadataButton').addEventListener('click', () => updateMetadata(true));
     $('reloadCatalogButton').addEventListener('click', async () => {
       const seed = normalizeCatalog(window.DDF_EPISODES_SEED || []);
-      state.catalog = seed;
+      state.catalog = applyCanonicalCorrections(seed);
       invalidateDerived({ catalog: true });
       state.metadataUpdatedAt = null;
       await dbDelete(CATALOG_KEY);
@@ -1342,7 +1370,7 @@
         return { cached: false, needsUpdate: true };
       }
     }
-    state.catalog = seed;
+    state.catalog = applyCanonicalCorrections(seed);
     return { cached: false, needsUpdate: true };
   }
 
