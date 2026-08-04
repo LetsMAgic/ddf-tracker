@@ -8,7 +8,7 @@
   const CATALOG_KEY = 'enrichedCatalogV10';
   const LEGACY_CATALOG_KEYS = ['enrichedCatalogV9', 'enrichedCatalogV8', 'enrichedCatalogV7', 'enrichedCatalogV6', 'enrichedCatalogV5', 'enrichedCatalogV4'];
   const LEGACY_USER_KEYS = ['user-state', 'userState', 'state'];
-  const APP_VERSION = 12.7;
+  const APP_VERSION = 12.8;
   const DEFAULT_STREAMING_SERVICE = 'spotify';
   const META_URL = 'https://dreimetadaten.de/data/Serie.json';
   const META_MAX_AGE = 1000 * 60 * 60 * 24 * 30;
@@ -50,6 +50,10 @@
     tutorialSmartPlaylistId: null,
     tutorialInputTimer: 0,
     tutorialLockedScrollY: 0,
+    tutorialProgrammaticScroll: false,
+    tutorialKeyboardActive: false,
+    tutorialKeyboardTimer: 0,
+    tutorialViewportTimer: 0,
     pendingUnheardNr: null,
   };
 
@@ -1612,6 +1616,8 @@ function renderPlaylists() {
 
 
 function tutorialCreatedPlaylistCard() {
+  const exact = document.getElementById('tutorialCreatedPlaylist');
+  if (exact?.isConnected && exact.getClientRects().length) return exact;
   const wantedId = String(state.tutorialPlaylistId || '');
   const cards = [...document.querySelectorAll('#userPlaylists .playlist-card[data-playlist-open]')]
     .filter((card) => card.isConnected && card.getClientRects().length);
@@ -1691,7 +1697,8 @@ const TUTORIAL_STEPS = [
     event: 'click',
     verify: () => Boolean(state.detailNr) && !$('detailOverlay').classList.contains('hidden'),
     after: () => { state.tutorialEpisodeNr = Number(state.detailNr); },
-    settle: 260,
+    waitForKeyboardClose: true,
+    settle: 180,
   },
   {
     id: 'rate-plus',
@@ -1877,6 +1884,7 @@ const TUTORIAL_STEPS = [
       const sheet = document.querySelector('#playlistEditorOverlay .mini-sheet');
       if (sheet) sheet.scrollTop = 0;
     },
+    after: () => tutorialBlurTextControls(),
     settle: 230,
   },
   {
@@ -1890,6 +1898,7 @@ const TUTORIAL_STEPS = [
     action: 'Tippe auf die gerade erstellte Playlist.',
     event: 'click',
     intercept: true,
+    waitForKeyboardClose: true,
     prepare: () => {
       state.playlistTab = 'mine';
       state.user.settings = { ...(state.user.settings || {}), playlistTab: 'mine' };
@@ -1902,24 +1911,43 @@ const TUTORIAL_STEPS = [
         card.classList.add('tutorial-created-playlist');
       }
     },
-    prePosition: async () => {
+    prePositionAsync: async () => {
+      // First render and move the page while the tutorial is still invisible.
+      // Only after the exact playlist card is in place do we freeze and highlight it.
+      await waitForTutorialSettle(80);
       const card = tutorialCreatedPlaylistCard();
       if (!card) return;
-      // First move the page while the tutorial is fully hidden. Only after the
-      // card has reached its stable position is scrolling locked and the
-      // spotlight drawn around it.
-      await tutorialScrollElementIntoStage(card, { top: Math.max(260, window.innerHeight * 0.50), settle: 180 });
+      card.id = 'tutorialCreatedPlaylist';
+      card.classList.add('tutorial-created-playlist');
+      const viewportHeight = window.visualViewport?.height || window.innerHeight;
+      const desiredTop = Math.max(500, Math.min(viewportHeight * 0.58, viewportHeight - 300));
+      const rect = card.getBoundingClientRect();
+      state.tutorialProgrammaticScroll = true;
+      document.documentElement.classList.add('tutorial-instant-scroll');
+      window.scrollTo(0, Math.max(0, window.scrollY + rect.top - desiredTop));
+      void document.documentElement.offsetHeight;
+      await waitForTutorialSettle(90);
+      document.documentElement.classList.remove('tutorial-instant-scroll');
+      state.tutorialLockedScrollY = window.scrollY;
+      state.tutorialProgrammaticScroll = false;
+    },
+    beforePosition: () => {
+      const card = tutorialCreatedPlaylistCard();
+      if (card) {
+        card.id = 'tutorialCreatedPlaylist';
+        card.classList.add('tutorial-created-playlist');
+      }
     },
     onAction: (event) => {
-      const card = event?.target?.closest?.('#userPlaylists .playlist-card[data-playlist-open]') || tutorialCreatedPlaylistCard();
+      const card = event?.target?.closest?.('#tutorialCreatedPlaylist') || tutorialCreatedPlaylistCard();
       const playlistId = card?.dataset?.playlistOpen || state.tutorialPlaylistId;
       if (playlistId) openPlaylistDetail(playlistId, false);
     },
-    revealAlign: 'center',
-    focusPadding: 6,
+    skipReveal: true,
+    focusPadding: 7,
     verify: () => String(state.playlistDetailId || '') === String(state.tutorialPlaylistId || '') && !$('playlistDetailOverlay').classList.contains('hidden'),
     invalidMessage: 'Tippe direkt auf die hervorgehobene Playlist-Karte.',
-    settle: 260,
+    settle: 160,
   },
   {
     id: 'open-add-panel',
@@ -2353,50 +2381,81 @@ function prepareTutorialStep(step) {
   step.prepare?.();
 }
 
+function tutorialTextControl(element) {
+  if (!(element instanceof Element)) return false;
+  return element.matches('input:not([type=button]):not([type=submit]):not([type=checkbox]):not([type=radio]), textarea, select, [contenteditable=true]');
+}
+
+function tutorialBlurTextControls() {
+  const active = document.activeElement;
+  if (tutorialTextControl(active)) active.blur();
+  document.querySelectorAll('input:focus, textarea:focus, select:focus, [contenteditable=true]:focus').forEach((element) => element.blur());
+}
+
+function tutorialKeyboardLooksOpen() {
+  const visual = window.visualViewport;
+  if (!visual) return false;
+  return visual.height < window.innerHeight * 0.82;
+}
+
+function waitForTutorialViewportStable(maxWait = 950, stableFor = 170) {
+  return new Promise((resolve) => {
+    const visual = window.visualViewport;
+    if (!visual) { setTimeout(resolve, 260); return; }
+    const started = performance.now();
+    let lastChange = started;
+    let lastHeight = visual.height;
+    let lastTop = visual.offsetTop;
+    const check = () => {
+      const now = performance.now();
+      if (Math.abs(visual.height - lastHeight) > 1 || Math.abs(visual.offsetTop - lastTop) > 1) {
+        lastHeight = visual.height;
+        lastTop = visual.offsetTop;
+        lastChange = now;
+      }
+      if ((now - lastChange >= stableFor && !tutorialKeyboardLooksOpen()) || now - started >= maxWait) {
+        resolve();
+        return;
+      }
+      requestAnimationFrame(check);
+    };
+    requestAnimationFrame(check);
+  });
+}
+
+function refreshTutorialFocusRectOnly() {
+  if (!state.tutorialActive) return;
+  const step = currentTutorialStep();
+  const elements = tutorialFocusElements(step);
+  const rect = tutorialRectFor(elements);
+  if (!rect) return;
+  const focus = $('tutorialFocus');
+  const viewport = tutorialViewportMetrics();
+  const pad = Number(step?.focusPadding ?? 8);
+  const left = Math.max(6, rect.left - pad);
+  const top = Math.max(viewport.top + 6, rect.top - pad);
+  const right = Math.min(window.innerWidth - 6, rect.right + pad);
+  const bottom = Math.min(viewport.bottom - 6, rect.bottom + pad);
+  if (right <= left || bottom <= top) return;
+  focus.style.left = `${left}px`;
+  focus.style.top = `${top}px`;
+  focus.style.width = `${right - left}px`;
+  focus.style.height = `${bottom - top}px`;
+  state.tutorialLockedScrollY = window.scrollY;
+}
+
+function scheduleTutorialKeyboardRefresh(delay = 170) {
+  clearTimeout(state.tutorialViewportTimer);
+  state.tutorialViewportTimer = setTimeout(() => {
+    if (!state.tutorialActive) return;
+    refreshTutorialFocusRectOnly();
+  }, delay);
+}
+
 function waitForTutorialSettle(milliseconds = 100) {
   return new Promise((resolve) => {
     requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, milliseconds)));
   });
-}
-
-async function tutorialScrollElementIntoStage(element, options = {}) {
-  if (!element?.isConnected) return false;
-  const overlay = $('tutorialOverlay');
-  overlay?.classList.add('tutorial-positioning');
-  const viewport = tutorialViewportMetrics();
-  const desiredTop = Number(options.top ?? Math.max(viewport.topGuard + 18, viewport.height * 0.42));
-  const rect = element.getBoundingClientRect();
-  const scrollParent = tutorialScrollableAncestor(element);
-  document.documentElement.classList.add('tutorial-instant-scroll');
-  if (scrollParent) {
-    const parentRect = scrollParent.getBoundingClientRect();
-    const targetInsideParent = rect.top - parentRect.top + scrollParent.scrollTop;
-    const desiredInsideParent = Math.max(0, desiredTop - parentRect.top);
-    scrollParent.scrollTop = Math.max(0, targetInsideParent - desiredInsideParent);
-  } else {
-    window.scrollTo(0, Math.max(0, window.scrollY + rect.top - desiredTop));
-  }
-  void document.documentElement.offsetHeight;
-  document.documentElement.classList.remove('tutorial-instant-scroll');
-  await waitForTutorialSettle(Number(options.settle ?? 120));
-  state.tutorialLockedScrollY = window.scrollY;
-  return element.isConnected;
-}
-
-function scheduleTutorialAfterKeyboard() {
-  if (!state.tutorialActive) return;
-  clearTimeout(state.tutorialKeyboardTimer);
-  state.tutorialKeyboardTimer = setTimeout(async () => {
-    if (!state.tutorialActive || state.tutorialInputFocused) return;
-    const step = currentTutorialStep();
-    const overlay = $('tutorialOverlay');
-    if (!step || !overlay) return;
-    overlay.classList.add('tutorial-positioning');
-    await waitForTutorialSettle(180);
-    if (!state.tutorialActive || state.tutorialInputFocused || currentTutorialStep() !== step) return;
-    positionTutorialFocus(step);
-    overlay.classList.remove('tutorial-positioning');
-  }, 260);
 }
 
 async function renderTutorialStep() {
@@ -2407,10 +2466,24 @@ async function renderTutorialStep() {
 
   const overlay = $('tutorialOverlay');
   const focus = $('tutorialFocus');
+  const token = ++state.tutorialPositionFrame;
   overlay.classList.add('tutorial-positioning');
   focus.style.width = '0px';
   focus.style.height = '0px';
+
+  if (step.waitForKeyboardClose) {
+    tutorialBlurTextControls();
+    state.tutorialKeyboardActive = false;
+    overlay.classList.remove('tutorial-keyboard-active');
+    await waitForTutorialViewportStable();
+    if (!state.tutorialActive || token !== state.tutorialPositionFrame || currentTutorialStep() !== step) return;
+  }
+
   prepareTutorialStep(step);
+  if (step.prePositionAsync) {
+    await step.prePositionAsync();
+    if (!state.tutorialActive || token !== state.tutorialPositionFrame || currentTutorialStep() !== step) return;
+  }
 
   $('tutorialProgress').textContent = `${state.tutorialStep + 1} von ${TUTORIAL_STEPS.length}`;
   $('tutorialTitle').textContent = step.title;
@@ -2425,14 +2498,8 @@ async function renderTutorialStep() {
   finishButton.classList.toggle('hidden', step.event !== 'finish');
   finishButton.textContent = step.event === 'finish' ? 'App benutzen' : 'Weiter';
 
-  const token = ++state.tutorialPositionFrame;
   await waitForTutorialSettle(Number(step.settle ?? 110));
   if (!state.tutorialActive || token !== state.tutorialPositionFrame || currentTutorialStep() !== step) return;
-
-  if (step.prePosition) {
-    await step.prePosition();
-    if (!state.tutorialActive || token !== state.tutorialPositionFrame || currentTutorialStep() !== step) return;
-  }
 
   let positioned = false;
   const expectsTarget = Boolean(step.focus ?? step.target);
@@ -2450,6 +2517,7 @@ async function renderTutorialStep() {
   }
   overlay.classList.remove('tutorial-positioning');
 }
+
 function tutorialNudge(message = '') {
   const action = $('tutorialAction');
   action.textContent = message || currentTutorialStep()?.action || 'Nutze das hervorgehobene Element.';
@@ -2521,13 +2589,42 @@ function tutorialClickCapture(event) {
   completeTutorialAction(event);
 }
 
+function tutorialFocusInCapture(event) {
+  if (!state.tutorialActive || !tutorialTextControl(event.target)) return;
+  const step = currentTutorialStep();
+  if (!elementMatchesAny(event.target, tutorialAllowedElements(step))) return;
+  state.tutorialKeyboardActive = true;
+  $('tutorialOverlay')?.classList.add('tutorial-keyboard-active');
+  state.tutorialLockedScrollY = window.scrollY;
+  scheduleTutorialKeyboardRefresh(260);
+}
+
+function tutorialFocusOutCapture(event) {
+  if (!state.tutorialActive || !tutorialTextControl(event.target)) return;
+  clearTimeout(state.tutorialKeyboardTimer);
+  state.tutorialKeyboardTimer = setTimeout(() => {
+    if (tutorialTextControl(document.activeElement)) return;
+    state.tutorialKeyboardActive = false;
+    $('tutorialOverlay')?.classList.remove('tutorial-keyboard-active');
+    state.tutorialLockedScrollY = window.scrollY;
+    scheduleTutorialKeyboardRefresh(120);
+  }, 360);
+}
+
+function tutorialViewportChangeCapture() {
+  if (!state.tutorialActive) return;
+  if (state.tutorialKeyboardActive || tutorialTextControl(document.activeElement)) {
+    state.tutorialLockedScrollY = window.scrollY;
+    scheduleTutorialKeyboardRefresh(180);
+  }
+}
+
 function tutorialInputCapture(event) {
   if (!state.tutorialActive) return;
   const step = currentTutorialStep();
   if (!step || step.event !== 'input') return;
   if (!elementMatchesAny(event.target, tutorialActionElements(step))) return;
   clearTimeout(state.tutorialInputTimer);
-  clearTimeout(state.tutorialKeyboardTimer);
   state.tutorialInputTimer = setTimeout(() => completeTutorialAction(event), step.verifyDelay || 100);
 }
 
@@ -2560,22 +2657,8 @@ function tutorialChangeCapture(event) {
   completeTutorialAction(event);
 }
 
-function tutorialFocusInCapture(event) {
-  if (!state.tutorialActive) return;
-  if (!event.target?.matches?.('input, textarea, select, [contenteditable="true"]')) return;
-  state.tutorialInputFocused = true;
-  clearTimeout(state.tutorialKeyboardTimer);
-}
-
-function tutorialFocusOutCapture(event) {
-  if (!state.tutorialActive) return;
-  if (!event.target?.matches?.('input, textarea, select, [contenteditable="true"]')) return;
-  state.tutorialInputFocused = false;
-  scheduleTutorialAfterKeyboard();
-}
-
 function tutorialScrollCapture(event) {
-  if (!state.tutorialActive) return;
+  if (!state.tutorialActive || state.tutorialProgrammaticScroll) return;
   if ($('tutorialCard')?.contains(event.target)) return;
   const allowed = tutorialAllowScrollElements();
   if (allowed.length && elementMatchesAny(event.target, allowed)) return;
@@ -2583,9 +2666,14 @@ function tutorialScrollCapture(event) {
 }
 
 function tutorialWindowScrollGuard() {
-  if (!state.tutorialActive || state.tutorialInputFocused) return;
+  if (!state.tutorialActive || state.tutorialProgrammaticScroll) return;
   const overlay = $('tutorialOverlay');
   if (!overlay || overlay.classList.contains('tutorial-positioning')) return;
+  if (state.tutorialKeyboardActive || tutorialTextControl(document.activeElement)) {
+    state.tutorialLockedScrollY = window.scrollY;
+    scheduleTutorialKeyboardRefresh(120);
+    return;
+  }
   if (Math.abs(window.scrollY - state.tutorialLockedScrollY) < 1) return;
   window.scrollTo(0, state.tutorialLockedScrollY);
 }
@@ -2612,7 +2700,6 @@ function snapshotTutorialSession() {
 
 function closeTutorialSurfaces() {
   clearTimeout(state.tutorialInputTimer);
-  clearTimeout(state.tutorialKeyboardTimer);
   clearTutorialStepClasses();
   $('heardResetOverlay').classList.add('hidden');
   $('heardResetOverlay').setAttribute('aria-hidden', 'true');
@@ -3331,6 +3418,8 @@ function closeHelp() {
     document.addEventListener('wheel', tutorialScrollCapture, { capture: true, passive: false });
     document.addEventListener('touchmove', tutorialScrollCapture, { capture: true, passive: false });
     window.addEventListener('scroll', tutorialWindowScrollGuard, { passive: true });
+    window.visualViewport?.addEventListener('resize', tutorialViewportChangeCapture, { passive: true });
+    window.visualViewport?.addEventListener('scroll', tutorialViewportChangeCapture, { passive: true });
     $('closeHeardReset').addEventListener('click', closeHeardReset);
     $('cancelHeardReset').addEventListener('click', closeHeardReset);
     $('confirmUnheardAndClear').addEventListener('click', confirmUnheardAndClear);
