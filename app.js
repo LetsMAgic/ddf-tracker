@@ -8,7 +8,7 @@
   const CATALOG_KEY = 'enrichedCatalogV10';
   const LEGACY_CATALOG_KEYS = ['enrichedCatalogV9', 'enrichedCatalogV8', 'enrichedCatalogV7', 'enrichedCatalogV6', 'enrichedCatalogV5', 'enrichedCatalogV4'];
   const LEGACY_USER_KEYS = ['user-state', 'userState', 'state'];
-  const APP_VERSION = 11.0;
+  const APP_VERSION = 12.0;
   const DEFAULT_STREAMING_SERVICE = 'spotify';
   const META_URL = 'https://dreimetadaten.de/data/Serie.json';
   const META_MAX_AGE = 1000 * 60 * 60 * 24 * 30;
@@ -40,6 +40,15 @@
     tutorialStep: 0,
     tutorialPositionFrame: 0,
     tutorialPositionTimer: 0,
+    tutorialActive: false,
+    tutorialAdvancing: false,
+    tutorialPreparedStep: -1,
+    tutorialTarget: null,
+    tutorialSnapshot: null,
+    tutorialEpisodeNr: null,
+    tutorialPlaylistId: null,
+    tutorialSmartPlaylistId: null,
+    tutorialInputTimer: 0,
     pendingUnheardNr: null,
   };
 
@@ -621,6 +630,7 @@
   }
 
   function queueUserPersist() {
+    if (state.tutorialActive) return;
     clearTimeout(persistTimer);
     persistTimer = setTimeout(() => {
       const snapshot = typeof structuredClone === 'function'
@@ -1315,7 +1325,9 @@ function renderPlaylists() {
     if (existing) {
       existing.title = title.slice(0,60); existing.description = description.slice(0,300); existing.updatedAt = new Date().toISOString();
     } else {
-      state.user.playlists.push(normalizePlaylist({ title, description, episodeNumbers: state.playlistEditorSeedNr ? [state.playlistEditorSeedNr] : [] }));
+      const created = normalizePlaylist({ title, description, episodeNumbers: state.playlistEditorSeedNr ? [state.playlistEditorSeedNr] : [] });
+      state.user.playlists.push(created);
+      if (state.tutorialActive) state.tutorialPlaylistId = created.id;
     }
     closePlaylistEditor(); closePlaylistPicker();
     state.playlistTab = 'mine';
@@ -1560,6 +1572,7 @@ function renderPlaylists() {
     state.user.playlists.push(normalizePlaylist({title:plan.title,description:`Automatisch geplant: ${fmtDuration(plan.target)} · ${moodLabel(plan.mood)} · ${plan.status==='unheard'?'nur ungehört':plan.status==='heard'?'nur bekannt':'gemischt'}`,episodeNumbers:plan.episodes.map(e=>e.nr),smartMeta:{target:plan.target,mood:plan.mood,status:plan.status,continuity:plan.continuity}}));
     const savedTitle = plan.title;
     const savedPlaylist = state.user.playlists[state.user.playlists.length - 1];
+    if (state.tutorialActive) state.tutorialSmartPlaylistId = savedPlaylist?.id || null;
     state.playlistTab = 'mine';
     state.user.settings = { ...(state.user.settings || {}), playlistTab: 'mine' };
     persistPlaylists('Smart Playlist gespeichert.');
@@ -1577,10 +1590,10 @@ function renderPlaylists() {
     if(status){
       status.innerHTML=`<span>✓</span><div><strong>„${esc(savedTitle)}“ gespeichert</strong><small>Die Playlist findest du jetzt direkt unter „Meine Playlists“.</small></div>`;
       status.classList.remove('hidden');
-      status.scrollIntoView({behavior:'smooth',block:'nearest'});
+      status.scrollIntoView({behavior:state.tutorialActive?'auto':'smooth',block:'nearest'});
       setTimeout(() => {
         pulsePlaylistCard(savedPlaylist.id);
-        document.querySelector('[data-playlist-open="' + savedPlaylist.id + '"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        document.querySelector('[data-playlist-open="' + savedPlaylist.id + '"]')?.scrollIntoView({ behavior: state.tutorialActive ? 'auto' : 'smooth', block: 'center' });
       }, 80);
       clearTimeout(state.planSavedTimer);
       state.planSavedTimer=setTimeout(()=>status.classList.add('hidden'),5000);
@@ -1588,20 +1601,351 @@ function renderPlaylists() {
   }
 
 
+
 const TUTORIAL_STEPS = [
-  { page: 'home', target: '[data-nav="home"]', title: 'Willkommen in deinem Archiv', text: 'Auf der Startseite siehst du Fortschritt, Tagesempfehlung und passende Folgen für deine verfügbare Zeit.', next: 'Folgen entdecken' },
-  { page: 'episodes', target: '[data-nav="episodes"]', title: 'Alle Folgen', text: 'Hier findest du den vollständigen Katalog. Filter, Autor, Ära und Sortierung lassen sich miteinander kombinieren.', next: 'Suche zeigen' },
-  { page: 'episodes', target: '.search-box', position: 'search', title: 'Intelligente Suche', text: 'Suche nach Titel, Autor, Figur, Handlung oder Stichwort – zum Beispiel „Peters Opa“, „André Marx“ oder „Fußball“.', next: 'Bewertungen' },
-  { page: 'episodes', target: '.episode-card .rating-mini', title: 'Bewerten und entfernen', text: 'Minus, Neutral, Plus und Super sind exklusiv. Super zählt doppelt für Empfehlungen. Tippe erneut auf dieselbe aktive Bewertung, um sie wieder zu entfernen.', next: 'Hörstatus', demo: 'rating' },
-  { page: 'episodes', target: '.episode-card [data-heard]', title: 'Gehört oder ungehört', text: 'Eine Bewertung markiert die Folge automatisch als gehört. Den Hörstatus kannst du wieder zurücksetzen; eine vorhandene Bewertung wird dabei auf Wunsch entfernt.', next: 'Details öffnen' },
-  { page: 'episodes', target: '.episode-card .episode-title', title: 'Folgendetails', text: 'Ein Tipp auf die Folgenkarte öffnet Beschreibung, Streaminglinks, Wissenskarte, Rückbezüge und persönliche Notizen.', next: 'Listen entdecken' },
-  { page: 'playlists', target: '[data-nav="playlists"]', title: 'Essentials, Themen und eigene Listen', text: 'Goldene Essentials sind besonders wichtige Sammlungen. Daneben findest du Themen und deine selbst benannten Playlists.', next: 'Smart-Planer' },
-  { page: 'playlists', target: '#generatePlanButton', title: 'Smart-Playlist erstellen', text: 'Gib Dauer, Stimmung, Hörstatus und optional einen Autor an. Mit diesem Button erstellt die App einen passenden Hörplan und beachtet auf Wunsch Reihenfolgen.', next: 'Backup & Hilfe' },
-  { page: 'settings', target: '#exportButton', title: 'Alles wird automatisch gespeichert', text: 'Deine Änderungen liegen lokal auf diesem Gerät. Das JSON-Backup brauchst du nur zur Absicherung oder für einen Gerätewechsel.', next: 'Los geht’s' },
+  {
+    id: 'go-episodes',
+    contextPage: 'home',
+    target: '[data-nav="episodes"]',
+    card: 'top',
+    title: 'Willkommen in deinem Archiv',
+    text: 'Auf der Startseite findest du Fortschritt, Empfehlungen und passende Folgen für deine verfügbare Zeit.',
+    action: 'Tippe unten auf „Folgen“.',
+    event: 'click',
+    verify: () => state.page === 'episodes',
+  },
+  {
+    id: 'search',
+    contextPage: 'episodes',
+    target: '#searchInput',
+    card: 'bottom',
+    title: 'Suche ausprobieren',
+    text: 'Die Suche findet Titel, Autoren, Figuren, Handlungen und Stichwörter.',
+    action: 'Tippe in das Suchfeld und gib mindestens drei Zeichen ein, zum Beispiel „Skinny“.',
+    event: 'input',
+    prepare: () => {
+      state.search = '';
+      state.collectionLabel = '';
+      const input = $('searchInput');
+      if (input) input.value = '';
+      pageDirty.episodes = true;
+      renderEpisodes();
+    },
+    verify: (event) => String(event?.target?.value || '').trim().length >= 3 && Boolean(document.querySelector('.episode-card')),
+    verifyDelay: 260,
+  },
+  {
+    id: 'open-result',
+    contextPage: 'episodes',
+    target: () => document.querySelector('.episode-card .episode-title'),
+    card: 'top',
+    title: 'Folge öffnen',
+    text: 'Ein Tipp auf den Titel öffnet die vollständige Detailansicht.',
+    action: 'Tippe auf den hervorgehobenen Folgentitel.',
+    event: 'click',
+    verify: () => Boolean(state.detailNr) && !$('detailOverlay').classList.contains('hidden'),
+    after: () => { state.tutorialEpisodeNr = Number(state.detailNr); },
+  },
+  {
+    id: 'rate-plus',
+    target: '#detailRating [data-rating="plus"]',
+    card: 'bottom',
+    title: 'Bewertung vergeben',
+    text: 'Minus, Neutral, Plus und Super sind immer exklusiv. Eine Bewertung markiert die Folge automatisch als gehört.',
+    action: 'Tippe auf „Plus“.',
+    event: 'click',
+    verify: () => userFor(state.tutorialEpisodeNr).rating === 'plus',
+  },
+  {
+    id: 'remove-plus',
+    target: '#detailRating [data-rating="plus"]',
+    card: 'bottom',
+    title: 'Bewertung entfernen',
+    text: 'Eine versehentliche Bewertung lässt sich direkt wieder löschen.',
+    action: 'Tippe noch einmal auf das aktive „Plus“.',
+    event: 'click',
+    verify: () => !userFor(state.tutorialEpisodeNr).rating,
+  },
+  {
+    id: 'rate-super',
+    target: '#detailRating [data-rating="super"]',
+    card: 'bottom',
+    title: 'Super-Folge markieren',
+    text: 'Super-Folgen zählen doppelt für dein Geschmacksprofil und deine Empfehlungen.',
+    action: 'Tippe auf „Super“.',
+    event: 'click',
+    verify: () => userFor(state.tutorialEpisodeNr).rating === 'super' && userFor(state.tutorialEpisodeNr).heard,
+  },
+  {
+    id: 'request-unheard',
+    target: '.detail-heard-control',
+    card: 'top',
+    title: 'Wieder als ungehört markieren',
+    text: 'Auch der Hörstatus lässt sich zurücksetzen. Bei einer vorhandenen Bewertung schützt dich eine Rückfrage.',
+    action: 'Tippe auf den Schalter „Schon gehört“.',
+    event: 'click',
+    verify: () => !$('heardResetOverlay').classList.contains('hidden'),
+    verifyDelay: 120,
+  },
+  {
+    id: 'confirm-unheard',
+    target: '#confirmUnheardAndClear',
+    card: 'top',
+    title: 'Zurücksetzen bestätigen',
+    text: 'So entfernst du Bewertung und Hörstatus gemeinsam, ohne andere Folgendaten oder Playlists anzutasten.',
+    action: 'Tippe auf „Bewertung entfernen & ungehört“.',
+    event: 'click',
+    verify: () => {
+      const user = userFor(state.tutorialEpisodeNr);
+      return !user.rating && !user.heard && $('heardResetOverlay').classList.contains('hidden');
+    },
+    verifyDelay: 140,
+  },
+  {
+    id: 'open-knowledge',
+    target: '#detailKnowledgeSection > summary',
+    card: 'top',
+    title: 'Wissenskarte öffnen',
+    text: 'Die Zusatzbereiche sind eingeklappt, damit die wichtigsten Aktionen oben bleiben.',
+    action: 'Tippe auf „Wissenskarte“.',
+    event: 'click',
+    verify: () => Boolean($('detailKnowledgeSection')?.open),
+    verifyDelay: 80,
+  },
+  {
+    id: 'close-detail',
+    target: '#closeDetail',
+    card: 'bottom',
+    title: 'Zur Liste zurückkehren',
+    text: 'Mit dem × schließt du die Folgendetails und landest wieder genau dort, wo du hergekommen bist.',
+    action: 'Tippe auf das ×.',
+    event: 'click',
+    verify: () => !state.detailNr && $('detailOverlay').classList.contains('hidden'),
+  },
+  {
+    id: 'go-playlists',
+    contextPage: 'episodes',
+    target: '[data-nav="playlists"]',
+    card: 'top',
+    title: 'Listen und Hörpläne',
+    text: 'Im Listen-Bereich findest du kuratierte Sammlungen, eigene Playlists und den Smart-Planer.',
+    action: 'Tippe unten auf „Listen“.',
+    event: 'click',
+    prepare: () => {
+      state.playlistTab = 'essentials';
+      state.user.settings = { ...(state.user.settings || {}), playlistTab: 'essentials' };
+      pageDirty.playlists = true;
+    },
+    verify: () => state.page === 'playlists',
+  },
+  {
+    id: 'themes-tab',
+    contextPage: 'playlists',
+    target: '[data-playlist-tab="themes"]',
+    card: 'bottom',
+    title: 'Themen entdecken',
+    text: 'Hier liegen Sammlungen wie Weihnachten, Halloween, Fußball oder Autorenlisten.',
+    action: 'Tippe auf „Themen“.',
+    event: 'click',
+    verify: () => state.playlistTab === 'themes',
+  },
+  {
+    id: 'mine-tab',
+    contextPage: 'playlists',
+    target: '[data-playlist-tab="mine"]',
+    card: 'bottom',
+    title: 'Deine eigenen Listen',
+    text: 'Unter „Meine“ erscheinen alle frei benannten und gespeicherten Smart-Playlists.',
+    action: 'Tippe auf „Meine“.',
+    event: 'click',
+    verify: () => state.playlistTab === 'mine',
+  },
+  {
+    id: 'new-playlist',
+    contextPage: 'playlists',
+    target: '#newPlaylistButton',
+    card: 'bottom',
+    title: 'Eigene Playlist erstellen',
+    text: 'Eigene Listen können einen Namen, eine Beschreibung und eine beliebige Reihenfolge bekommen.',
+    action: 'Tippe auf „Neue Playlist“.',
+    event: 'click',
+    verify: () => !$('playlistEditorOverlay').classList.contains('hidden'),
+  },
+  {
+    id: 'name-playlist',
+    target: '#playlistNameInput',
+    card: 'top',
+    title: 'Playlist benennen',
+    text: 'Der Name ist frei wählbar. Die Beschreibung ist optional.',
+    action: 'Gib deiner Test-Playlist einen Namen mit mindestens drei Zeichen.',
+    event: 'input',
+    verify: (event) => String(event?.target?.value || '').trim().length >= 3,
+  },
+  {
+    id: 'save-playlist',
+    target: '#savePlaylistButton',
+    card: 'top',
+    title: 'Playlist speichern',
+    text: 'Nach dem Speichern erscheint die Liste sofort unter „Meine“.',
+    action: 'Tippe auf „Playlist speichern“.',
+    event: 'click',
+    verify: () => Boolean(state.tutorialPlaylistId)
+      && $('playlistEditorOverlay').classList.contains('hidden')
+      && Boolean(document.querySelector(`[data-playlist-open="${state.tutorialPlaylistId}"]`)),
+    verifyDelay: 130,
+  },
+  {
+    id: 'open-playlist',
+    contextPage: 'playlists',
+    target: () => state.tutorialPlaylistId
+      ? document.querySelector(`[data-playlist-open="${state.tutorialPlaylistId}"]`)
+      : null,
+    card: 'top',
+    title: 'Playlist öffnen',
+    text: 'In einer eigenen Playlist kannst du Reihenfolge, Laufzeit und passende Vorschläge verwalten.',
+    action: 'Tippe auf deine gerade erstellte Playlist.',
+    event: 'click',
+    verify: () => state.playlistDetailId === state.tutorialPlaylistId,
+  },
+  {
+    id: 'open-add-panel',
+    target: '#playlistAddEpisodeButton',
+    card: 'top',
+    title: 'Folge hinzufügen',
+    text: 'Du kannst innerhalb einer Playlist direkt nach Folgen suchen und sie mit einem Tipp ergänzen.',
+    action: 'Tippe auf „Folge hinzufügen“.',
+    event: 'click',
+    verify: () => !$('playlistAddPanel').classList.contains('hidden'),
+  },
+  {
+    id: 'add-first-episode',
+    target: () => document.querySelector('#playlistAddResults [data-playlist-quick-add]'),
+    card: 'top',
+    title: 'Folge übernehmen',
+    text: 'Das Plus fügt die Folge sofort hinzu. Anzahl, Laufzeit und Vorschläge aktualisieren sich direkt.',
+    action: 'Tippe beim ersten Vorschlag auf das Plus.',
+    event: 'click',
+    verify: () => {
+      const playlist = playlistById(state.tutorialPlaylistId);
+      return Boolean(playlist?.episodeNumbers?.length);
+    },
+    verifyDelay: 170,
+  },
+  {
+    id: 'open-added-detail',
+    target: () => document.querySelector('#playlistEpisodeList .playlist-episode-main'),
+    card: 'top',
+    title: 'Beschreibung aus der Playlist öffnen',
+    text: 'Titel und Info-Schaltflächen führen auch innerhalb einer Playlist zur vollständigen Folgenbeschreibung.',
+    action: 'Tippe auf die hinzugefügte Folge.',
+    event: 'click',
+    prepare: () => {
+      $('playlistAddPanel')?.classList.add('hidden');
+      if (state.tutorialPlaylistId) openPlaylistDetail(state.tutorialPlaylistId, false);
+    },
+    verify: () => Boolean(state.detailNr) && !$('detailOverlay').classList.contains('hidden'),
+  },
+  {
+    id: 'close-playlist-episode-detail',
+    target: '#closeDetail',
+    card: 'bottom',
+    title: 'Zur Playlist zurück',
+    text: 'Nach dem Schließen bleibt die Playlist im Hintergrund geöffnet.',
+    action: 'Tippe auf das ×.',
+    event: 'click',
+    verify: () => !state.detailNr
+      && !$('playlistDetailOverlay').classList.contains('hidden')
+      && state.playlistDetailId === state.tutorialPlaylistId,
+  },
+  {
+    id: 'close-playlist',
+    target: '#closePlaylistDetail',
+    card: 'bottom',
+    title: 'Playlist schließen',
+    text: 'Mit dem × kommst du zurück zur Listenübersicht.',
+    action: 'Tippe auf das × der Playlist.',
+    event: 'click',
+    verify: () => !state.playlistDetailId && $('playlistDetailOverlay').classList.contains('hidden'),
+  },
+  {
+    id: 'generate-smart',
+    contextPage: 'playlists',
+    target: '#generatePlanButton',
+    card: 'top',
+    title: 'Smart-Playlist planen',
+    text: 'Der Smart-Planer kombiniert Dauer, Stimmung, Hörstatus, Autor und zusammenhängende Geschichten.',
+    action: 'Tippe auf „Smart Playlist erstellen“.',
+    event: 'click',
+    prepare: () => {
+      $('planName').value = 'Tutorial-Mix';
+      $('planHours').value = '1';
+      $('planMinutes').value = '30';
+      $('planMood').value = 'any';
+      $('planStatus').value = 'mixed';
+      if ($('planAuthor')) $('planAuthor').value = 'all';
+      $('planContinuity').checked = true;
+      state.generatedPlan = null;
+      $('planPreview').classList.add('hidden');
+      $('planPreview').innerHTML = '';
+    },
+    verify: () => Boolean(state.generatedPlan)
+      && !$('planPreview').classList.contains('hidden')
+      && Boolean($('saveGeneratedPlan')),
+    verifyDelay: 120,
+  },
+  {
+    id: 'save-smart',
+    target: '#saveGeneratedPlan',
+    card: 'top',
+    title: 'Smart-Playlist speichern',
+    text: 'Nach dem Speichern verschwindet die Vorschau, die Eingaben werden zurückgesetzt und die Playlist liegt unter „Meine“.',
+    action: 'Tippe auf „Playlist speichern“.',
+    event: 'click',
+    verify: () => !state.generatedPlan && Boolean(state.tutorialSmartPlaylistId),
+    verifyDelay: 160,
+  },
+  {
+    id: 'go-settings',
+    contextPage: 'playlists',
+    target: '[data-nav="settings"]',
+    card: 'top',
+    title: 'Einstellungen und Hilfe',
+    text: 'Hier findest du Streamingdienst, Backup, Katalog-Updates und dieses Tutorial.',
+    action: 'Tippe unten auf „Einstellungen“.',
+    event: 'click',
+    verify: () => state.page === 'settings',
+  },
+  {
+    id: 'backup',
+    contextPage: 'settings',
+    target: '#exportButton',
+    card: 'bottom',
+    title: 'Backup kennenlernen',
+    text: 'Alles speichert sich automatisch lokal. Ein JSON-Backup brauchst du nur als zusätzliche Sicherung oder für einen Gerätewechsel.',
+    action: 'Tippe auf „JSON exportieren“. Im Tutorial wird noch keine Datei erstellt.',
+    event: 'click',
+    intercept: true,
+    verify: () => true,
+  },
+  {
+    id: 'done',
+    target: null,
+    card: 'bottom',
+    title: 'Du bist startklar',
+    text: 'Du hast Suche, Bewertungen, Hörstatus, Folgendetails, eigene Playlists, Smart-Playlists und Backups selbst ausprobiert.',
+    action: 'Tippe auf „App benutzen“, um das Tutorial abzuschließen.',
+    event: 'finish',
+  },
 ];
 
 function tutorialCompleted() {
   return Boolean(state.user.settings?.tutorialCompleted);
+}
+
+function cloneTutorialValue(value) {
+  return typeof structuredClone === 'function'
+    ? structuredClone(value)
+    : JSON.parse(JSON.stringify(value));
 }
 
 function setTutorialCompleted(value = true) {
@@ -1610,8 +1954,17 @@ function setTutorialCompleted(value = true) {
   queueUserPersist();
 }
 
-function tutorialDemoMarkup() {
-  return `<span class="field-label">Demo-Bewertung</span><div id="tutorialRatingDemo" class="rating-control"><button data-demo-rating="minus"><span>−</span>Minus</button><button data-demo-rating="neutral"><span>●</span>Neutral</button><button data-demo-rating="plus"><span>＋</span>Plus</button><button data-demo-rating="super"><span>★</span>Super</button></div><small id="tutorialDemoNote" class="tutorial-demo-note">Probiere Plus oder Super aus – ein zweiter Tipp entfernt die Auswahl.</small>`;
+function currentTutorialStep() {
+  return TUTORIAL_STEPS[state.tutorialStep] || null;
+}
+
+function tutorialTargetFor(step = currentTutorialStep()) {
+  if (!step?.target) return null;
+  const target = typeof step.target === 'function' ? step.target() : findVisibleTutorialTarget(step.target);
+  if (!target) return null;
+  const style = getComputedStyle(target);
+  const rect = target.getBoundingClientRect();
+  return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 3 && rect.height > 3 ? target : null;
 }
 
 function findVisibleTutorialTarget(selector) {
@@ -1627,6 +1980,17 @@ function findVisibleTutorialTarget(selector) {
   }) || null;
 }
 
+function tutorialScrollableAncestor(element) {
+  let parent = element?.parentElement;
+  while (parent && parent !== document.body) {
+    const style = getComputedStyle(parent);
+    const overflowY = style.overflowY;
+    if (/(auto|scroll)/.test(overflowY) && parent.scrollHeight > parent.clientHeight + 4) return parent;
+    parent = parent.parentElement;
+  }
+  return null;
+}
+
 function resetTutorialCardPosition() {
   const card = $('tutorialCard');
   card.classList.remove('top', 'is-above', 'is-below', 'is-scrollable', 'tutorial-card-top-fixed', 'tutorial-card-bottom-fixed');
@@ -1636,120 +2000,273 @@ function resetTutorialCardPosition() {
   card.style.removeProperty('overflow-y');
 }
 
-function positionTutorialFocus({ jump = true } = {}) {
+function revealTutorialTarget(target, cardAtTop) {
+  if (!target) return;
+  const viewportTop = window.visualViewport?.offsetTop || 0;
+  const viewportHeight = window.visualViewport?.height || window.innerHeight;
+  const desiredCenter = cardAtTop
+    ? viewportTop + viewportHeight * 0.68
+    : viewportTop + viewportHeight * 0.28;
+  let rect = target.getBoundingClientRect();
+  const scrollParent = tutorialScrollableAncestor(target);
+  const delta = (rect.top + rect.bottom) / 2 - desiredCenter;
+  document.documentElement.classList.add('tutorial-instant-scroll');
+  if (scrollParent) {
+    scrollParent.scrollTop = Math.max(0, scrollParent.scrollTop + delta);
+  } else {
+    window.scrollTo(0, Math.max(0, window.scrollY + delta));
+  }
+  document.documentElement.classList.remove('tutorial-instant-scroll');
+}
+
+function positionTutorialFocus() {
   const overlay = $('tutorialOverlay');
-  if (overlay.classList.contains('hidden')) return;
-  const step = TUTORIAL_STEPS[state.tutorialStep];
-  const target = findVisibleTutorialTarget(step?.target || '');
+  if (!state.tutorialActive || overlay.classList.contains('hidden')) return;
+  const step = currentTutorialStep();
   const focus = $('tutorialFocus');
   const card = $('tutorialCard');
   resetTutorialCardPosition();
 
+  const cardAtTop = step?.card === 'top';
+  card.classList.add(cardAtTop ? 'tutorial-card-top-fixed' : 'tutorial-card-bottom-fixed');
+  const viewportHeight = window.visualViewport?.height || window.innerHeight;
+  card.style.maxHeight = `${Math.max(180, Math.floor(viewportHeight * 0.44))}px`;
+  card.style.overflowY = 'auto';
+
+  const target = tutorialTargetFor(step);
+  state.tutorialTarget = target;
   if (!target) {
     overlay.classList.add('no-focus');
-    card.classList.add('tutorial-card-bottom-fixed');
+    focus.style.width = '0px';
+    focus.style.height = '0px';
     return;
   }
 
   overlay.classList.remove('no-focus');
+  revealTutorialTarget(target, cardAtTop);
+  const rect = target.getBoundingClientRect();
   const viewportTop = window.visualViewport?.offsetTop || 0;
-  const viewportHeight = window.visualViewport?.height || window.innerHeight;
-  const viewportBottom = viewportTop + viewportHeight;
+  const viewportBottom = viewportTop + (window.visualViewport?.height || window.innerHeight);
   const pad = 8;
+  const left = Math.max(6, rect.left - pad);
+  const top = Math.max(viewportTop + 6, rect.top - pad);
+  const right = Math.min(window.innerWidth - 6, rect.right + pad);
+  const bottom = Math.min(viewportBottom - 6, rect.bottom + pad);
+  focus.style.left = `${left}px`;
+  focus.style.top = `${top}px`;
+  focus.style.width = `${Math.max(8, right - left)}px`;
+  focus.style.height = `${Math.max(8, bottom - top)}px`;
+}
 
-  let rect = target.getBoundingClientRect();
-  const targetInitiallyLow = (rect.top + rect.bottom) / 2 > viewportTop + viewportHeight / 2;
-  const isSearchStep = step?.position === 'search';
-  const cardAtTop = isSearchStep ? false : targetInitiallyLow;
-  card.classList.add(cardAtTop ? 'tutorial-card-top-fixed' : 'tutorial-card-bottom-fixed');
-  card.style.maxHeight = `${Math.max(170, Math.floor(viewportHeight * 0.42))}px`;
-  card.style.overflowY = 'auto';
-
-  // One immediate jump only. No smooth scrolling, no repeated correction and
-  // no scroll listener. This is intentionally deterministic for iOS Safari.
-  if (jump) {
-    const desiredCenter = isSearchStep
-      ? viewportTop + Math.min(150, viewportHeight * 0.22)
-      : (cardAtTop
-        ? viewportTop + viewportHeight * 0.68
-        : viewportTop + viewportHeight * 0.30);
-    const absoluteTargetCenter = window.scrollY + (rect.top + rect.bottom) / 2;
-    const nextScrollTop = Math.max(0, Math.round(absoluteTargetCenter - desiredCenter));
-    document.documentElement.classList.add('tutorial-instant-scroll');
-    window.scrollTo(0, nextScrollTop);
-    document.documentElement.classList.remove('tutorial-instant-scroll');
-    rect = target.getBoundingClientRect();
-  }
-
-  const focusLeft = Math.max(6, rect.left - pad);
-  const focusTop = Math.max(viewportTop + 6, rect.top - pad);
-  const focusRight = Math.min(window.innerWidth - 6, rect.right + pad);
-  const focusBottom = Math.min(viewportBottom - 6, rect.bottom + pad);
-  focus.style.left = `${focusLeft}px`;
-  focus.style.top = `${focusTop}px`;
-  focus.style.width = `${Math.max(8, focusRight - focusLeft)}px`;
-  focus.style.height = `${Math.max(8, focusBottom - focusTop)}px`;
+function prepareTutorialStep(step) {
+  if (!step || state.tutorialPreparedStep === state.tutorialStep) return;
+  state.tutorialPreparedStep = state.tutorialStep;
+  if (step.contextPage && state.page !== step.contextPage) showPage(step.contextPage);
+  step.prepare?.();
 }
 
 function renderTutorialStep() {
-  const step = TUTORIAL_STEPS[state.tutorialStep];
+  const step = currentTutorialStep();
   if (!step) return finishTutorial();
-  showPage(step.page);
+  state.tutorialAdvancing = false;
+  prepareTutorialStep(step);
+
   $('tutorialProgress').textContent = `${state.tutorialStep + 1} von ${TUTORIAL_STEPS.length}`;
   $('tutorialTitle').textContent = step.title;
   $('tutorialText').textContent = step.text;
-  $('tutorialNext').textContent = step.next || 'Weiter';
-  $('tutorialBack').disabled = state.tutorialStep === 0;
-  $('tutorialDemo').classList.toggle('hidden', step.demo !== 'rating');
-  $('tutorialDemo').innerHTML = step.demo === 'rating' ? tutorialDemoMarkup() : '';
-  cancelAnimationFrame(state.tutorialPositionFrame);
-  clearTimeout(state.tutorialPositionTimer);
+  const action = $('tutorialAction');
+  action.textContent = step.action || '';
+  action.classList.remove('success', 'warning');
+  $('tutorialDemo').classList.add('hidden');
+  $('tutorialDemo').innerHTML = '';
+  $('tutorialBack').classList.add('hidden');
+  const finishButton = $('tutorialNext');
+  finishButton.classList.toggle('hidden', step.event !== 'finish');
+  finishButton.textContent = step.event === 'finish' ? 'App benutzen' : 'Weiter';
+
   const overlay = $('tutorialOverlay');
   overlay.classList.add('tutorial-positioning');
-  // Wait for the selected tab/page to render, then jump exactly once and show
-  // the overlay. A second frame only paints the already-final geometry.
+  cancelAnimationFrame(state.tutorialPositionFrame);
   state.tutorialPositionFrame = requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      positionTutorialFocus({ jump: true });
+      positionTutorialFocus();
       overlay.classList.remove('tutorial-positioning');
+      if (step.event === 'input') {
+        const target = tutorialTargetFor(step);
+        if (target) setTimeout(() => target.focus({ preventScroll: true }), 80);
+      }
     });
   });
 }
 
+function tutorialNudge(message = '') {
+  const action = $('tutorialAction');
+  action.textContent = message || currentTutorialStep()?.action || 'Nutze das hervorgehobene Element.';
+  action.classList.add('warning');
+  $('tutorialFocus').classList.remove('tutorial-nudge');
+  void $('tutorialFocus').offsetWidth;
+  $('tutorialFocus').classList.add('tutorial-nudge');
+  setTimeout(() => $('tutorialFocus').classList.remove('tutorial-nudge'), 320);
+}
+
+function completeTutorialAction(event = null) {
+  const step = currentTutorialStep();
+  if (!step || state.tutorialAdvancing) return;
+  const delay = Number(step.verifyDelay || 70);
+  setTimeout(() => {
+    if (!state.tutorialActive || state.tutorialAdvancing || currentTutorialStep() !== step) return;
+    let valid = true;
+    try { valid = step.verify ? Boolean(step.verify(event)) : true; } catch (error) { valid = false; console.warn(error); }
+    if (!valid) {
+      tutorialNudge('Die Aktion ist noch nicht abgeschlossen. Probiere es noch einmal.');
+      positionTutorialFocus();
+      return;
+    }
+    step.after?.(event);
+    state.tutorialAdvancing = true;
+    const action = $('tutorialAction');
+    action.textContent = 'Erledigt ✓';
+    action.classList.remove('warning');
+    action.classList.add('success');
+    setTimeout(() => {
+      if (!state.tutorialActive) return;
+      state.tutorialStep += 1;
+      state.tutorialPreparedStep = -1;
+      renderTutorialStep();
+    }, 360);
+  }, delay);
+}
+
+function tutorialClickCapture(event) {
+  if (!state.tutorialActive) return;
+  const card = $('tutorialCard');
+  if (card.contains(event.target)) return;
+  const step = currentTutorialStep();
+  if (!step || step.event === 'finish') {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    return;
+  }
+  const target = tutorialTargetFor(step);
+  if (!target || !(target === event.target || target.contains(event.target))) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    tutorialNudge();
+    return;
+  }
+  if (step.event !== 'click') return;
+  if (step.intercept) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
+  completeTutorialAction(event);
+}
+
+function tutorialInputCapture(event) {
+  if (!state.tutorialActive) return;
+  const step = currentTutorialStep();
+  if (!step || step.event !== 'input') return;
+  const target = tutorialTargetFor(step);
+  if (!target || event.target !== target) return;
+  clearTimeout(state.tutorialInputTimer);
+  state.tutorialInputTimer = setTimeout(() => completeTutorialAction(event), step.verifyDelay || 80);
+}
+
+function snapshotTutorialSession() {
+  return {
+    user: cloneTutorialValue(state.user),
+    ui: {
+      page: state.page,
+      filter: state.filter,
+      authorFilter: state.authorFilter,
+      eraFilter: state.eraFilter,
+      sort: state.sort,
+      ranking: state.ranking,
+      search: state.search,
+      time: state.time,
+      mood: state.mood,
+      collectionLabel: state.collectionLabel,
+      playlistTab: state.playlistTab,
+    },
+  };
+}
+
+function closeTutorialSurfaces() {
+  clearTimeout(state.tutorialInputTimer);
+  $('heardResetOverlay').classList.add('hidden');
+  $('heardResetOverlay').setAttribute('aria-hidden', 'true');
+  state.pendingUnheardNr = null;
+  closeDetail();
+  closePlaylistDetail();
+  closePlaylistEditor();
+  closePlaylistPicker();
+  document.body.style.overflow = '';
+}
+
+function restoreTutorialSession({ completed = true, message = '' } = {}) {
+  const snapshot = state.tutorialSnapshot;
+  state.tutorialActive = false;
+  state.tutorialAdvancing = false;
+  state.tutorialTarget = null;
+  state.tutorialPreparedStep = -1;
+  clearTimeout(persistTimer);
+  closeTutorialSurfaces();
+
+  if (snapshot) {
+    state.user = snapshot.user;
+    Object.assign(state, snapshot.ui);
+  }
+  state.tutorialSnapshot = null;
+  state.tutorialEpisodeNr = null;
+  state.tutorialPlaylistId = null;
+  state.tutorialSmartPlaylistId = null;
+  state.generatedPlan = null;
+  state.search = state.search || '';
+  invalidateDerived();
+  renderAll();
+  showPage(state.page || 'home');
+  $('searchInput').value = state.search;
+  $('tutorialOverlay').classList.add('hidden');
+  $('tutorialOverlay').setAttribute('aria-hidden', 'true');
+  setTutorialCompleted(completed);
+  if (message) toast(message);
+}
+
 function startTutorial({ fromSettings = false } = {}) {
   closeHelp();
+  if (state.tutorialActive) return;
+  clearTimeout(persistTimer);
+  state.tutorialSnapshot = snapshotTutorialSession();
+  state.tutorialActive = true;
   state.tutorialStep = 0;
+  state.tutorialPreparedStep = -1;
+  state.tutorialEpisodeNr = null;
+  state.tutorialPlaylistId = null;
+  state.tutorialSmartPlaylistId = null;
+  state.tutorialAdvancing = false;
+  closeTutorialSurfaces();
+  showPage('home');
   $('tutorialOverlay').classList.remove('hidden');
   $('tutorialOverlay').setAttribute('aria-hidden', 'false');
   renderTutorialStep();
 }
 
 function finishTutorial() {
-  $('tutorialOverlay').classList.add('hidden');
-  $('tutorialOverlay').setAttribute('aria-hidden', 'true');
-  setTutorialCompleted(true);
-  showPage('home');
-  toast('Einführung abgeschlossen – viel Spaß beim Hören!');
+  restoreTutorialSession({ completed: true, message: 'Einführung abgeschlossen – viel Spaß beim Hören!' });
 }
 
 function skipTutorial() {
-  $('tutorialOverlay').classList.add('hidden');
-  $('tutorialOverlay').setAttribute('aria-hidden', 'true');
-  setTutorialCompleted(true);
-  toast('Tutorial übersprungen. Du findest es jederzeit in den Einstellungen.');
+  restoreTutorialSession({ completed: true, message: 'Tutorial übersprungen. Du findest es jederzeit in den Einstellungen.' });
 }
 
 function tutorialNext() {
-  if (state.tutorialStep >= TUTORIAL_STEPS.length - 1) return finishTutorial();
-  state.tutorialStep += 1;
-  renderTutorialStep();
+  if (currentTutorialStep()?.event === 'finish') finishTutorial();
 }
 
 function tutorialBack() {
-  if (state.tutorialStep <= 0) return;
-  state.tutorialStep -= 1;
-  renderTutorialStep();
+  tutorialNudge('Dieses Tutorial wird durch echte Aktionen gesteuert.');
 }
+
 
 function openHelp() {
   $('helpOverlay').classList.remove('hidden');
@@ -2379,21 +2896,8 @@ function closeHelp() {
     $('tutorialNext').addEventListener('click', tutorialNext);
     $('tutorialBack').addEventListener('click', tutorialBack);
     $('skipTutorial').addEventListener('click', skipTutorial);
-    $('tutorialDemo').addEventListener('click', (event) => {
-      const button = event.target.closest('[data-demo-rating]');
-      if (!button) return;
-      const wasActive = button.classList.contains('active');
-      document.querySelectorAll('#tutorialRatingDemo [data-demo-rating]').forEach((item) => item.classList.remove('active'));
-      if (!wasActive) button.classList.add('active');
-      const note = $('tutorialDemoNote');
-      note.textContent = wasActive ? 'Bewertung entfernt ✓' : `${ratingLabel(button.dataset.demoRating)} ausgewählt. Tippe erneut zum Entfernen.`;
-      note.classList.toggle('tutorial-demo-success', wasActive);
-    });
-    const scheduleTutorialPosition = debounce(() => {
-      if ($('tutorialOverlay').classList.contains('hidden')) return;
-      positionTutorialFocus();
-    }, 140);
-    window.addEventListener('resize', scheduleTutorialPosition);
+    document.addEventListener('click', tutorialClickCapture, true);
+    document.addEventListener('input', tutorialInputCapture, true);
     $('closeHeardReset').addEventListener('click', closeHeardReset);
     $('cancelHeardReset').addEventListener('click', closeHeardReset);
     $('confirmUnheardAndClear').addEventListener('click', confirmUnheardAndClear);

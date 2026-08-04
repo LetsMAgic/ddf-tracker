@@ -294,3 +294,64 @@ html.tutorial-instant-scroll,html.tutorial-instant-scroll body{scroll-behavior:a
 .tutorial-demo .rating-control button.active[data-demo-rating="neutral"]{background:#b5b9c2;border-color:#b5b9c2;color:#15161a;transform:scale(1.02)}
 .tutorial-demo .rating-control button.active[data-demo-rating="minus"]{background:var(--red);border-color:var(--red);color:#251013;transform:scale(1.02)}
 .tutorial-demo .rating-control button[data-demo-rating]{transition:background-color .12s ease,border-color .12s ease,color .12s ease,transform .12s ease}
+
+
+/* v12: action-driven onboarding. The card never moves smoothly; users progress
+   by operating the real highlighted control. Temporary tutorial changes are
+   restored automatically after finishing or skipping. */
+.tutorial-overlay{pointer-events:none}
+.tutorial-card{pointer-events:auto}
+.tutorial-focus{pointer-events:none;transition:none!important}
+.tutorial-action{
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+  margin-top:14px;
+  padding:11px 12px;
+  border-radius:15px;
+  border:1px solid rgba(245,196,65,.28);
+  background:rgba(245,196,65,.075);
+  color:#f1d985;
+  font-size:.84rem;
+  font-weight:760;
+  line-height:1.42
+}
+.tutorial-action:before{
+  content:"›";
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  width:20px;
+  height:20px;
+  border-radius:7px;
+  background:var(--accent);
+  color:#181307;
+  font-weight:950
+}
+.tutorial-action.success{
+  border-color:rgba(78,219,145,.42);
+  background:rgba(78,219,145,.09);
+  color:#9cebc2
+}
+.tutorial-action.success:before{content:"✓";background:var(--green);color:#102017}
+.tutorial-action.warning{
+  border-color:rgba(255,198,41,.5);
+  background:rgba(255,198,41,.12);
+  color:#ffe59a
+}
+.tutorial-actions:has(#tutorialNext.hidden){display:none}
+.tutorial-actions #tutorialNext:not(.hidden){width:100%;flex:1}
+.tutorial-focus.tutorial-nudge{animation:tutorialNudgeFlash .32s ease!important}
+@keyframes tutorialNudgeFlash{
+  0%,100%{filter:brightness(1)}
+  45%{filter:brightness(1.8);border-color:#fff3b5}
+}
+.tutorial-overlay.tutorial-positioning .tutorial-card,
+.tutorial-overlay.tutorial-positioning .tutorial-focus{opacity:0!important}
+.tutorial-card.tutorial-card-top-fixed,
+.tutorial-card.tutorial-card-bottom-fixed{transform:none!important}
+@media(max-width:560px){
+  .tutorial-card{left:12px;right:12px;padding:15px}
+  .tutorial-card h2{font-size:1.22rem}
+  .tutorial-action{font-size:.79rem;padding:10px 11px}
+}
