@@ -1103,7 +1103,10 @@
     if (definition.type === 'range') return list.filter((episode) => episode.nr >= definition.from && episode.nr <= definition.to).sort((a,b)=>a.nr-b.nr);
     if (definition.type === 'theme') list = list.filter((episode) => moodMatch(episode, definition.mood));
     if (definition.type === 'keywords') {
-      list = list.filter((episode) => definition.keywords.some((keyword) => episode.searchText.includes(normalizeText(keyword))));
+      list = list.filter((episode) => {
+        const haystack = episode.searchText || buildSearchText(episode);
+        return definition.keywords.some((keyword) => haystack.includes(normalizeText(keyword)));
+      });
     }
     list.sort((a,b) => recommendationScore(b).score - recommendationScore(a).score || rockyCompare(a,b));
     return definition.max ? list.slice(0, definition.max) : list;
@@ -1248,17 +1251,64 @@
     const episodes=best.flatMap(unit=>unit.episodes);return {episodes,duration:episodes.reduce((s,e)=>s+e.durationMin,0)};
   }
 
+  function smartPlanReason(episode, index, episodes, plan) {
+    const reasons = [];
+    const previous = episodes[index - 1];
+    const block = STORY_BLOCKS.find((item) => item.numbers.includes(episode.nr));
+    if (plan.continuity && block) {
+      const included = block.numbers.filter((nr) => episodes.some((item) => item.nr === nr));
+      if (included.length > 1) reasons.push(`Teil der Reihenfolge „${block.title}“`);
+    }
+    if (previous) {
+      const shared = (episode.tags || []).filter((tag) => (previous.tags || []).includes(tag)).slice(0, 2);
+      if (shared.length) reasons.push(`passt thematisch zu „${previous.titel}“ (${shared.join(' · ')})`);
+    }
+    if (!episode.heard) reasons.push('noch nicht gehört');
+    else if (episode.rating === 'super') reasons.push('eine deiner Super-Folgen');
+    else if (episode.rating === 'plus') reasons.push('von dir positiv bewertet');
+    if (plan.mood !== 'any') reasons.push(`passt zur Stimmung „${moodLabel(plan.mood)}“`);
+    if (!reasons.length) reasons.push('gute Mischung aus Laufzeit, Bewertung und Abwechslung');
+    return reasons.slice(0, 2).join(' · ');
+  }
+
+  function smartPlanEpisodeMarkup(episode, index, episodes, plan) {
+    const description = displayDescription(episode) || 'Keine Kurzbeschreibung vorhanden.';
+    const reason = smartPlanReason(episode, index, episodes, plan);
+    return `<article class="plan-episode-card">
+      <div class="plan-episode-number">${index + 1}</div>
+      <div class="plan-episode-copy">
+        <div class="plan-episode-title"><strong>${esc(episode.nr + '. ' + episode.titel)}</strong><span>${fmtDuration(episode.durationMin)}</span></div>
+        <p>${esc(description)}</p>
+        <small><b>Warum dabei:</b> ${esc(reason)}</small>
+      </div>
+    </article>`;
+  }
+
   function generatePlan(){
     const target=Math.max(30,Math.min(720,(Number($('planHours').value)||0)*60+(Number($('planMinutes').value)||0)));
     const mood=$('planMood').value,status=$('planStatus').value,continuity=$('planContinuity').checked;
     const result=buildSmartPlan(target,mood,status,continuity); state.generatedPlan={...result,target,mood,status,continuity,title:$('planName').value.trim()||'Smart Playlist'};
-    $('planPreview').classList.remove('hidden'); $('planPreview').innerHTML=`<div class="plan-preview-head"><div><h3>${esc(state.generatedPlan.title)}</h3><p>${result.episodes.length} Folgen · ${fmtDuration(result.duration)} von gewünschten ${fmtDuration(target)}</p></div><strong>${Math.abs(target-result.duration)<=15?'Sehr passend':`${Math.abs(target-result.duration)} Min. Abweichung`}</strong></div><div class="plan-preview-list">${result.episodes.map((e,i)=>`<span><b>${i+1}. ${esc(e.titel)}</b><small>${fmtDuration(e.durationMin)}</small></span>`).join('')}</div><div class="plan-preview-actions"><button id="saveGeneratedPlan" class="primary-button">Playlist speichern</button><button id="regeneratePlan" class="subtle-button">Neu mischen</button></div>`;
+    $('planSavedStatus')?.classList.add('hidden');
+    $('planPreview').classList.remove('hidden');
+    $('planPreview').innerHTML=`<div class="plan-preview-head"><div><h3>${esc(state.generatedPlan.title)}</h3><p>${result.episodes.length} Folgen · ${fmtDuration(result.duration)} von gewünschten ${fmtDuration(target)}</p></div><strong>${Math.abs(target-result.duration)<=15?'Sehr passend':`${Math.abs(target-result.duration)} Min. Abweichung`}</strong></div><div class="plan-preview-list detailed">${result.episodes.map((episode,index)=>smartPlanEpisodeMarkup(episode,index,result.episodes,state.generatedPlan)).join('')}</div><div class="plan-preview-actions"><button id="saveGeneratedPlan" class="primary-button">Playlist speichern</button><button id="regeneratePlan" class="subtle-button">Neu mischen</button></div>`;
   }
 
   function saveGeneratedPlan(){
     const plan=state.generatedPlan;if(!plan||!plan.episodes.length)return;
     state.user.playlists.push(normalizePlaylist({title:plan.title,description:`Automatisch geplant: ${fmtDuration(plan.target)} · ${moodLabel(plan.mood)} · ${plan.status==='unheard'?'nur ungehört':plan.status==='heard'?'nur bekannt':'gemischt'}`,episodeNumbers:plan.episodes.map(e=>e.nr),smartMeta:{target:plan.target,mood:plan.mood,status:plan.status,continuity:plan.continuity}}));
-    persistPlaylists('Smart Playlist gespeichert.'); $('planPreview').classList.add('hidden');state.generatedPlan=null;
+    const savedTitle = plan.title;
+    persistPlaylists('Smart Playlist gespeichert.');
+    $('planPreview').classList.add('hidden');
+    $('planPreview').innerHTML='';
+    state.generatedPlan=null;
+    const status=$('planSavedStatus');
+    if(status){
+      status.innerHTML=`<span>✓</span><div><strong>„${esc(savedTitle)}“ gespeichert</strong><small>Die Playlist findest du jetzt direkt unter „Meine Playlists“.</small></div>`;
+      status.classList.remove('hidden');
+      status.scrollIntoView({behavior:'smooth',block:'nearest'});
+      clearTimeout(state.planSavedTimer);
+      state.planSavedTimer=setTimeout(()=>status.classList.add('hidden'),5000);
+    }
   }
 
   function renderSettings() {
