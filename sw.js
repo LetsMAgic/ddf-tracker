@@ -1,4 +1,4 @@
-const CACHE = 'ddf-v11-6-tutorial-jump';
+const CACHE = 'ddf-v11-7-tutorial-search-rating';
 const ASSETS = [
   './',
   './index.html',

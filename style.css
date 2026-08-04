@@ -287,3 +287,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 html.tutorial-instant-scroll,html.tutorial-instant-scroll body{scroll-behavior:auto!important}
 .tutorial-overlay.tutorial-positioning .tutorial-card,.tutorial-overlay.tutorial-positioning .tutorial-focus{opacity:0!important}
 .tutorial-focus,.tutorial-card{transition:none!important}
+
+/* v11.7: tutorial demo rating uses its own data attribute */
+.tutorial-demo .rating-control button.active[data-demo-rating="super"]{background:var(--gold);border-color:var(--gold);color:#181307;transform:scale(1.02)}
+.tutorial-demo .rating-control button.active[data-demo-rating="plus"]{background:var(--green);border-color:var(--green);color:#111b15;transform:scale(1.02)}
+.tutorial-demo .rating-control button.active[data-demo-rating="neutral"]{background:#b5b9c2;border-color:#b5b9c2;color:#15161a;transform:scale(1.02)}
+.tutorial-demo .rating-control button.active[data-demo-rating="minus"]{background:var(--red);border-color:var(--red);color:#251013;transform:scale(1.02)}
+.tutorial-demo .rating-control button[data-demo-rating]{transition:background-color .12s ease,border-color .12s ease,color .12s ease,transform .12s ease}

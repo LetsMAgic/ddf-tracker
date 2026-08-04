@@ -1591,7 +1591,7 @@ function renderPlaylists() {
 const TUTORIAL_STEPS = [
   { page: 'home', target: '[data-nav="home"]', title: 'Willkommen in deinem Archiv', text: 'Auf der Startseite siehst du Fortschritt, Tagesempfehlung und passende Folgen für deine verfügbare Zeit.', next: 'Folgen entdecken' },
   { page: 'episodes', target: '[data-nav="episodes"]', title: 'Alle Folgen', text: 'Hier findest du den vollständigen Katalog. Filter, Autor, Ära und Sortierung lassen sich miteinander kombinieren.', next: 'Suche zeigen' },
-  { page: 'episodes', target: '.search-box', title: 'Intelligente Suche', text: 'Suche nach Titel, Autor, Figur, Handlung oder Stichwort – zum Beispiel „Peters Opa“, „André Marx“ oder „Fußball“.', next: 'Bewertungen' },
+  { page: 'episodes', target: '.search-box', position: 'search', title: 'Intelligente Suche', text: 'Suche nach Titel, Autor, Figur, Handlung oder Stichwort – zum Beispiel „Peters Opa“, „André Marx“ oder „Fußball“.', next: 'Bewertungen' },
   { page: 'episodes', target: '.episode-card .rating-mini', title: 'Bewerten und entfernen', text: 'Minus, Neutral, Plus und Super sind exklusiv. Super zählt doppelt für Empfehlungen. Tippe erneut auf dieselbe aktive Bewertung, um sie wieder zu entfernen.', next: 'Hörstatus', demo: 'rating' },
   { page: 'episodes', target: '.episode-card [data-heard]', title: 'Gehört oder ungehört', text: 'Eine Bewertung markiert die Folge automatisch als gehört. Den Hörstatus kannst du wieder zurücksetzen; eine vorhandene Bewertung wird dabei auf Wunsch entfernt.', next: 'Details öffnen' },
   { page: 'episodes', target: '.episode-card .episode-title', title: 'Folgendetails', text: 'Ein Tipp auf die Folgenkarte öffnet Beschreibung, Streaminglinks, Wissenskarte, Rückbezüge und persönliche Notizen.', next: 'Listen entdecken' },
@@ -1659,7 +1659,8 @@ function positionTutorialFocus({ jump = true } = {}) {
 
   let rect = target.getBoundingClientRect();
   const targetInitiallyLow = (rect.top + rect.bottom) / 2 > viewportTop + viewportHeight / 2;
-  const cardAtTop = targetInitiallyLow;
+  const isSearchStep = step?.position === 'search';
+  const cardAtTop = isSearchStep ? false : targetInitiallyLow;
   card.classList.add(cardAtTop ? 'tutorial-card-top-fixed' : 'tutorial-card-bottom-fixed');
   card.style.maxHeight = `${Math.max(170, Math.floor(viewportHeight * 0.42))}px`;
   card.style.overflowY = 'auto';
@@ -1667,9 +1668,11 @@ function positionTutorialFocus({ jump = true } = {}) {
   // One immediate jump only. No smooth scrolling, no repeated correction and
   // no scroll listener. This is intentionally deterministic for iOS Safari.
   if (jump) {
-    const desiredCenter = cardAtTop
-      ? viewportTop + viewportHeight * 0.68
-      : viewportTop + viewportHeight * 0.30;
+    const desiredCenter = isSearchStep
+      ? viewportTop + Math.min(150, viewportHeight * 0.22)
+      : (cardAtTop
+        ? viewportTop + viewportHeight * 0.68
+        : viewportTop + viewportHeight * 0.30);
     const absoluteTargetCenter = window.scrollY + (rect.top + rect.bottom) / 2;
     const nextScrollTop = Math.max(0, Math.round(absoluteTargetCenter - desiredCenter));
     document.documentElement.classList.add('tutorial-instant-scroll');
