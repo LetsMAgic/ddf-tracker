@@ -5,17 +5,17 @@
   const DB_VERSION = 1;
   const STORE = 'kv';
   const USER_KEY = 'appState';
-  const CATALOG_KEY = 'enrichedCatalogV13';
-  const LEGACY_CATALOG_KEYS = ['enrichedCatalogV10', 'enrichedCatalogV9', 'enrichedCatalogV8', 'enrichedCatalogV7', 'enrichedCatalogV6', 'enrichedCatalogV5', 'enrichedCatalogV4'];
+  const CATALOG_KEY = 'enrichedCatalogV14';
+  const LEGACY_CATALOG_KEYS = ['enrichedCatalogV13', 'enrichedCatalogV10', 'enrichedCatalogV9', 'enrichedCatalogV8', 'enrichedCatalogV7', 'enrichedCatalogV6', 'enrichedCatalogV5', 'enrichedCatalogV4'];
   const LEGACY_USER_KEYS = ['user-state', 'userState', 'state'];
-  const APP_VERSION = '13.2.0';
+  const APP_VERSION = '14.0.0';
   const DEFAULT_STREAMING_SERVICE = 'spotify';
   const META_URL = 'https://dreimetadaten.de/data/Serie.json';
   const META_MAX_AGE = 1000 * 60 * 60 * 24 * 30;
 
   const state = {
     catalog: [],
-    user: { version: APP_VERSION, episodes: {}, playlists: [], settings: { preferredService: DEFAULT_STREAMING_SERVICE, tutorialCompleted: false, playlistTab: 'essentials' }, updatedAt: null },
+    user: { version: APP_VERSION, episodes: {}, playlists: [], pinned: [], history: [], settings: { preferredService: DEFAULT_STREAMING_SERVICE, tutorialCompleted: false, playlistTab: 'essentials' }, updatedAt: null },
     page: 'home',
     filter: 'all',
     authorFilter: 'all',
@@ -56,6 +56,9 @@
     tutorialViewportTimer: 0,
     pendingUnheardNr: null,
     episodeRenderLimit: 32,
+    surpriseStatus: 'all',
+    surpriseTheme: 'any',
+    surpriseRating: 'any',
   };
 
   const $ = (id) => document.getElementById(id);
@@ -145,6 +148,14 @@
     [['schrottplatzhelfer', 'helfer auf dem schrottplatz', 'irische brueder'], 'patrick kenneth'],
     [['hector sebastian'], 'mr hitfield'],
     [['detektiv perry', 'privatdetektiv'], 'dick perry'],
+    [['peter opa', 'opa peter', 'grossvater peter'], 'ben peck'],
+    [['franzose', 'der boese franzose', 'kunstdieb'], 'victor hugenay'],
+    [['weihnachtsfolge', 'weihnachts folgen', 'adventskalender'], 'weihnachten advent bescherung'],
+    [['halloween', 'unheimlich', 'gruselig'], 'grusel spuk geist mystery'],
+    [['fussballfolge', 'fussball folgen', 'stadion'], 'fussball sport spieler'],
+    [['meerfolge', 'inselfolge', 'insel folge'], 'meer insel schiff'],
+    [['musikfolge', 'musik folgen'], 'musik melodie lied'],
+    [['hoehle', 'hoehlenfolge'], 'hohle grotto schlucht'],
   ];
 
   const CURATED_PLAYLISTS = [
@@ -470,6 +481,13 @@
     };
   }
 
+  function normalizeHistoryEntry(input = {}) {
+    const nr = Number(input.nr ?? input.number ?? input.episodeNumber);
+    const listenedAt = input.listenedAt || input.heardAt || input.date || null;
+    if (!Number.isFinite(nr) || nr <= 0 || !listenedAt || Number.isNaN(new Date(listenedAt).getTime())) return null;
+    return { nr, listenedAt: new Date(listenedAt).toISOString() };
+  }
+
   function normalizeUser(raw) {
     const preferredService = normalizeStreamingService(
       raw?.settings?.preferredService
@@ -481,6 +499,8 @@
       version: APP_VERSION,
       episodes: {},
       playlists: [],
+      pinned: [],
+      history: [],
       settings: {
         preferredService,
         tutorialCompleted: Boolean(rawSettings.tutorialCompleted),
@@ -492,6 +512,14 @@
     if (Array.isArray(playlistSource)) {
       output.playlists = playlistSource.map(normalizePlaylist).filter(Boolean);
     }
+    const pinnedSource = raw?.user?.pinned || raw?.pinned || raw?.favorites || [];
+    if (Array.isArray(pinnedSource)) {
+      output.pinned = [...new Set(pinnedSource.map((item) => Number(item?.nr ?? item)).filter((nr) => Number.isFinite(nr) && nr > 0))];
+    }
+    const historySource = raw?.user?.history || raw?.history || raw?.listeningHistory || [];
+    if (Array.isArray(historySource)) {
+      output.history = historySource.map(normalizeHistoryEntry).filter(Boolean).sort((a, b) => new Date(b.listenedAt) - new Date(a.listenedAt)).slice(0, 120);
+    }
     const source = raw?.user?.episodes || raw?.episodes || raw?.userData || {};
     if (Array.isArray(source)) {
       for (const item of source) {
@@ -499,6 +527,13 @@
       }
     } else if (source && typeof source === 'object') {
       for (const [number, item] of Object.entries(source)) output.episodes[String(number)] = normalizeEpisodeState(item);
+    }
+    if (!output.history.length) {
+      output.history = Object.entries(output.episodes)
+        .map(([number, item]) => normalizeHistoryEntry({ nr: Number(number), listenedAt: item.heardAt }))
+        .filter(Boolean)
+        .sort((a, b) => new Date(b.listenedAt) - new Date(a.listenedAt))
+        .slice(0, 120);
     }
     return output;
   }
@@ -509,6 +544,44 @@
 
   function merged(episode) {
     return { ...episode, ...userFor(episode.nr) };
+  }
+
+  function isPinned(number) {
+    return Array.isArray(state.user.pinned) && state.user.pinned.includes(Number(number));
+  }
+
+  function recordHistory(number, listenedAt = new Date().toISOString()) {
+    const nr = Number(number);
+    if (!Number.isFinite(nr)) return;
+    state.user.history = Array.isArray(state.user.history) ? state.user.history : [];
+    state.user.history.unshift({ nr, listenedAt });
+    state.user.history = state.user.history
+      .filter((entry, index, list) => index === list.findIndex((candidate) => candidate.nr === entry.nr && candidate.listenedAt === entry.listenedAt))
+      .sort((a, b) => new Date(b.listenedAt) - new Date(a.listenedAt))
+      .slice(0, 120);
+  }
+
+  function historyFor(number) {
+    return (state.user.history || []).filter((entry) => Number(entry.nr) === Number(number));
+  }
+
+  function togglePin(number) {
+    const nr = Number(number);
+    state.user.pinned = Array.isArray(state.user.pinned) ? state.user.pinned : [];
+    const index = state.user.pinned.indexOf(nr);
+    const pinned = index < 0;
+    if (pinned) state.user.pinned.unshift(nr);
+    else state.user.pinned.splice(index, 1);
+    state.user.updatedAt = new Date().toISOString();
+    patchVisibleEpisode(nr);
+    if (state.detailNr === nr) refreshDetail();
+    pageDirty.home = true;
+    pageDirty.episodes = true;
+    queueUserPersist();
+    if (state.page === 'home') renderHome();
+    if (state.page === 'episodes' && state.filter === 'pinned') renderEpisodes();
+    toast(pinned ? 'Folge angeheftet.' : 'Anheftung entfernt.');
+    return pinned;
   }
 
   function ratingLabel(rating) {
@@ -678,6 +751,17 @@
         heardButton.setAttribute('aria-label', user.heard ? 'Als ungehört markieren' : 'Als gehört markieren');
         heardButton.setAttribute('aria-pressed', String(Boolean(user.heard)));
       }
+      const pinButton = card.querySelector('[data-pin]');
+      if (pinButton) {
+        const pinned = isPinned(number);
+        pinButton.classList.toggle('active', pinned);
+        pinButton.setAttribute('aria-pressed', String(pinned));
+        pinButton.setAttribute('aria-label', pinned ? 'Anheftung entfernen' : 'Folge anheften');
+      }
+      card.classList.remove('episode-card-updated');
+      void card.offsetWidth;
+      card.classList.add('episode-card-updated');
+      setTimeout(() => card.classList.remove('episode-card-updated'), 420);
       const badges = card.querySelectorAll('.badges .badge');
       const statusBadge = badges[badges.length - 1];
       if (statusBadge) {
@@ -716,6 +800,8 @@
     }
 
     state.user.episodes[String(number)] = next;
+    if (!old.heard && next.heard) recordHistory(number, next.heardAt || now);
+    if (old.heard && !next.heard) state.user.history = (state.user.history || []).filter((entry) => Number(entry.nr) !== Number(number));
     state.user.updatedAt = now;
     invalidateDerived();
 
@@ -812,12 +898,13 @@
     const accepted = await appConfirm({
       kicker: 'Folgendaten',
       title: 'Persönliche Daten zurücksetzen?',
-      message: 'Bewertung, Hörstatus, Datum und Notiz dieser Folge werden gelöscht. Die Folge bleibt in deinen Playlists.',
+      message: 'Bewertung, Hörstatus, Hörverlauf und Notiz dieser Folge werden gelöscht. Anheftung und Playlists bleiben erhalten.',
       confirmText: 'Folgendaten löschen',
       danger: true,
     });
     if (!accepted) return;
     delete state.user.episodes[String(number)];
+    state.user.history = (state.user.history || []).filter((entry) => Number(entry.nr) !== Number(number));
     state.user.updatedAt = new Date().toISOString();
     invalidateDerived();
     patchVisibleEpisode(number);
@@ -970,6 +1057,37 @@
       .sort((a, b) => b.replayScore - a.replayScore)[0];
   }
 
+  function surpriseThemeMatch(episode, theme) {
+    if (theme === 'any') return true;
+    if (theme === 'special') return isSpecial(episode);
+    if (theme === 'weihnachten') return (episode.tags || []).includes('Weihnachten') || (episode._search?.all || '').includes('advent');
+    if (theme === 'fussball') return (episode._search?.all || '').includes('fussball') || ((episode.tags || []).includes('Sport') && /(stadion|spieler|turnier|foul)/.test(episode._search?.all || ''));
+    return moodMatch(episode, theme);
+  }
+
+  function surprisePick() {
+    const status = $('surpriseStatus')?.value || state.surpriseStatus;
+    const theme = $('surpriseTheme')?.value || state.surpriseTheme;
+    const rating = $('surpriseRating')?.value || state.surpriseRating;
+    state.surpriseStatus = status;
+    state.surpriseTheme = theme;
+    state.surpriseRating = rating;
+    let candidates = state.catalog.map(merged).filter((episode) => surpriseThemeMatch(episode, theme));
+    if (status === 'unheard') candidates = candidates.filter((episode) => !episode.heard);
+    if (status === 'heard') candidates = candidates.filter((episode) => episode.heard);
+    if (rating === 'liked') candidates = candidates.filter((episode) => ['super', 'plus'].includes(episode.rating));
+    if (rating === 'super') candidates = candidates.filter((episode) => episode.rating === 'super');
+    if (rating === 'unrated') candidates = candidates.filter((episode) => !episode.rating);
+    if (!candidates.length) {
+      toast('Für diese Kombination wurde keine Folge gefunden.');
+      return null;
+    }
+    const ranked = candidates.map((episode) => ({ ...episode, ...recommendationScore(episode) }));
+    const pick = status === 'unheard' ? weightedPick(ranked.sort((a, b) => b.score - a.score)) : ranked[Math.floor(Math.random() * ranked.length)];
+    showRecommendation(pick, 'Zufallsauswahl');
+    return pick;
+  }
+
   function showPage(page) {
     flushPendingNote();
     state.page = page;
@@ -1051,6 +1169,32 @@
       </div>`;
   }
 
+  function weightedFavorite(field) {
+    const weights = new Map();
+    for (const base of state.catalog) {
+      const episode = merged(base);
+      if (!['super', 'plus'].includes(episode.rating)) continue;
+      const value = String(episode[field] || '').trim();
+      if (!value) continue;
+      weights.set(value, (weights.get(value) || 0) + (episode.rating === 'super' ? 2 : 1));
+    }
+    return [...weights.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'de'))[0]?.[0] || '—';
+  }
+
+  function renderPinnedHome() {
+    const pinned = (state.user.pinned || [])
+      .map((nr) => state.catalog.find((episode) => episode.nr === Number(nr)))
+      .filter(Boolean)
+      .map(merged);
+    $('pinnedSection')?.classList.toggle('hidden', !pinned.length);
+    if (!$('pinnedList')) return;
+    $('pinnedList').innerHTML = pinned.slice(0, 5).map((episode) => `
+      <div class="compact-item pinned-item">
+        <button class="compact-item-main" data-open="${episode.nr}"><span><strong>${esc(episodeLabel(episode))} · ${esc(episode.titel)}</strong><small>${fmtDuration(episode.durationMin)} · ${ratingLabel(episode.rating)}</small></span></button>
+        <button class="compact-pin active" data-pin="${episode.nr}" aria-label="Anheftung entfernen" aria-pressed="true">📌</button>
+      </div>`).join('');
+  }
+
   function renderHome() {
     const stats = calculateStats();
     const percent = stats.total ? Math.round((stats.heard / stats.total) * 100) : 0;
@@ -1066,23 +1210,32 @@
     $('plusCount').textContent = stats.plus;
     $('neutralCount').textContent = stats.neutral;
     $('minusCount').textContent = stats.minus;
+    const average = stats.average == null ? null : Math.round(stats.average * 10) / 10;
+    $('averageRating').textContent = average == null ? '—' : `${String(average).replace('.', ',')} / 4`;
+    $('averageRatingText').textContent = stats.rated ? `${stats.rated} bewertete Folgen` : 'Noch keine Wertung';
+    $('favoriteAuthor').textContent = weightedFavorite('author');
+    $('favoriteEra').textContent = weightedFavorite('era');
+    $('pinnedCount').textContent = String((state.user.pinned || []).length);
+    renderPinnedHome();
 
     const today = dailyPick();
     $('todayCard').classList.remove('loading-card');
     $('todayCard').innerHTML = recommendationMarkup(today, { kicker: 'Heute für dich' });
 
-    const recent = state.catalog
-      .map(merged)
-      .filter((episode) => episode.updatedAt)
-      .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-      .slice(0, 5);
+    const recent = (state.user.history || [])
+      .map((entry) => {
+        const base = state.catalog.find((episode) => episode.nr === Number(entry.nr));
+        return base ? { ...merged(base), listenedAt: entry.listenedAt } : null;
+      })
+      .filter(Boolean)
+      .slice(0, 6);
     $('recentList').innerHTML = recent.length
       ? recent.map((episode) => `
         <button class="compact-item" data-open="${episode.nr}">
-          <span><strong>${esc(episodeLabel(episode))} · ${esc(episode.titel)}</strong><small>${episode.heard ? 'Gehört' : 'Offen'} · ${ratingLabel(episode.rating)}${episode.durationMin ? ` · ${fmtDuration(episode.durationMin)}` : ''}</small></span>
+          <span><strong>${esc(episodeLabel(episode))} · ${esc(episode.titel)}</strong><small>${new Date(episode.listenedAt).toLocaleDateString('de-DE')} · ${ratingLabel(episode.rating)}${episode.durationMin ? ` · ${fmtDuration(episode.durationMin)}` : ''}</small></span>
           <span class="compact-rating">${ratingSymbol(episode.rating)}</span>
         </button>`).join('')
-      : '<div class="empty-message">Noch keine Aktivität. Eine Bewertung markiert die Folge automatisch als gehört.</div>';
+      : '<div class="empty-message">Noch kein Hörverlauf. Markiere eine Folge als gehört oder gib eine Bewertung ab.</div>';
     markRendered('home');
   }
 
@@ -1095,6 +1248,36 @@
     const tokens = normalized.split(' ').filter((token) => token.length > 1 && !STOP_WORDS.has(token));
     if (tokens.length) alternatives.push(tokens.join(' '));
     return uniqueStrings(alternatives.map(normalizeText));
+  }
+
+  function editDistanceWithin(a, b, limit) {
+    if (Math.abs(a.length - b.length) > limit) return false;
+    const previous = Array.from({ length: b.length + 1 }, (_, index) => index);
+    for (let row = 1; row <= a.length; row += 1) {
+      const current = [row];
+      let rowMinimum = row;
+      for (let column = 1; column <= b.length; column += 1) {
+        const cost = a[row - 1] === b[column - 1] ? 0 : 1;
+        const value = Math.min(previous[column] + 1, current[column - 1] + 1, previous[column - 1] + cost);
+        current[column] = value;
+        rowMinimum = Math.min(rowMinimum, value);
+      }
+      if (rowMinimum > limit) return false;
+      previous.splice(0, previous.length, ...current);
+    }
+    return previous[b.length] <= limit;
+  }
+
+  function fuzzySearchScore(episode, query) {
+    const queryTokens = normalizeText(query).split(' ').filter((token) => token.length >= 4 && !STOP_WORDS.has(token));
+    if (!queryTokens.length) return -1;
+    if (!episode._searchTokens) episode._searchTokens = [...new Set((episode._search?.all || '').split(' ').filter((token) => token.length >= 3))];
+    const matched = queryTokens.every((queryToken) => episode._searchTokens.some((candidate) => {
+      if (candidate.startsWith(queryToken) || queryToken.startsWith(candidate)) return true;
+      const limit = queryToken.length >= 8 ? 2 : 1;
+      return editDistanceWithin(queryToken, candidate, limit);
+    }));
+    return matched ? 26 + queryTokens.length * 3 : -1;
   }
 
   function searchScore(episode, query) {
@@ -1116,6 +1299,7 @@
       if (tokens.length && tokens.every((token) => fields.all.includes(token))) score = Math.max(score, 38 + tokens.length * 4);
       best = Math.max(best, score);
     }
+    if (best < 0) best = fuzzySearchScore(episode, query);
     return best;
   }
 
@@ -1125,6 +1309,7 @@
     if (state.filter === 'unheard') list = list.filter((episode) => !episode.heard);
     if (['super', 'plus', 'neutral', 'minus'].includes(state.filter)) list = list.filter((episode) => episode.rating === state.filter);
     if (state.filter === 'unrated') list = list.filter((episode) => !episode.rating);
+    if (state.filter === 'pinned') list = list.filter((episode) => isPinned(episode.nr));
     if (state.filter === 'long') list = list.filter((episode) => (episode.durationMin || 0) > 90);
     if (state.filter === 'special') list = list.filter(isSpecial);
     if (state.collectionLabel) list = list.filter((episode) => moodMatch(episode, state.mood));
@@ -1158,9 +1343,8 @@
   }
 
   function episodeCard(episode) {
-    const description = displayDescription(episode);
-    const result = recommendationScore(episode);
     const showMatch = tasteProfile().rated > 0 && !episode.heard;
+    const result = showMatch ? recommendationScore(episode) : null;
     return `
       <article class="episode-card rating-${episode.rating || 'none'}" data-open="${episode.nr}">
         <div class="episode-main">
@@ -1169,6 +1353,7 @@
             <h3 class="episode-title"><button type="button" class="episode-title-button" data-open="${episode.nr}">${esc(episode.titel)}</button></h3>
           </div>
           <div class="episode-card-actions">
+            <button class="pin-button ${isPinned(episode.nr) ? 'active' : ''}" data-pin="${episode.nr}" aria-pressed="${isPinned(episode.nr)}" aria-label="${isPinned(episode.nr) ? 'Anheftung entfernen' : 'Folge anheften'}">📌</button>
             ${streamingButtonMarkup(episode, preferredStreamingService(), { compact: true })}
             <button class="heard-button ${episode.heard ? 'on' : ''}" data-heard="${episode.nr}" aria-pressed="${episode.heard}" aria-label="${episode.heard ? 'Als ungehört markieren' : 'Als gehört markieren'}">${episode.heard ? '✓' : '○'}</button>
           </div>
@@ -1179,7 +1364,7 @@
             ${isSpecial(episode) ? '<span class="badge special-badge">✦ Spezial</span>' : ''}
             <span class="badge">Rocky ${fmtRocky(episode.rockyRanking)}</span>
             ${episode.author ? `<span class="badge author-badge">${esc(episode.author)}</span>` : ''}
-            ${showMatch ? `<span class="badge match">${result.match}% Match</span>` : `<span class="badge">${ratingLabel(episode.rating)}</span>`}
+            ${showMatch ? `<span class="badge match">${result?.match || 0}% Match</span>` : `<span class="badge">${ratingLabel(episode.rating)}</span>`}
           </div>
           <div class="rating-mini" aria-label="Eigene Bewertung">
             <button data-rate="${episode.nr}:minus" data-value="minus" class="${episode.rating === 'minus' ? 'active' : ''}" aria-pressed="${episode.rating === 'minus'}" aria-label="Minus">−</button>
@@ -1197,6 +1382,10 @@
     const visibleCount = Math.min(state.episodeRenderLimit, list.length);
     const visible = list.slice(0, visibleCount);
     $('episodeResultCount').textContent = `${list.length} ${list.length === 1 ? 'Folge' : 'Folgen'}`;
+    document.querySelectorAll('[data-filter]').forEach((button) => button.classList.toggle('active', button.dataset.filter === state.filter));
+    if ($('episodeSort')) $('episodeSort').value = state.sort;
+    if ($('authorFilter')) $('authorFilter').value = state.authorFilter;
+    if ($('eraFilter')) $('eraFilter').value = state.eraFilter;
     $('clearSearch').classList.toggle('hidden', !state.search);
     $('activeCollection').classList.toggle('hidden', !state.collectionLabel);
     if (state.collectionLabel) {
@@ -1381,6 +1570,7 @@ function renderPlaylists() {
     state.playlistEditorId = playlist?.id || null;
     state.playlistEditorSeedNr = seedNr ? Number(seedNr) : null;
     $('playlistEditorTitle').textContent = playlist ? 'Playlist bearbeiten' : 'Neue Playlist';
+    $('savePlaylistButton').textContent = playlist ? 'Änderungen speichern' : 'Playlist erstellen';
     $('playlistNameInput').value = playlist?.title || '';
     $('playlistDescriptionInput').value = playlist?.description || '';
     $('playlistEditorOverlay').classList.remove('hidden');
@@ -1993,16 +2183,16 @@ const TUTORIAL_STEPS = [
     allowedTargets: ['#playlistEditorOverlay .note-field', '#savePlaylistButton'],
     allowScroll: '#playlistEditorOverlay .mini-sheet',
     card: 'top',
-    title: 'Playlist speichern',
+    title: 'Playlist erstellen',
     text: 'Die Beschreibung ist optional. Der Name muss mindestens drei Zeichen lang sein.',
-    action: 'Gib einen Namen ein und tippe anschließend auf „Playlist speichern“.',
+    action: 'Gib einen Namen ein und tippe anschließend auf „Playlist erstellen“.',
     event: 'click',
     verify: () => Boolean(state.tutorialPlaylistId)
       && $('playlistEditorOverlay').classList.contains('hidden')
       && Boolean(document.querySelector(`[data-playlist-open="${state.tutorialPlaylistId}"]`)),
     invalidMessage: () => String($('playlistNameInput')?.value || '').trim().length < 3
       ? 'Gib zuerst einen Namen mit mindestens drei Zeichen ein.'
-      : 'Tippe auf „Playlist speichern“.',
+      : 'Tippe auf „Playlist erstellen“.',
     beforePosition: () => {
       const sheet = document.querySelector('#playlistEditorOverlay .mini-sheet');
       if (sheet) sheet.scrollTop = 0;
@@ -2879,7 +3069,7 @@ function closeHelp() {
     const roles = state.catalog.reduce((sum, episode) => sum + (episode.characters?.length || 0), 0);
     const spotifyLinks = state.catalog.filter((episode) => episode.spotifyUrl).length;
     const appleLinks = state.catalog.filter((episode) => episode.appleMusicUrl).length;
-    $('storageInfo').textContent = `${state.catalog.length} Folgen · ${states} persönliche Einträge · ${(state.user.playlists||[]).length} Playlists · ${state.catalog.filter((episode) => episode.rockyRanking != null).length} Rocky-Wertungen`;
+    $('storageInfo').textContent = `${state.catalog.length} Folgen · ${states} persönliche Einträge · ${(state.user.playlists||[]).length} Playlists · ${(state.user.pinned||[]).length} angeheftet · ${(state.user.history||[]).length} im Hörverlauf`;
     if ($('appVersionInfo')) $('appVersionInfo').textContent = `Version ${APP_VERSION.replace(/\.0$/, '')} · Offline-fähig`;
     $('metadataInfo').textContent = state.metadataUpdatedAt
       ? `${roles.toLocaleString('de-DE')} Rollen · ${spotifyLinks} Spotify- und ${appleLinks} Apple-Music-Direktlinks · aktualisiert ${new Date(state.metadataUpdatedAt).toLocaleDateString('de-DE')}`
@@ -3179,9 +3369,15 @@ function closeHelp() {
     });
     $('clearRating').classList.toggle('hidden', !episode.rating);
     $('detailHeard').checked = episode.heard;
+    const listens = historyFor(episode.nr);
     $('detailHeardDate').textContent = episode.heardAt
-      ? `Zuletzt markiert am ${new Date(episode.heardAt).toLocaleDateString('de-DE')}`
+      ? `${listens.length > 1 ? `${listens.length}-mal gehört · ` : ''}zuletzt am ${new Date(episode.heardAt).toLocaleDateString('de-DE')}`
       : 'Eine Bewertung markiert die Folge automatisch als gehört.';
+    const pinned = isPinned(episode.nr);
+    $('detailPinButton').classList.toggle('active', pinned);
+    $('detailPinButton').setAttribute('aria-pressed', String(pinned));
+    $('detailPinButton').querySelector('strong').textContent = pinned ? 'Anheftung entfernen' : 'Folge anheften';
+    $('detailPinButton').querySelector('small').textContent = pinned ? 'Nicht mehr auf der Startseite anzeigen' : 'Auf der Startseite schnell wiederfinden';
     if (document.activeElement !== $('detailNote')) $('detailNote').value = episode.note || '';
   }
 
@@ -3202,6 +3398,8 @@ function closeHelp() {
         exportedAt: new Date().toISOString(),
         episodes: state.user.episodes,
         playlists: state.user.playlists,
+        pinned: state.user.pinned || [],
+        history: state.user.history || [],
         settings: state.user.settings,
       };
       const text = JSON.stringify(payload, null, 2);
@@ -3433,6 +3631,7 @@ function closeHelp() {
     $('playlistAddSearch').addEventListener('input',debounce((event)=>renderPlaylistAddResults(event.target.value),100));
     $('playlistSuggestionRefresh').addEventListener('click',()=>{state.playlistSuggestionOffset+=8;renderPlaylistSuggestions();});
     $('playlistSuggestionMode').addEventListener('click',()=>{state.playlistSuggestionMode=state.playlistSuggestionMode==='similar'?'variety':'similar';state.playlistSuggestionOffset=0;renderPlaylistSuggestions();});
+    $('detailPinButton').addEventListener('click', () => { if (state.detailNr) togglePin(state.detailNr); });
     $('detailAddPlaylist').addEventListener('click',()=>{if(state.detailNr)openPlaylistPicker(state.detailNr);});
     $('playlistPlayFirst').addEventListener('click',()=>{const first=currentPlaylistEpisodes()[0];if(first)openStreaming(first.nr,preferredStreamingService());});
     $('playlistEditButton').addEventListener('click',()=>{const id=state.playlistDetailId;closePlaylistDetail();if(id&&!id.startsWith('curated:'))openPlaylistEditor(id);});
@@ -3511,12 +3710,19 @@ function closeHelp() {
       state.dailyOffset += 1;
       $('todayCard').innerHTML = recommendationMarkup(dailyPick(), { kicker: 'Alternative für heute' });
     });
+    $('surpriseToggleButton').addEventListener('click', () => {
+      const panel = $('surprisePanel');
+      const opening = panel.classList.contains('hidden');
+      panel.classList.toggle('hidden', !opening);
+      $('surpriseToggleButton').setAttribute('aria-expanded', String(opening));
+      if (opening) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+    $('surprisePickButton').addEventListener('click', surprisePick);
     $('randomNewButton').addEventListener('click', () => {
       const candidates = state.catalog.map(merged).filter((episode) => !episode.heard);
       showRecommendation(candidates[Math.floor(Math.random() * candidates.length)], 'Zufällige neue Folge');
     });
     $('randomHeardButton').addEventListener('click', () => showRecommendation(replayPick(), 'Zum Wiederhören'));
-    $('randomSpecialButton').addEventListener('click', () => showRecommendation(weightedPick(recommendationPool('special', 'any')), 'Lange Spezialfolge'));
 
     $('streamingPreference').addEventListener('click', (event) => {
       const button = event.target.closest('[data-service]');
@@ -3573,12 +3779,12 @@ function closeHelp() {
       const accepted = await appConfirm({
         kicker: 'Persönliche Daten',
         title: 'Alle persönlichen Daten löschen?',
-        message: 'Hörstände, Bewertungen, Notizen und eigene Playlists werden unwiderruflich von diesem Gerät entfernt.',
+        message: 'Hörstände, Bewertungen, Notizen, Anheftungen, Hörverlauf und eigene Playlists werden unwiderruflich von diesem Gerät entfernt.',
         confirmText: 'Alle Daten löschen',
         danger: true,
       });
       if (!accepted) return;
-      state.user = { version: APP_VERSION, episodes: {}, playlists: [], settings: { preferredService: preferredStreamingService(), tutorialCompleted: false, playlistTab: 'essentials' }, updatedAt: new Date().toISOString() };
+      state.user = { version: APP_VERSION, episodes: {}, playlists: [], pinned: [], history: [], settings: { preferredService: preferredStreamingService(), tutorialCompleted: false, playlistTab: 'essentials' }, updatedAt: new Date().toISOString() };
       invalidateDerived();
       await dbSet(USER_KEY, state.user);
       renderAll();
@@ -3629,6 +3835,25 @@ function closeHelp() {
         saveConnectionPlaylist(connectionSave.dataset.connectionSave, false);
         connectionSave.textContent = 'Gespeichert ✓';
         connectionSave.disabled = true;
+        return;
+      }
+      const pinButton = event.target.closest('[data-pin]');
+      if (pinButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        const pinned = togglePin(Number(pinButton.dataset.pin));
+        pinButton.classList.toggle('pin-pop', pinned);
+        setTimeout(() => pinButton.classList.remove('pin-pop'), 420);
+        return;
+      }
+      const filterJump = event.target.closest('[data-filter-jump]');
+      if (filterJump) {
+        state.filter = filterJump.dataset.filterJump || 'all';
+        state.search = '';
+        state.collectionLabel = '';
+        pageDirty.episodes = true;
+        showPage('episodes');
+        document.querySelectorAll('[data-filter]').forEach((button) => button.classList.toggle('active', button.dataset.filter === state.filter));
         return;
       }
       const streamButton = event.target.closest('[data-stream]');

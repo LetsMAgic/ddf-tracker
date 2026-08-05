@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_VERSION = '13.3.0';
+const CACHE_VERSION = '14.0.0';
 const CACHE_NAME = `ddf-tracker-${CACHE_VERSION}`;
 const APP_SHELL = [
   './',

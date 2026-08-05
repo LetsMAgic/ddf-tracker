@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Folgen-Tracker">
-  <meta name="description" content="Persönlicher Offline-Folgen-Tracker mit Empfehlungen, Suche und Ranking.">
+  <meta name="description" content="Persönlicher Offline-Hörspiel-Tracker mit Bewertungen, Empfehlungen, Playlists, Suche und Ranking.">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" href="icon-192.png">
@@ -52,6 +52,24 @@
         <div class="stat minus"><strong id="minusCount">0</strong><span>Minus</span></div>
       </section>
 
+      <section id="pinnedSection" class="section-block pinned-section hidden">
+        <div class="section-heading">
+          <div><span class="eyebrow">Schnell erreichbar</span><h2>Angeheftet</h2></div>
+          <button class="text-button" data-filter-jump="pinned">Alle anzeigen</button>
+        </div>
+        <div id="pinnedList" class="compact-list pinned-list"></div>
+      </section>
+
+      <section id="profileInsightsSection" class="section-block profile-insights">
+        <div class="section-heading"><div><span class="eyebrow">Dein Hörprofil</span><h2>Was dir besonders gefällt</h2></div></div>
+        <div class="profile-insight-grid">
+          <article><span>Ø Bewertung</span><strong id="averageRating">—</strong><small id="averageRatingText">Noch keine Wertung</small></article>
+          <article><span>Lieblingsautor</span><strong id="favoriteAuthor">—</strong><small>aus Plus & Super</small></article>
+          <article><span>Lieblingsära</span><strong id="favoriteEra">—</strong><small>aus Plus & Super</small></article>
+          <article><span>Angeheftet</span><strong id="pinnedCount">0</strong><small>schnell erreichbar</small></article>
+        </div>
+      </section>
+
       <section class="section-block">
         <div class="section-heading">
           <div><span class="eyebrow">Heute hören</span><h2>Dein Fall des Tages</h2></div>
@@ -85,18 +103,26 @@
         <button id="exploreMoodButton" class="subtle-link">Diese Auswahl in der Folgenliste öffnen</button>
       </section>
 
-      <section class="section-block">
+      <section class="section-block surprise-section">
         <div class="section-heading"><div><span class="eyebrow">Schnellauswahl</span><h2>Direkt loshören</h2></div></div>
         <div class="action-grid">
-          <button id="randomNewButton" class="action-card"><span>✦</span><strong>Neue Folge</strong><small>Zufällig ungehört</small></button>
+          <button id="surpriseToggleButton" class="action-card featured" aria-expanded="false" aria-controls="surprisePanel"><span>🎲</span><strong>Überrasch mich</strong><small>mit eigenen Filtern</small></button>
+          <button id="randomNewButton" class="action-card"><span>✦</span><strong>Neue Folge</strong><small>zufällig ungehört</small></button>
           <button id="randomHeardButton" class="action-card"><span>↻</span><strong>Wiederhören</strong><small>lange nicht gehört</small></button>
-          <button id="randomSpecialButton" class="action-card"><span>◈</span><strong>Spezial</strong><small>extra lange Folge</small></button>
+        </div>
+        <div id="surprisePanel" class="surprise-panel hidden">
+          <div class="surprise-controls">
+            <label class="compact-select"><span>Hörstatus</span><select id="surpriseStatus"><option value="all">Alle Folgen</option><option value="unheard">Nur ungehört</option><option value="heard">Nur gehört</option></select></label>
+            <label class="compact-select"><span>Thema</span><select id="surpriseTheme"><option value="any">Egal</option><option value="grusel">Grusel & Mystery</option><option value="klassiker">Klassiker</option><option value="weihnachten">Weihnachten</option><option value="fussball">Fußball</option><option value="meer">Meer & Insel</option><option value="special">Spezialfolgen</option></select></label>
+            <label class="compact-select"><span>Bewertung</span><select id="surpriseRating"><option value="any">Egal</option><option value="liked">Plus oder Super</option><option value="super">Nur Super</option><option value="unrated">Unbewertet</option></select></label>
+          </div>
+          <button id="surprisePickButton" class="primary-button full">Folge auslosen</button>
         </div>
       </section>
 
       <section class="section-block">
         <div class="section-heading">
-          <div><span class="eyebrow">Zuletzt geändert</span><h2>Deine Aktivität</h2></div>
+          <div><span class="eyebrow">Hörverlauf</span><h2>Zuletzt gehört</h2></div>
           <button class="text-button" data-go="episodes">Alle Folgen</button>
         </div>
         <div id="recentList" class="compact-list"></div>
@@ -123,6 +149,7 @@
           <button class="chip" data-filter="neutral">Neutral</button>
           <button class="chip" data-filter="minus">Minus</button>
           <button class="chip" data-filter="unrated">Unbewertet</button>
+          <button class="chip" data-filter="pinned">📌 Angeheftet</button>
           <button class="chip" data-filter="long">90+ Min.</button>
           <button class="chip" data-filter="special">Spezial</button>
         </div>
@@ -209,8 +236,9 @@
 
     <section class="page" data-page="settings">
       <div class="page-title">
-        <span class="eyebrow">Verwaltung</span><h2>Einstellungen</h2><p>Backups, Folgenwissen und lokale Daten.</p>
+        <span class="eyebrow">Verwaltung</span><h2>Einstellungen</h2><p>Streaming, Daten, Hilfe und App-Informationen.</p>
       </div>
+      <div class="settings-section-label"><span>Allgemein</span></div>
       <div class="settings-group streaming-settings">
         <h3>Bevorzugter Streamingdienst</h3>
         <div class="stream-preference" id="streamingPreference" role="group" aria-label="Bevorzugten Streamingdienst auswählen">
@@ -225,25 +253,41 @@
         </div>
         <p class="stream-setting-note" id="streamingPreferenceInfo">Schnellbuttons öffnen Spotify. In den Folgendetails bleiben beide Dienste sichtbar.</p>
       </div>
+      <div class="settings-section-label"><span>Daten</span></div>
       <div class="settings-group">
-        <h3>Backup</h3>
-        <button id="exportButton" class="settings-row"><span><strong>JSON exportieren</strong><small>Hörstatus, Bewertungen und Notizen sichern</small></span><b>›</b></button>
+        <h3>Backup & Übertragung</h3>
+        <button id="exportButton" class="settings-row"><span><strong>JSON exportieren</strong><small>Hörstatus, Bewertungen, Playlists, Verlauf und Anheftungen sichern</small></span><b>›</b></button>
         <button id="importButton" class="settings-row"><span><strong>JSON importieren</strong><small>Vorhandenes Backup einlesen</small></span><b>›</b></button>
         <input id="importFile" type="file" accept="application/json,.json" hidden>
       </div>
+      <div class="settings-section-label"><span>Inhalte</span></div>
       <div class="settings-group">
         <h3>Folgenwissen</h3>
         <button id="updateMetadataButton" class="settings-row"><span><strong>Folgenwissen aktualisieren</strong><small>Laufzeiten, Beschreibungen, Figuren und Streaming-Links laden</small></span><b>↓</b></button>
         <button id="reloadCatalogButton" class="settings-row"><span><strong>Eingebauten Katalog neu laden</strong><small>Rocky-Ranking und Grunddaten zurücksetzen</small></span><b>↻</b></button>
       </div>
+      <div class="settings-section-label"><span>Hilfe</span></div>
       <div class="settings-group">
         <h3>Hilfe & Einführung</h3>
         <button id="startTutorialButton" class="settings-row"><span><strong>Interaktives Tutorial starten</strong><small>Schritt für Schritt durch Bewertungen, Folgen und Playlists</small></span><b>›</b></button>
         <button id="openHelpButton" class="settings-row"><span><strong>Kurzanleitung öffnen</strong><small>Bewertungen, Smart-Playlists, Speicherung und Backups nachlesen</small></span><b>›</b></button>
       </div>
+      <div class="settings-section-label"><span>Zurücksetzen</span></div>
       <div class="settings-group">
         <h3>Persönliche Daten</h3>
-        <button id="resetButton" class="settings-row danger"><span><strong>Persönliche Daten zurücksetzen</strong><small>Hörstatus, Bewertungen und Notizen löschen</small></span><b>›</b></button>
+        <button id="resetButton" class="settings-row danger"><span><strong>Persönliche Daten zurücksetzen</strong><small>Hörstatus, Bewertungen, Playlists, Verlauf und Anheftungen löschen</small></span><b>›</b></button>
+      </div>
+      <div class="settings-section-label"><span>Über die App</span></div>
+      <div class="settings-group changelog-group">
+        <details>
+          <summary><span><strong>Neu in Version 14</strong><small>Komfort, Verlauf, Zufallsauswahl und Feinschliff</small></span><b aria-hidden="true">›</b></summary>
+          <div class="changelog-list">
+            <p><strong>Angeheftet:</strong> Lieblingsfolgen sind auf der Startseite sofort erreichbar.</p>
+            <p><strong>Hörverlauf:</strong> Die zuletzt gehörten Folgen werden getrennt von bloßen Änderungen angezeigt.</p>
+            <p><strong>Überrasch mich:</strong> Zufallsauswahl nach Hörstatus, Thema und Bewertung.</p>
+            <p><strong>Feinschliff:</strong> schnellere Listen, einheitlichere Abstände, bessere Rückmeldungen und robustere Bedienung.</p>
+          </div>
+        </details>
       </div>
       <div class="settings-group app-info">
         <img src="icon-192.png" alt="App-Icon">
@@ -251,7 +295,7 @@
           <strong>Folgen-Tracker</strong>
           <small id="storageInfo">Lade Daten …</small>
           <small id="metadataInfo">Folgenwissen wird geprüft …</small>
-          <small id="appVersionInfo">Version 13.0 · Offline-fähig</small>
+          <small id="appVersionInfo">Version 14.0 · Offline-fähig</small>
           <small id="appUpdateInfo">App-Shell und persönliche Daten sind lokal verfügbar.</small>
           <small class="source-note">Folgenmetadaten & Streaming-Links: dreimetadaten.de · Community-Wertungen: rocky-beach.com</small>
         </div>
@@ -303,7 +347,8 @@
       <small class="streaming-note">Direktlinks öffnen nach Möglichkeit die installierte App. Bei noch nicht veröffentlichten Folgen öffnet sich die Suche.</small>
     </section>
 
-    <section class="detail-section add-list-section">
+    <section class="detail-section detail-organize-actions">
+      <button id="detailPinButton" class="playlist-add-button pin-detail-button" aria-pressed="false"><span>📌</span><span><strong>Folge anheften</strong><small>Auf der Startseite schnell wiederfinden</small></span><b>›</b></button>
       <button id="detailAddPlaylist" class="playlist-add-button"><span>＋</span><span><strong>Zu Playlist hinzufügen</strong><small>Eigene Liste auswählen oder neu erstellen</small></span><b>›</b></button>
     </section>
 
@@ -355,7 +400,7 @@
     <header class="detail-header"><div><span class="eyebrow">Persönliche Liste</span><h2 id="playlistEditorTitle">Neue Playlist</h2></div><button id="closePlaylistEditor" class="icon-button" aria-label="Playlist-Editor schließen">×</button></header>
     <label class="note-field"><span class="field-label">Name</span><input id="playlistNameInput" maxlength="60" placeholder="z. B. 5-Stunden-Autofahrt"></label>
     <label class="note-field"><span class="field-label">Beschreibung</span><textarea id="playlistDescriptionInput" maxlength="300" placeholder="Wofür ist diese Liste gedacht?"></textarea></label>
-    <button id="savePlaylistButton" class="primary-button full">Playlist speichern</button>
+    <button id="savePlaylistButton" class="primary-button full">Playlist erstellen</button>
   </article>
 </div>
 
@@ -414,10 +459,11 @@
     <header class="detail-header"><div><span class="eyebrow">Hilfe</span><h2 id="helpTitle">So funktioniert die App</h2></div><button id="closeHelp" class="icon-button" aria-label="Hilfe schließen">×</button></header>
     <div class="help-list">
       <details open><summary>Bewertungen & Hörstatus</summary><p>Minus, Neutral, Plus und Super sind gegenseitig exklusiv. Tippe erneut auf die aktive Bewertung, um sie zu entfernen. Jede Bewertung markiert die Folge automatisch als gehört. Beim Zurücksetzen auf ungehört kannst du die Bewertung direkt mit entfernen.</p></details>
-      <details><summary>Folgen finden</summary><p>Die Suche berücksichtigt Titel, Autor, Ära, Figuren, Handlung, Kapitel und versteckte Stichwörter. Filter und Sortierung lassen sich kombinieren.</p></details>
+      <details><summary>Folgen finden</summary><p>Die Suche berücksichtigt Titel, Autor, Ära, Figuren, Handlung, Kapitel und Synonyme. Filter und Sortierung lassen sich kombinieren. Häufig genutzte Folgen kannst du zusätzlich anheften.</p></details>
       <details><summary>Playlists</summary><p>Unter Listen findest du goldene Essentials, Themenlisten und deine eigenen Playlists. Eigene Listen kannst du frei benennen, beschreiben, sortieren und mit automatischen Vorschlägen erweitern.</p></details>
       <details><summary>Smart-Playlists</summary><p>Lege Dauer, Stimmung, Hörstatus und optional einen Autor fest. Zusammenhängende Fälle bleiben auf Wunsch in der richtigen Reihenfolge.</p></details>
-      <details><summary>Speicherung & Backup</summary><p>Alle Änderungen werden automatisch lokal auf diesem Gerät gespeichert. Das JSON-Backup brauchst du nur als zusätzliche Sicherung oder für einen Gerätewechsel.</p></details>
+      <details><summary>Überrasch mich & Hörverlauf</summary><p>Auf der Startseite kannst du eine Folge nach Hörstatus, Thema und eigener Bewertung auslosen. Unter „Zuletzt gehört“ findest du deinen lokalen Hörverlauf.</p></details>
+      <details><summary>Speicherung & Backup</summary><p>Alle Änderungen, angehefteten Folgen, der Hörverlauf und deine Playlists werden automatisch lokal auf diesem Gerät gespeichert. Das JSON-Backup brauchst du nur als zusätzliche Sicherung oder für einen Gerätewechsel.</p></details>
     </div>
     <button id="helpStartTutorial" class="primary-button full">Interaktives Tutorial starten</button>
   </article>
