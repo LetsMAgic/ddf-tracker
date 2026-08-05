@@ -2900,15 +2900,34 @@ function closeHelp() {
   }
 
   function openDetail(number) {
-    state.detailNr = Number(number);
+    const requestedNumber = Number(number);
+    const base = state.catalog.find((episode) => episode.nr === requestedNumber);
+    if (!base) {
+      toast('Die Folge wurde im Katalog nicht gefunden.');
+      return;
+    }
+    state.detailNr = requestedNumber;
     document.querySelectorAll('#detailOverlay details.detail-accordion').forEach((section) => { section.open = false; });
-    refreshDetail();
     const detailOverlay = $('detailOverlay');
     const playlistIsOpen = !$('playlistDetailOverlay').classList.contains('hidden');
     detailOverlay.classList.toggle('overlay-front', playlistIsOpen);
     detailOverlay.classList.remove('hidden');
     detailOverlay.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
+    try {
+      refreshDetail();
+    } catch (error) {
+      console.error('Folgendetails konnten nicht vollständig geladen werden:', error);
+      // Keep the modal usable instead of letting one malformed metadata field
+      // terminate the whole interaction on iOS WebKit.
+      $('detailNumber').textContent = episodeLabel(base);
+      $('detailTitle').textContent = base.titel || 'Folgendetails';
+      $('detailDescription').textContent = displayDescription(base) || 'Für diese Folge sind derzeit nicht alle Details verfügbar.';
+      $('detailKnowledgeGrid').innerHTML = '';
+      $('detailConnectionsSection').classList.add('hidden');
+      $('detailSimilarSection').classList.add('hidden');
+      $('detailTriviaSection').classList.add('hidden');
+    }
     setTimeout(() => $('closeDetail')?.focus({ preventScroll: true }), 0);
   }
 
@@ -3024,18 +3043,31 @@ function closeHelp() {
   }
 
   function similarEpisodes(episode, limit = 4) {
-    const tags = new Set((episode.tags || []).map(normalizeText));
-    const chars = new Set(importantCharacters(episode, 10).map(normalizeText));
-    return state.catalog.map(merged).filter((item) => item.nr !== episode.nr).map((item) => {
+    // Mobile-safe: use the already cached recommendation features instead of
+    // rebuilding character lists for the entire catalogue whenever a detail opens.
+    const sourceFeatures = new Map(episodeFeatures(episode).map((feature) => [feature.key, feature]));
+    const results = [];
+    for (const base of state.catalog) {
+      if (base.nr === episode.nr) continue;
+      const item = merged(base);
       let score = 0;
-      const sharedTags = (item.tags || []).filter((tag) => tags.has(normalizeText(tag)));
-      const sharedChars = importantCharacters(item, 10).filter((name) => chars.has(normalizeText(name)));
-      score += sharedTags.length * 2.2 + sharedChars.length * 3.2;
-      if (item.author && item.author === episode.author) score += 1.25;
+      let reason = '';
+      for (const feature of episodeFeatures(item)) {
+        const shared = sourceFeatures.get(feature.key);
+        if (!shared) continue;
+        const weight = feature.type === 'character' ? 3.2 : 2.2;
+        score += weight;
+        if (!reason) reason = shared.label;
+      }
+      if (item.author && item.author === episode.author) {
+        score += 1.25;
+        if (!reason) reason = `ebenfalls ${item.author}`;
+      }
       if (item.era && item.era === episode.era) score += .35;
       if (item.rockyRanking != null) score += Math.max(0, 2.8 - item.rockyRanking) * .22;
-      return { item, score, reason: sharedChars[0] || sharedTags[0] || (item.author === episode.author ? `ebenfalls ${item.author}` : '') };
-    }).filter((entry) => entry.score > 0).sort((a,b) => b.score - a.score || rockyCompare(a.item,b.item)).slice(0, limit);
+      if (score > 0) results.push({ item, score, reason });
+    }
+    return results.sort((a,b) => b.score - a.score || rockyCompare(a.item,b.item)).slice(0, limit);
   }
 
   function knowledgeTrivia(episode) {
@@ -3116,9 +3148,10 @@ function closeHelp() {
     $('detailReasons').innerHTML = result.reasons.map((reason) => `<span>${esc(reason)}</span>`).join('');
     $('detailCharactersSection').classList.toggle('hidden', !characters.length);
     $('detailCharacters').innerHTML = characters.map((character) => `<span>${esc(character)}</span>`).join('');
-    $('detailThemesSection').classList.toggle('hidden', !episode.tags.length);
-    $('detailThemes').innerHTML = episode.tags.slice(0, 10).map((tag) => `<span>${esc(tag)}</span>`).join('');
-    $('detailPeopleSection').classList.toggle('hidden', !characters.length && !episode.tags.length);
+    const detailTags = Array.isArray(episode.tags) ? episode.tags : [];
+    $('detailThemesSection').classList.toggle('hidden', !detailTags.length);
+    $('detailThemes').innerHTML = detailTags.slice(0, 10).map((tag) => `<span>${esc(tag)}</span>`).join('');
+    $('detailPeopleSection').classList.toggle('hidden', !characters.length && !detailTags.length);
 
     document.querySelectorAll('#detailRating [data-rating]').forEach((button) => {
       const active = button.dataset.rating === episode.rating;
