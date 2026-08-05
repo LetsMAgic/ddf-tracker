@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#12110d">
+  <meta name="color-scheme" content="dark">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Folgen-Tracker">
@@ -250,7 +251,8 @@
           <strong>Folgen-Tracker</strong>
           <small id="storageInfo">Lade Daten …</small>
           <small id="metadataInfo">Folgenwissen wird geprüft …</small>
-          <small>Version 11.0 · Speicherung ausschließlich auf diesem Gerät</small>
+          <small id="appVersionInfo">Version 13.0 · Offline-fähig</small>
+          <small id="appUpdateInfo">App-Shell und persönliche Daten sind lokal verfügbar.</small>
           <small class="source-note">Folgenmetadaten & Streaming-Links: dreimetadaten.de · Community-Wertungen: rocky-beach.com</small>
         </div>
       </div>
@@ -350,7 +352,7 @@
 <div id="playlistEditorOverlay" class="overlay hidden" aria-hidden="true">
   <article class="mini-sheet" role="dialog" aria-modal="true" aria-labelledby="playlistEditorTitle">
     <div class="sheet-handle"></div>
-    <header class="detail-header"><div><span class="eyebrow">Persönliche Liste</span><h2 id="playlistEditorTitle">Neue Playlist</h2></div><button id="closePlaylistEditor" class="icon-button">×</button></header>
+    <header class="detail-header"><div><span class="eyebrow">Persönliche Liste</span><h2 id="playlistEditorTitle">Neue Playlist</h2></div><button id="closePlaylistEditor" class="icon-button" aria-label="Playlist-Editor schließen">×</button></header>
     <label class="note-field"><span class="field-label">Name</span><input id="playlistNameInput" maxlength="60" placeholder="z. B. 5-Stunden-Autofahrt"></label>
     <label class="note-field"><span class="field-label">Beschreibung</span><textarea id="playlistDescriptionInput" maxlength="300" placeholder="Wofür ist diese Liste gedacht?"></textarea></label>
     <button id="savePlaylistButton" class="primary-button full">Playlist speichern</button>
@@ -360,7 +362,7 @@
 <div id="playlistPickerOverlay" class="overlay hidden" aria-hidden="true">
   <article class="mini-sheet" role="dialog" aria-modal="true" aria-labelledby="playlistPickerTitle">
     <div class="sheet-handle"></div>
-    <header class="detail-header"><div><span class="eyebrow">Merken</span><h2 id="playlistPickerTitle">Zu Playlist hinzufügen</h2></div><button id="closePlaylistPicker" class="icon-button">×</button></header>
+    <header class="detail-header"><div><span class="eyebrow">Merken</span><h2 id="playlistPickerTitle">Zu Playlist hinzufügen</h2></div><button id="closePlaylistPicker" class="icon-button" aria-label="Playlist-Auswahl schließen">×</button></header>
     <div id="playlistPickerList" class="picker-list"></div>
     <button id="pickerNewPlaylist" class="subtle-button full">＋ Neue Playlist erstellen</button>
   </article>
@@ -369,7 +371,7 @@
 <div id="playlistDetailOverlay" class="overlay hidden" aria-hidden="true">
   <article class="detail-sheet playlist-sheet" role="dialog" aria-modal="true" aria-labelledby="playlistDetailTitle">
     <div class="sheet-handle"></div>
-    <header class="detail-header"><div><span id="playlistDetailKicker" class="eyebrow">Playlist</span><h2 id="playlistDetailTitle"></h2></div><button id="closePlaylistDetail" class="icon-button">×</button></header>
+    <header class="detail-header"><div><span id="playlistDetailKicker" class="eyebrow">Playlist</span><h2 id="playlistDetailTitle"></h2></div><button id="closePlaylistDetail" class="icon-button" aria-label="Playlist schließen">×</button></header>
     <p id="playlistDetailDescription" class="detail-description"></p>
     <div id="playlistDetailStats" class="playlist-detail-stats"></div>
     <div class="playlist-detail-actions"><button id="playlistPlayFirst" class="primary-button">▶ Erste Folge öffnen</button><button id="playlistAddEpisodeButton" class="subtle-button">＋ Folge hinzufügen</button><button id="playlistEditButton" class="subtle-button">Bearbeiten</button><button id="playlistDeleteButton" class="danger-button">Löschen</button></div>
@@ -394,6 +396,15 @@
     <p>Eine bewertete Folge gilt als gehört. Um sie wieder als ungehört zu markieren, wird deshalb auch deine Bewertung entfernt.</p>
     <button id="confirmUnheardAndClear" class="danger-button full">Bewertung entfernen & als ungehört markieren</button>
     <button id="cancelHeardReset" class="subtle-button full">Abbrechen</button>
+  </article>
+</div>
+
+<div id="confirmOverlay" class="overlay action-overlay overlay-front hidden" aria-hidden="true">
+  <article class="mini-sheet action-sheet confirm-sheet" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMessage">
+    <div class="sheet-handle"></div>
+    <header class="detail-header"><div><span id="confirmKicker" class="eyebrow">Bestätigen</span><h2 id="confirmTitle">Aktion bestätigen</h2></div><button id="closeConfirm" class="icon-button" aria-label="Dialog schließen">×</button></header>
+    <p id="confirmMessage"></p>
+    <div class="confirm-actions"><button id="confirmCancel" class="subtle-button full">Abbrechen</button><button id="confirmAccept" class="primary-button full">Bestätigen</button></div>
   </article>
 </div>
 

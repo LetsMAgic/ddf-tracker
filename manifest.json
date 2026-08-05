@@ -1,15 +1,27 @@
 {
-  "name": "Die drei ??? – Folgen-Tracker",
+  "id": "./",
+  "name": "Die drei ??? Folgen-Tracker",
   "short_name": "Folgen-Tracker",
-  "description": "Persönlicher Hörspiel-Tracker mit Empfehlungen und Ranking.",
+  "description": "Persönlicher Offline-Hörspiel-Tracker mit Bewertungen, Empfehlungen, Rankings und Playlists.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "background_color": "#090b0f",
-  "theme_color": "#090b0f",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#12110d",
+  "theme_color": "#12110d",
   "icons": [
-    {"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
-    {"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
   ]
 }

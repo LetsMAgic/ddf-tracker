@@ -76,7 +76,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .overlay{position:fixed;z-index:50;inset:0;background:rgba(0,0,0,.66);display:flex;align-items:flex-end;backdrop-filter:blur(8px);animation:fadeIn .18s ease}.detail-sheet{width:min(820px,100%);max-height:93dvh;overflow-y:auto;margin:0 auto;padding:8px 18px calc(28px + env(safe-area-inset-bottom));border-radius:30px 30px 0 0;background:linear-gradient(180deg,#1b1e24,#111318);border:1px solid #343941;border-bottom:0;box-shadow:0 -25px 70px rgba(0,0,0,.5);animation:sheetUp .25s cubic-bezier(.2,.8,.2,1)}@keyframes fadeIn{from{opacity:0}}@keyframes sheetUp{from{transform:translateY(40px);opacity:.5}}
 .sheet-handle{width:42px;height:5px;border-radius:999px;background:#4c515a;margin:2px auto 17px}.detail-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}.detail-header h2{font-size:30px;line-height:1.08;letter-spacing:-.045em;margin:7px 0 0}.detail-score-row{display:flex;align-items:center;gap:15px;margin-top:18px}.match-orb{display:grid;place-items:center;flex:0 0 76px;height:76px;border-radius:24px;background:#28230f;border:1px solid #59450e;color:var(--gold)}.match-orb strong,.match-orb span{display:block;text-align:center}.match-orb strong{font-size:22px}.match-orb span{font-size:10px;text-transform:uppercase;letter-spacing:.1em}.detail-meta{display:flex;flex-wrap:wrap;gap:7px}.detail-description{color:#c9ccd2;font-size:15px;line-height:1.65;margin:20px 0}.detail-section{margin-top:20px}.field-label{display:block;margin-bottom:9px;color:#aeb3bd;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.character-cloud span{border-color:#38455a;background:#1a2230;color:#c9d8ee}
 .rating-control{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.rating-control button{min-height:62px;border-radius:17px;background:#20242b;border:1px solid #303640;color:#9ca2ad;font-size:11px;font-weight:800}.rating-control button span{display:block;font-size:22px;line-height:1.1;margin-bottom:3px}.rating-control button.active[data-rating="super"]{background:var(--gold);border-color:var(--gold);color:#181307;animation:superPulse .38s ease}.rating-control button.active[data-rating="plus"]{background:var(--green);border-color:var(--green);color:#111b15}.rating-control button.active[data-rating="neutral"]{background:#b5b9c2;border-color:#b5b9c2;color:#15161a}.rating-control button.active[data-rating="minus"]{background:var(--red);border-color:var(--red);color:#251013}.clear-rating{display:block;margin:8px auto 0;padding:7px 10px;background:none;color:#777d88;font-size:12px}
-.heard-control{display:flex;align-items:center;gap:12px;margin-top:22px;padding:15px;border-radius:19px;background:#191c22;border:1px solid #2d323b}.heard-control input{width:23px;height:23px;accent-color:var(--green)}.heard-control strong,.heard-control small{display:block}.heard-control small{color:var(--muted);font-size:11px;margin-top:3px}.note-field{display:block;margin-top:20px}.note-field textarea{width:100%;min-height:112px;resize:vertical;padding:14px;border-radius:17px;background:#15181d;border:1px solid #30353e;outline:none}.toast{position:fixed;z-index:80;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%);width:max-content;max-width:calc(100% - 32px);padding:12px 16px;border-radius:999px;background:#f0f1f4;color:#16181c;font-weight:750;font-size:13px;box-shadow:0 12px 34px rgba(0,0,0,.4);animation:toastIn .22s ease}@keyframes toastIn{from{transform:translate(-50%,10px);opacity:0}}
+.heard-control{display:flex;align-items:center;gap:12px;margin-top:22px;padding:15px;border-radius:19px;background:#191c22;border:1px solid #2d323b}.heard-control input{width:23px;height:23px;accent-color:var(--green)}.heard-control strong,.heard-control small{display:block}.heard-control small{color:var(--muted);font-size:11px;margin-top:3px}.note-field{display:block;margin-top:20px}.note-field textarea{width:100%;min-height:112px;resize:vertical;padding:14px;border-radius:17px;background:#15181d;border:1px solid #30353e;outline:none}.toast{position:fixed;z-index:80;pointer-events:none;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%);width:max-content;max-width:calc(100% - 32px);padding:12px 16px;border-radius:999px;background:#f0f1f4;color:#16181c;font-weight:750;font-size:13px;box-shadow:0 12px 34px rgba(0,0,0,.4);animation:toastIn .22s ease}@keyframes toastIn{from{transform:translate(-50%,10px);opacity:0}}
 
 @media(max-width:620px){
   .app-shell{padding-left:14px;padding-right:14px}.app-header{padding-bottom:24px}.brand-icon{width:48px;height:48px}.brand h1{font-size:25px}.icon-button{width:48px;height:48px}
@@ -501,3 +501,90 @@ body.tutorial-running .tutorial-card.tutorial-card-compact{max-height:26dvh!impo
   .connection-card > .connection-episodes > .relation-row{padding:10px;grid-template-columns:27px minmax(0,1fr) 16px!important}
   .connection-card > .connection-episodes .relation-row strong{font-size:12px;line-height:1.32}
 }
+
+
+/* v12.8 — iOS keyboard-safe tutorial fields and exact playlist-card step */
+body.tutorial-running input,
+body.tutorial-running textarea,
+body.tutorial-running select{font-size:16px!important}
+body.tutorial-running .tutorial-overlay.tutorial-keyboard-active .tutorial-focus{transition:none!important}
+#tutorialCreatedPlaylist.tutorial-created-playlist{
+  scroll-margin-top:360px!important;
+  scroll-margin-bottom:180px!important;
+}
+
+/* Version 13.0 – final polish */
+.episode-title-button{
+  display:inline;
+  max-width:100%;
+  padding:0;
+  border:0;
+  background:none;
+  color:inherit;
+  font:inherit;
+  font-weight:inherit;
+  line-height:inherit;
+  letter-spacing:inherit;
+  text-align:left;
+}
+.episode-title-button:hover{text-decoration:underline;text-decoration-color:rgba(255,198,41,.55);text-underline-offset:3px}
+.playlist-row-actions button:disabled{opacity:.28;cursor:default;pointer-events:none}
+.chips-scroll{
+  padding-right:26px;
+  -webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 28px),transparent 100%);
+  mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 28px),transparent 100%);
+}
+.confirm-sheet{max-width:520px}
+.confirm-sheet>p{margin:18px 0;color:#c8ccd4;line-height:1.6}
+.confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.confirm-actions .full{margin-top:0;width:100%}
+.confirm-actions .danger-button{font-weight:850}
+
+button:focus-visible,[role="button"]:focus-visible,a:focus-visible{
+  outline:2px solid var(--gold);
+  outline-offset:3px;
+}
+
+/* A temporary lower starting position makes the search tutorial comfortable
+   below iOS status bars without relying on device-specific pixel offsets. */
+body.tutorial-search-step .page[data-page="episodes"] .sticky-tools{
+  transform:translateY(clamp(54px,8dvh,78px));
+  margin-bottom:clamp(54px,8dvh,78px);
+}
+
+/* One deterministic tutorial stage. Older version-specific rules above are
+   deliberately overridden here so the spotlight never animates between stale
+   measurements. */
+.tutorial-overlay{pointer-events:none!important}
+.tutorial-card{pointer-events:auto!important;transition:none!important;animation:none!important}
+.tutorial-focus{
+  pointer-events:none!important;
+  transition:none!important;
+  animation:none!important;
+  border:2px solid var(--gold)!important;
+  outline:1px solid rgba(255,255,255,.24)!important;
+  box-shadow:0 0 0 9999px rgba(2,3,5,.68),0 0 0 6px rgba(245,196,65,.17),0 0 28px rgba(245,196,65,.30)!important;
+}
+.tutorial-overlay.tutorial-positioning .tutorial-card,
+.tutorial-overlay.tutorial-positioning .tutorial-focus{opacity:0!important}
+.tutorial-card.tutorial-card-reading{max-height:29dvh!important}
+body.tutorial-reading-detail #detailOverlay .detail-sheet,
+body.tutorial-reading-plan #planPreview{scroll-behavior:auto!important;overscroll-behavior:contain}
+body.tutorial-running[data-tutorial-step="read-knowledge-close"] #detailOverlay .detail-sheet,
+body.tutorial-running[data-tutorial-step="read-description-close"] #detailOverlay .detail-sheet{
+  box-shadow:0 0 0 2px rgba(255,198,41,.2),0 -25px 70px rgba(0,0,0,.5)
+}
+
+@media(max-width:430px){
+  .confirm-actions{grid-template-columns:1fr}
+  .confirm-actions #confirmAccept{order:-1}
+}
+@media(prefers-reduced-motion:reduce){
+  .playlist-card:active,.curated-card:active,.primary-button:active,.stream-service-button:active,.stream-icon-button:active{transform:none!important}
+}
+
+/* Narrow-screen containment: grid cards must be allowed to shrink below their
+   intrinsic content width instead of widening the page. */
+.episode-list,.episode-card,.episode-card-main,.episode-header,.episode-footer,.episode-info{min-width:0;max-width:100%}
+.episode-card{overflow:hidden}
+.episode-title,.episode-description,.badges{min-width:0;max-width:100%}

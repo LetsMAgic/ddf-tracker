@@ -5,10 +5,10 @@
   const DB_VERSION = 1;
   const STORE = 'kv';
   const USER_KEY = 'appState';
-  const CATALOG_KEY = 'enrichedCatalogV10';
-  const LEGACY_CATALOG_KEYS = ['enrichedCatalogV9', 'enrichedCatalogV8', 'enrichedCatalogV7', 'enrichedCatalogV6', 'enrichedCatalogV5', 'enrichedCatalogV4'];
+  const CATALOG_KEY = 'enrichedCatalogV13';
+  const LEGACY_CATALOG_KEYS = ['enrichedCatalogV10', 'enrichedCatalogV9', 'enrichedCatalogV8', 'enrichedCatalogV7', 'enrichedCatalogV6', 'enrichedCatalogV5', 'enrichedCatalogV4'];
   const LEGACY_USER_KEYS = ['user-state', 'userState', 'state'];
-  const APP_VERSION = 12.8;
+  const APP_VERSION = '13.0.0';
   const DEFAULT_STREAMING_SERVICE = 'spotify';
   const META_URL = 'https://dreimetadaten.de/data/Serie.json';
   const META_MAX_AGE = 1000 * 60 * 60 * 24 * 30;
@@ -71,6 +71,9 @@
 
   let dbPromise;
   let noteTimer;
+  let pendingNote = null;
+  let confirmResolver = null;
+  let lastFocusedElement = null;
 
   const TAG_RULES = [
     ['Grusel', ['geist', 'gespenst', 'spuk', 'grusel', 'schreck', 'dämon', 'vampir', 'werwolf', 'untot', 'jenseits', 'hexen', 'fluch', 'toten', 'monster', 'moor', 'nebel']],
@@ -149,7 +152,7 @@
     { id: 'football', icon: '⚽', title: 'Fußballfälle', description: 'Stadien, Spieler, Fouls, Turniere und gestohlene Siege.', type: 'numbers', numbers: [63,81,123,141,153,164,176,245], sequence: false },
     { id: 'andre-marx', icon: '✎', title: 'André Marx', description: 'Fälle eines der prägendsten Autoren der modernen Serie.', type: 'author', author: 'André Marx', max: 24 },
     { id: 'summer', icon: '≈', title: 'Sommer, Meer & Inseln', description: 'Inseln, Küsten, Schiffe, Tauchen und salzige Seeluft.', type: 'theme', mood: 'meer', max: 16 },
-    { id: 'classics', icon: '◇', title: 'Die Klassiker', description: 'Die ersten 39 Hörspielfolgen in chronologischer Reihenfolge.', type: 'range', from: 1, to: 39 },
+    { id: 'classics', icon: '◇', title: 'Die ersten Klassiker', description: 'Die ersten 39 Hörspielfolgen in chronologischer Reihenfolge.', type: 'range', from: 1, to: 39 },
     { id: 'hugenay', icon: '♜', title: 'Die Hugenay-Chronik', description: 'Die wichtigsten Auftritte des französischen Meisterdiebs in sinnvoller Reihenfolge.', type: 'numbers', numbers: [9,16,103,125], sequence: true },
     { id: 'feuriges-auge', icon: '◆', title: 'Vor Feuriges Auge', description: 'Der klassische Ursprung des Rubins und anschließend die Jubiläumsfolge.', type: 'numbers', numbers: [5,200], sequence: true },
     { id: 'taipan', icon: '⌁', title: 'Vor dem dunklen Taipan', description: 'Fälle und Motive, auf die das Live-Hörspiel besonders deutlich zurückgreift.', type: 'numbers', numbers: [2,5,16,23,25], sequence: true },
@@ -516,13 +519,15 @@
   }
 
   function fmtRocky(value) {
-    return value == null ? '—' : Number(value).toFixed(2).replace('.', ',');
+    return value == null ? 'nicht verfügbar' : Number(value).toFixed(2).replace('.', ',');
   }
 
   function fmtDuration(minutes) {
-    if (!minutes) return '—';
-    const hours = Math.floor(minutes / 60);
-    const remaining = minutes % 60;
+    if (minutes == null || !Number.isFinite(Number(minutes))) return 'nicht verfügbar';
+    const value = Math.max(0, Math.round(Number(minutes)));
+    if (value === 0) return '0 Min.';
+    const hours = Math.floor(value / 60);
+    const remaining = value % 60;
     if (!hours) return `${remaining} Min.`;
     return `${hours} Std.${remaining ? ` ${remaining} Min.` : ''}`;
   }
@@ -599,9 +604,13 @@
   }
 
   function displayDescription(episode) {
-    const description = String(episode.beschreibung || '');
-    if (!description || /^Stichwort/i.test(description) || /^Metadaten werden/i.test(description)) return '';
+    const description = String(episode.beschreibung || '').trim();
+    if (!description || /^Stichwort(?:e|suche)?/i.test(description) || /^Metadaten werden/i.test(description)) return '';
     return description;
+  }
+
+  function metadataFallback(label = 'Angabe') {
+    return `${label} noch nicht verfügbar`;
   }
 
   let persistTimer = null;
@@ -657,13 +666,16 @@
       card.classList.remove('rating-none', 'rating-minus', 'rating-neutral', 'rating-plus', 'rating-super');
       card.classList.add(`rating-${user.rating || 'none'}`);
       card.querySelectorAll('[data-rate]').forEach((button) => {
-        button.classList.toggle('active', button.dataset.value === user.rating);
+        const active = button.dataset.value === user.rating;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
       });
       const heardButton = card.querySelector('[data-heard]');
       if (heardButton) {
         heardButton.classList.toggle('on', user.heard);
         heardButton.textContent = user.heard ? '✓' : '○';
         heardButton.setAttribute('aria-label', user.heard ? 'Als ungehört markieren' : 'Als gehört markieren');
+        heardButton.setAttribute('aria-pressed', String(Boolean(user.heard)));
       }
       const badges = card.querySelectorAll('.badges .badge');
       const statusBadge = badges[badges.length - 1];
@@ -713,6 +725,45 @@
     scheduleSecondaryRefresh();
   }
 
+  function flushPendingNote() {
+    clearTimeout(noteTimer);
+    noteTimer = null;
+    if (!pendingNote?.number) return;
+    const { number, value } = pendingNote;
+    pendingNote = null;
+    if (userFor(number).note !== value) saveEpisode(number, { note: value });
+  }
+
+  function closeConfirmDialog(result = false) {
+    const overlay = $('confirmOverlay');
+    if (overlay) {
+      overlay.classList.add('hidden');
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+    const resolve = confirmResolver;
+    confirmResolver = null;
+    resolve?.(Boolean(result));
+    if (lastFocusedElement?.isConnected) lastFocusedElement.focus({ preventScroll: true });
+    lastFocusedElement = null;
+  }
+
+  function appConfirm({ kicker = 'Bestätigen', title = 'Aktion bestätigen', message = '', confirmText = 'Bestätigen', cancelText = 'Abbrechen', danger = false } = {}) {
+    if (!$('confirmOverlay')) return Promise.resolve(false);
+    if (confirmResolver) closeConfirmDialog(false);
+    lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    $('confirmKicker').textContent = kicker;
+    $('confirmTitle').textContent = title;
+    $('confirmMessage').textContent = message;
+    $('confirmAccept').textContent = confirmText;
+    $('confirmCancel').textContent = cancelText;
+    $('confirmAccept').classList.toggle('danger-button', danger);
+    $('confirmAccept').classList.toggle('primary-button', !danger);
+    $('confirmOverlay').classList.remove('hidden');
+    $('confirmOverlay').setAttribute('aria-hidden', 'false');
+    setTimeout(() => $('confirmAccept')?.focus({ preventScroll: true }), 0);
+    return new Promise((resolve) => { confirmResolver = resolve; });
+  }
+
   function toggleEpisodeRating(number, rating) {
     const current = userFor(number).rating;
     if (current === rating) {
@@ -734,6 +785,7 @@
     state.pendingUnheardNr = Number(number);
     $('heardResetOverlay').classList.remove('hidden');
     $('heardResetOverlay').setAttribute('aria-hidden', 'false');
+    setTimeout(() => $('confirmUnheardAndClear')?.focus({ preventScroll: true }), 0);
   }
 
   function closeHeardReset() {
@@ -755,8 +807,15 @@
     toast('Bewertung entfernt und als ungehört markiert.');
   }
 
-  function resetEpisodeData(number) {
-    if (!confirm('Bewertung, Hörstatus, Datum und Notiz dieser Folge zurücksetzen? Die Folge bleibt in deinen Playlists.')) return;
+  async function resetEpisodeData(number) {
+    const accepted = await appConfirm({
+      kicker: 'Folgendaten',
+      title: 'Persönliche Daten zurücksetzen?',
+      message: 'Bewertung, Hörstatus, Datum und Notiz dieser Folge werden gelöscht. Die Folge bleibt in deinen Playlists.',
+      confirmText: 'Folgendaten löschen',
+      danger: true,
+    });
+    if (!accepted) return;
     delete state.user.episodes[String(number)];
     state.user.updatedAt = new Date().toISOString();
     invalidateDerived();
@@ -911,6 +970,7 @@
   }
 
   function showPage(page) {
+    flushPendingNote();
     state.page = page;
     document.querySelectorAll('.page').forEach((element) => element.classList.toggle('active', element.dataset.page === page));
     document.querySelectorAll('[data-nav]').forEach((element) => element.classList.toggle('active', element.dataset.nav === page));
@@ -972,15 +1032,16 @@
     const reasons = [...result.reasons];
     if (episode.durationMin) reasons.push(fmtDuration(episode.durationMin));
     if (episode.rockyRanking != null) reasons.push(`Rocky ${fmtRocky(episode.rockyRanking)}`);
-    const kicker = options.kicker || (isSpecial(episode) ? 'Spezial-Empfehlung' : 'Persönliche Empfehlung');
+    const personal = tasteProfile().rated >= 2;
+    const kicker = options.kicker || (isSpecial(episode) ? 'Spezial-Empfehlung' : personal ? 'Persönliche Empfehlung' : 'Startempfehlung');
     return `
       <div class="recommendation-top">
         <div>
           <span class="eyebrow">${esc(kicker)}</span>
           <h3>${esc(episodeLabel(episode))} · ${esc(episode.titel)}</h3>
-          <p>${result.reasons.length ? 'Passt zu Merkmalen deiner besonders gut bewerteten Folgen.' : 'Ausgewählt anhand des Community-Rankings und deiner bisherigen Daten.'}</p>
+          <p>${personal && result.reasons.length ? 'Passt zu Merkmalen deiner besonders gut bewerteten Folgen.' : 'Ausgewählt anhand von Community-Wertung, Laufzeit und verfügbaren Folgendaten.'}</p>
         </div>
-        <div class="match-badge"><strong>${result.match}%</strong><span>Match</span></div>
+        <div class="match-badge"><strong>${result.match}%</strong><span>${personal ? 'Match' : 'Tipp'}</span></div>
       </div>
       <div class="recommend-reasons">${reasons.slice(0, 6).map((reason) => `<span>${esc(reason)}</span>`).join('')}</div>
       <div class="recommendation-actions">
@@ -1104,12 +1165,12 @@
         <div class="episode-main">
           <div>
             <span class="episode-number">${esc(episodeLabel(episode).toUpperCase())}</span>
-            <h3 class="episode-title">${esc(episode.titel)}</h3>
+            <h3 class="episode-title"><button type="button" class="episode-title-button" data-open="${episode.nr}">${esc(episode.titel)}</button></h3>
             ${description ? `<p class="episode-description">${esc(description)}</p>` : ''}
           </div>
           <div class="episode-card-actions">
             ${streamingButtonMarkup(episode, preferredStreamingService(), { compact: true })}
-            <button class="heard-button ${episode.heard ? 'on' : ''}" data-heard="${episode.nr}" aria-label="${episode.heard ? 'Als ungehört markieren' : 'Als gehört markieren'}">${episode.heard ? '✓' : '○'}</button>
+            <button class="heard-button ${episode.heard ? 'on' : ''}" data-heard="${episode.nr}" aria-pressed="${episode.heard}" aria-label="${episode.heard ? 'Als ungehört markieren' : 'Als gehört markieren'}">${episode.heard ? '✓' : '○'}</button>
           </div>
         </div>
         <div class="episode-footer">
@@ -1121,10 +1182,10 @@
             ${showMatch ? `<span class="badge match">${result.match}% Match</span>` : `<span class="badge">${ratingLabel(episode.rating)}</span>`}
           </div>
           <div class="rating-mini" aria-label="Eigene Bewertung">
-            <button data-rate="${episode.nr}:minus" data-value="minus" class="${episode.rating === 'minus' ? 'active' : ''}" aria-label="Minus">−</button>
-            <button data-rate="${episode.nr}:neutral" data-value="neutral" class="${episode.rating === 'neutral' ? 'active' : ''}" aria-label="Neutral">●</button>
-            <button data-rate="${episode.nr}:plus" data-value="plus" class="${episode.rating === 'plus' ? 'active' : ''}" aria-label="Plus">＋</button>
-            <button data-rate="${episode.nr}:super" data-value="super" class="${episode.rating === 'super' ? 'active' : ''}" aria-label="Super">★</button>
+            <button data-rate="${episode.nr}:minus" data-value="minus" class="${episode.rating === 'minus' ? 'active' : ''}" aria-pressed="${episode.rating === 'minus'}" aria-label="Minus">−</button>
+            <button data-rate="${episode.nr}:neutral" data-value="neutral" class="${episode.rating === 'neutral' ? 'active' : ''}" aria-pressed="${episode.rating === 'neutral'}" aria-label="Neutral">●</button>
+            <button data-rate="${episode.nr}:plus" data-value="plus" class="${episode.rating === 'plus' ? 'active' : ''}" aria-pressed="${episode.rating === 'plus'}" aria-label="Plus">＋</button>
+            <button data-rate="${episode.nr}:super" data-value="super" class="${episode.rating === 'super' ? 'active' : ''}" aria-pressed="${episode.rating === 'super'}" aria-label="Super">★</button>
           </div>
         </div>
       </article>`;
@@ -1156,7 +1217,7 @@
       label = 'Rocky';
     } else if (mode === 'match') {
       mainValue = `${result.match}%`;
-      label = 'Match';
+      label = tasteProfile().rated >= 2 ? 'Match' : 'Tipp';
     } else {
       mainValue = ratingSymbol(episode.rating);
       label = ratingLabel(episode.rating);
@@ -1182,7 +1243,8 @@
     }
     if (state.ranking === 'match') {
       const ranked = recommendationPool('any', 'any');
-      info.innerHTML = `<strong>${ranked.length}</strong> ungehörte Folgen, sortiert nach deinem Profil. Super-Folgen zählen dabei doppelt.`;
+      const personal = tasteProfile().rated >= 2;
+      info.innerHTML = `<strong>${ranked.length}</strong> ungehörte Folgen, ${personal ? 'sortiert nach deinem Profil' : 'als allgemeine Startempfehlungen sortiert'}. Super-Folgen zählen doppelt. Angezeigt werden die 100 passendsten.`;
       list.innerHTML = ranked.slice(0, 100).map((episode, index) => rankingCard(episode, index + 1, 'match')).join('') || '<div class="empty-message">Du hast alle Folgen gehört.</div>';
       markRendered('ranking');
       return;
@@ -1237,7 +1299,7 @@
 function playlistCardMarkup(playlist) {
   const duration = playlistDuration(playlist.episodeNumbers);
   const tutorialCreated = state.tutorialActive && state.tutorialPlaylistId === playlist.id;
-  return `<button class="playlist-card personal${tutorialCreated ? ' tutorial-created-playlist' : ''}" ${tutorialCreated ? 'id="tutorialCreatedPlaylist"' : ''} data-playlist-open="${esc(playlist.id)}">
+  return `<button type="button" class="playlist-card personal${tutorialCreated ? ' tutorial-created-playlist' : ''}" ${tutorialCreated ? 'id="tutorialCreatedPlaylist"' : ''} data-playlist-open="${esc(playlist.id)}" aria-label="Playlist ${esc(playlist.title)} öffnen">
     <span class="playlist-category-label">Meine Liste</span>
     <div class="playlist-card-head"><div><h3>${esc(playlist.title)}</h3><p>${esc(playlist.description || 'Eigene Playlist')}</p></div><span class="playlist-icon">☰</span></div>
     <div class="playlist-meta"><span>${playlist.episodeNumbers.length} Folgen</span><span>${fmtDuration(duration)}</span>${playlist.smartMeta ? '<span>Smart</span>' : ''}</div>
@@ -1325,7 +1387,7 @@ function renderPlaylists() {
 
   function savePlaylistEditor() {
     const title = $('playlistNameInput').value.trim();
-    if (!title) { toast('Bitte gib der Playlist einen Namen.'); return; }
+    if (title.length < 3) { toast('Bitte gib der Playlist einen Namen mit mindestens drei Zeichen.'); $('playlistNameInput').focus(); return; }
     const description = $('playlistDescriptionInput').value.trim();
     const existing = state.playlistEditorId ? playlistById(state.playlistEditorId) : null;
     if (existing) {
@@ -1351,6 +1413,7 @@ function renderPlaylists() {
       return `<button class="picker-row ${added?'added':''}" data-picker-playlist="${esc(playlist.id)}"><span><strong>${esc(playlist.title)}</strong><small>${playlist.episodeNumbers.length} Folgen</small></span><b>${added?'✓':'＋'}</b></button>`;
     }).join('') : '<div class="empty-playlists">Erstelle zuerst eine Playlist.</div>';
     $('playlistPickerOverlay').classList.remove('hidden'); $('playlistPickerOverlay').setAttribute('aria-hidden','false');
+    setTimeout(() => ($('playlistPickerList').querySelector('button') || $('pickerNewPlaylist'))?.focus({ preventScroll: true }), 0);
   }
 
   function closePlaylistPicker() { $('playlistPickerOverlay').classList.add('hidden'); $('playlistPickerOverlay').setAttribute('aria-hidden','true'); state.playlistPickerNr=null; }
@@ -1417,24 +1480,39 @@ function renderPlaylists() {
     $('playlistAddResults').innerHTML = results.length ? results.map((episode) => playlistAddResultMarkup(episode, playlist)).join('') : '<div class="empty-playlists">Keine passende Folge gefunden.</div>';
   }
 
+  const PLAYLIST_SIGNAL_STOP = new Set(['verbrechen', 'abenteuer', 'mystery']);
+
+  function playlistSignalCharacters(episode) {
+    return importantCharacters(episode, 12).filter((name) => {
+      const normalized = normalizeText(name);
+      return normalized && !MAIN_ROLE_PATTERNS.some((pattern) => normalized.includes(normalizeText(pattern)));
+    });
+  }
+
   function playlistCommonSignals(episodes) {
-    const count = (items) => { const map = new Map(); items.flat().filter(Boolean).forEach((x)=>map.set(x,(map.get(x)||0)+1)); return [...map.entries()].sort((a,b)=>b[1]-a[1]); };
-    const tags = count(episodes.map((e)=>e.tags||[])).filter(([,n])=>n>=Math.min(2,episodes.length));
-    const chars = count(episodes.map((e)=>e.characters||[])).filter(([,n])=>n>=Math.min(2,episodes.length));
-    return { tags: tags.slice(0,4).map(([x])=>x), chars: chars.slice(0,3).map(([x])=>x) };
+    const count = (items) => {
+      const map = new Map();
+      items.flat().filter(Boolean).forEach((value) => map.set(value, (map.get(value) || 0) + 1));
+      return [...map.entries()].sort((a, b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0]), 'de'));
+    };
+    const minimum = episodes.length > 1 ? 2 : 1;
+    const tags = count(episodes.map((episode) => (episode.tags || []).filter((tag) => !PLAYLIST_SIGNAL_STOP.has(normalizeText(tag)))))
+      .filter(([, amount]) => amount >= minimum);
+    const chars = count(episodes.map(playlistSignalCharacters)).filter(([, amount]) => amount >= minimum);
+    return { tags: tags.slice(0, 4).map(([value]) => value), chars: chars.slice(0, 3).map(([value]) => value) };
   }
 
   function playlistSuggestionScore(candidate, playlistEpisodes, mode='similar') {
     if (!playlistEpisodes.length) return -999;
     const existing = new Set(playlistEpisodes.map((e)=>e.nr)); if (existing.has(candidate.nr)) return -999;
     let score = recommendationScore(candidate).score * .35;
-    const tags = new Set(candidate.tags || []), chars = new Set(candidate.characters || []);
+    const tags = new Set(candidate.tags || []), chars = new Set(playlistSignalCharacters(candidate));
     const signals = playlistCommonSignals(playlistEpisodes);
     score += signals.tags.filter((x)=>tags.has(x)).length * 4;
     score += signals.chars.filter((x)=>chars.has(x)).length * 5;
     for (const source of playlistEpisodes) {
       score += (source.tags || []).filter((x)=>tags.has(x)).length * .7;
-      score += (source.characters || []).filter((x)=>chars.has(x)).length * 1.1;
+      score += playlistSignalCharacters(source).filter((x)=>chars.has(x)).length * 1.1;
     }
     const block = STORY_BLOCKS.find((b)=>b.numbers.includes(candidate.nr) && b.numbers.some((nr)=>existing.has(nr)));
     if (block) score += 18;
@@ -1452,7 +1530,7 @@ function renderPlaylists() {
     if (block) return `gehört zur Reihenfolge „${block.title}“`;
     const signals = playlistCommonSignals(playlistEpisodes);
     const sharedTags = signals.tags.filter((x)=>(candidate.tags||[]).includes(x));
-    const sharedChars = signals.chars.filter((x)=>(candidate.characters||[]).includes(x));
+    const sharedChars = signals.chars.filter((x)=>playlistSignalCharacters(candidate).includes(x));
     if (sharedChars.length) return `gleiche Figur: ${sharedChars[0]}`;
     if (sharedTags.length) return `passt zu ${sharedTags.slice(0,2).join(' · ')}`;
     return candidate.heard ? 'passt zu deinem bisherigen Geschmack' : 'passende ungehörte Ergänzung';
@@ -1473,7 +1551,7 @@ function renderPlaylists() {
     $('playlistSuggestions').innerHTML = selected.map(({episode,score})=>{
       const reason=playlistSuggestionReason(episode,episodes); const block=reason.startsWith('gehört zur Reihenfolge');
       const meta=[fmtDuration(episode.durationMin),episode.heard?'gehört':'offen',episode.rating?ratingLabel(episode.rating):'',episode.rockyRanking!=null?`Rocky ${Number(episode.rockyRanking).toFixed(2)}`:''].filter(Boolean).join(' · ');
-      const match=Math.max(50,Math.min(98,Math.round(58+score*2)));
+      const match = Math.max(52, Math.min(95, Math.round(55 + score * 1.35)));
       return `<div class="playlist-suggestion-row ${block?'story-link':''}"><button class="playlist-suggestion-main" data-open="${episode.nr}"><strong>${esc(episodeLabel(episode))} · ${esc(episode.titel)} <span class="match-pill">${match}%</span></strong><small>${esc(meta)}<br>${esc(reason)}</small></button><button class="playlist-suggestion-detail" data-open="${episode.nr}" aria-label="Details">i</button><button class="playlist-suggestion-add" data-playlist-suggest-add="${id}:${episode.nr}" aria-label="Hinzufügen">＋</button></div>`;
     }).join('');
     section.classList.remove('hidden');
@@ -1488,7 +1566,7 @@ function renderPlaylists() {
     const stats=playlistStats(episodes); $('playlistDetailStats').innerHTML=`<span>${episodes.length} Folgen</span><span>${fmtDuration(stats.duration)}</span><span>${stats.heard} gehört</span>`;
     $('playlistEditButton').classList.toggle('hidden',!editable); $('playlistDeleteButton').classList.toggle('hidden',!editable); $('playlistAddEpisodeButton').classList.toggle('hidden',!editable); if (!options.keepAddPanel) $('playlistAddPanel').classList.add('hidden');
     $('playlistPlayFirst').disabled=!episodes.length;
-    $('playlistEpisodeList').innerHTML=episodes.length?episodes.map((episode,index)=>`<div class="playlist-episode" data-playlist-episode="${episode.nr}"><span class="playlist-index">${index+1}</span><button class="rank-main playlist-episode-main" data-open="${episode.nr}"><strong>${esc(episodeLabel(episode))} · ${esc(episode.titel)}</strong><small>${fmtDuration(episode.durationMin)} · ${episode.heard?'gehört':'offen'} · Details ansehen</small></button><button class="playlist-row-info" data-open="${episode.nr}" aria-label="Vollständige Beschreibung">i</button>${editable?`<span class="playlist-row-actions"><button data-playlist-move="${id}:${index}:-1" aria-label="Nach oben">↑</button><button data-playlist-move="${id}:${index}:1" aria-label="Nach unten">↓</button><button data-playlist-remove="${id}:${episode.nr}" aria-label="Entfernen">×</button></span>`:''}</div>`).join(''):'<div class="empty-playlists">Diese Liste enthält noch keine Folgen.</div>';
+    $('playlistEpisodeList').innerHTML=episodes.length?episodes.map((episode,index)=>`<div class="playlist-episode" data-playlist-episode="${episode.nr}"><span class="playlist-index">${index+1}</span><button class="rank-main playlist-episode-main" data-open="${episode.nr}"><strong>${esc(episodeLabel(episode))} · ${esc(episode.titel)}</strong><small>${fmtDuration(episode.durationMin)} · ${episode.heard?'gehört':'offen'} · Details ansehen</small></button><button class="playlist-row-info" data-open="${episode.nr}" aria-label="Vollständige Beschreibung">i</button>${editable?`<span class="playlist-row-actions"><button data-playlist-move="${id}:${index}:-1" aria-label="Nach oben verschieben" ${index === 0 ? 'disabled' : ''}>↑</button><button data-playlist-move="${id}:${index}:1" aria-label="Nach unten verschieben" ${index === episodes.length - 1 ? 'disabled' : ''}>↓</button><button data-playlist-remove="${id}:${episode.nr}" aria-label="Aus Playlist entfernen">×</button></span>`:''}</div>`).join(''):'<div class="empty-playlists">Diese Liste enthält noch keine Folgen.</div>';
     if (options.keepAddPanel && editable) {
       $('playlistAddPanel').classList.remove('hidden');
       if ($('playlistAddSearch')) $('playlistAddSearch').value = options.query || '';
@@ -1496,6 +1574,7 @@ function renderPlaylists() {
     }
     renderPlaylistSuggestions();
     $('playlistDetailOverlay').classList.remove('hidden'); $('playlistDetailOverlay').setAttribute('aria-hidden','false');
+    setTimeout(() => $('closePlaylistDetail')?.focus({ preventScroll: true }), 0);
   }
 
   function closePlaylistDetail(){ $('playlistDetailOverlay').classList.add('hidden');$('playlistDetailOverlay').setAttribute('aria-hidden','true');$('playlistAddPanel').classList.add('hidden');state.playlistDetailId=null; }
@@ -1658,6 +1737,7 @@ const TUTORIAL_STEPS = [
       if (input) input.value = '';
       pageDirty.episodes = true;
       renderEpisodes();
+      document.body.classList.add('tutorial-search-step');
     },
     onAction: (event) => {
       const input = event?.target;
@@ -1670,11 +1750,9 @@ const TUTORIAL_STEPS = [
     },
     verify: (event) => String(event?.target?.value || '').trim().length >= 3 && Boolean(document.querySelector('.episode-card')),
     invalidMessage: 'Gib mindestens drei Zeichen ein und bestätige die Suche mit Enter.',
-    // Keep the episodes page at its natural top position. Scrolling the search
-    // field into the generic focus band pulled it underneath the iOS status bar.
-    // At scroll position 0 the page title remains visible and the search field
-    // sits comfortably lower on every viewport size.
-    skipReveal: true,
+    revealAlign: 'top',
+    revealOffsetY: 18,
+    after: () => document.body.classList.remove('tutorial-search-step'),
     beforePosition: () => {
       document.documentElement.classList.add('tutorial-instant-scroll');
       window.scrollTo(0, 0);
@@ -1690,7 +1768,7 @@ const TUTORIAL_STEPS = [
     contextPage: 'episodes',
     focus: () => document.querySelector('.episode-card .episode-title'),
     actionTarget: () => document.querySelector('.episode-card .episode-title'),
-    card: 'bottom',
+    card: 'top',
     title: 'Suchergebnis öffnen',
     text: 'In der Detailansicht findest du Beschreibung, Bewertung, Streaminglinks und Zusatzwissen.',
     action: 'Tippe auf den hervorgehobenen Folgentitel.',
@@ -1698,6 +1776,23 @@ const TUTORIAL_STEPS = [
     verify: () => Boolean(state.detailNr) && !$('detailOverlay').classList.contains('hidden'),
     after: () => { state.tutorialEpisodeNr = Number(state.detailNr); },
     waitForKeyboardClose: true,
+    beforePosition: () => {
+      const target = document.querySelector('.episode-card .episode-title');
+      const sticky = document.querySelector('.sticky-tools');
+      const card = $('tutorialCard');
+      if (!target || !sticky || !card?.classList.contains('tutorial-card-top-fixed')) return;
+      const targetRect = target.getBoundingClientRect();
+      const stickyRect = sticky.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+      const desiredTop = Math.max(stickyRect.bottom, cardRect.bottom) + 16;
+      const delta = targetRect.top - desiredTop;
+      if (Math.abs(delta) > 1) {
+        document.documentElement.classList.add('tutorial-instant-scroll');
+        window.scrollTo(0, Math.max(0, window.scrollY + delta));
+        document.documentElement.classList.remove('tutorial-instant-scroll');
+      }
+    },
+    skipReveal: true,
     settle: 180,
   },
   {
@@ -1773,6 +1868,15 @@ const TUTORIAL_STEPS = [
     text: 'Die Wissenskarte enthält Autor, Ära, Laufzeit, Themen, Figuren und weitere Einordnungen.',
     action: 'Tippe auf „Wissenskarte“.',
     event: 'click',
+    beforePosition: () => {
+      const sheet = document.querySelector('#detailOverlay .detail-sheet');
+      const summary = document.querySelector('#detailKnowledgeSection > summary');
+      if (sheet && summary) {
+        const targetTop = Math.max(0, summary.offsetTop - Math.max(110, sheet.clientHeight * 0.25));
+        sheet.scrollTop = targetTop;
+      }
+    },
+    revealAlign: 'center',
     verify: () => Boolean($('detailKnowledgeSection')?.open),
     settle: 140,
   },
@@ -1890,14 +1994,13 @@ const TUTORIAL_STEPS = [
   {
     id: 'open-playlist',
     contextPage: 'playlists',
-    focus: () => tutorialCreatedPlaylistCard(),
-    actionTarget: () => tutorialCreatedPlaylistCard(),
+    focus: () => state.tutorialPlaylistId ? document.querySelector(`#userPlaylists [data-playlist-open="${CSS.escape(String(state.tutorialPlaylistId))}"]`) : null,
+    actionTarget: () => state.tutorialPlaylistId ? document.querySelector(`#userPlaylists [data-playlist-open="${CSS.escape(String(state.tutorialPlaylistId))}"]`) : null,
     card: 'top',
     title: 'Playlist öffnen',
     text: 'In der Playlist kannst du Folgen hinzufügen, sortieren, entfernen und passende Vorschläge ansehen.',
     action: 'Tippe auf die gerade erstellte Playlist.',
     event: 'click',
-    intercept: true,
     waitForKeyboardClose: true,
     prepare: () => {
       state.playlistTab = 'mine';
@@ -1905,44 +2008,12 @@ const TUTORIAL_STEPS = [
       pageDirty.playlists = true;
       $('planSavedStatus')?.classList.add('hidden');
       renderPlaylists();
-      const card = tutorialCreatedPlaylistCard();
-      if (card) {
-        card.id = 'tutorialCreatedPlaylist';
-        card.classList.add('tutorial-created-playlist');
-      }
     },
-    prePositionAsync: async () => {
-      await waitForTutorialSettle(80);
-      const card = tutorialCreatedPlaylistCard();
-      if (!card) return;
-      card.id = 'tutorialCreatedPlaylist';
-      card.classList.add('tutorial-created-playlist');
-      state.tutorialProgrammaticScroll = true;
-      document.documentElement.classList.add('tutorial-instant-scroll');
-      card.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'nearest' });
-      void document.documentElement.offsetHeight;
-      await waitForTutorialSettle(100);
-      document.documentElement.classList.remove('tutorial-instant-scroll');
-      state.tutorialLockedScrollY = window.scrollY;
-      state.tutorialProgrammaticScroll = false;
-    },
-    beforePosition: () => {
-      const card = tutorialCreatedPlaylistCard();
-      if (card) {
-        card.id = 'tutorialCreatedPlaylist';
-        card.classList.add('tutorial-created-playlist');
-      }
-    },
-    onAction: (event) => {
-      const card = event?.target?.closest?.('#tutorialCreatedPlaylist') || tutorialCreatedPlaylistCard();
-      const playlistId = card?.dataset?.playlistOpen || state.tutorialPlaylistId;
-      if (playlistId) openPlaylistDetail(playlistId, false);
-    },
-    skipReveal: true,
+    revealAlign: 'center',
     focusPadding: 7,
     verify: () => String(state.playlistDetailId || '') === String(state.tutorialPlaylistId || '') && !$('playlistDetailOverlay').classList.contains('hidden'),
     invalidMessage: 'Tippe direkt auf die hervorgehobene Playlist-Karte.',
-    settle: 160,
+    settle: 180,
   },
   {
     id: 'open-add-panel',
@@ -2241,13 +2312,16 @@ function tutorialViewportMetrics() {
   const top = visual?.offsetTop || 0;
   const height = visual?.height || window.innerHeight;
   const bottom = top + height;
-  const topGuard = Math.min(94, Math.max(66, Math.round(height * 0.085)));
   const nav = document.querySelector('.bottom-nav');
   const navRect = nav && !nav.classList.contains('hidden') ? nav.getBoundingClientRect() : null;
-  const safeBottom = navRect && navRect.top > top && navRect.top < bottom
-    ? navRect.top - 12
-    : bottom - 14;
-  return { top, bottom, height, topGuard, safeBottom };
+  const safeBottom = navRect && navRect.top > top && navRect.top < bottom ? navRect.top - 12 : bottom - 12;
+  return {
+    top,
+    bottom,
+    height,
+    safeTop: top + Math.max(58, Math.min(92, height * 0.075)),
+    safeBottom,
+  };
 }
 
 function tutorialChooseCardSide(step, elements) {
@@ -2258,143 +2332,120 @@ function tutorialChooseCardSide(step, elements) {
   return ((rect.top + rect.bottom) / 2) < (viewport.top + viewport.height / 2) ? 'bottom' : 'top';
 }
 
-function tutorialVisibleBand(cardSide) {
-  const viewport = tutorialViewportMetrics();
-  const cardRect = $('tutorialCard').getBoundingClientRect();
-  const baseTop = viewport.top + viewport.topGuard;
-  const baseBottom = viewport.safeBottom;
-  if (cardSide === 'top') {
-    return { top: Math.max(baseTop, cardRect.bottom + 16), bottom: baseBottom };
-  }
-  return { top: baseTop, bottom: Math.min(baseBottom, cardRect.top - 16) };
-}
-
-function revealTutorialTarget(elements, cardSide, step = {}) {
-  if (!elements.length) return false;
-  let rect = tutorialRectFor(elements);
-  if (!rect) return false;
-  const primary = elements[0];
-  const scrollParent = tutorialScrollableAncestor(primary);
-  if (!scrollParent && tutorialHasFixedAncestor(primary)) return true;
-
-  const band = tutorialVisibleBand(cardSide);
-  const bandHeight = Math.max(88, band.bottom - band.top);
-  const targetHeight = rect.bottom - rect.top;
-  let desiredTop;
-  if (step.revealAlign === 'top' || targetHeight >= bandHeight * 0.82) {
-    desiredTop = band.top;
-  } else if (step.revealAlign === 'bottom') {
-    desiredTop = band.bottom - targetHeight;
-  } else {
-    desiredTop = band.top + Math.max(0, (bandHeight - targetHeight) / 2);
-  }
-  desiredTop += Number(step.revealOffsetY || 0);
-  desiredTop = Math.max(band.top, Math.min(desiredTop, band.bottom - targetHeight));
-  const delta = rect.top - desiredTop;
-  if (Math.abs(delta) < 1) return true;
-
-  document.documentElement.classList.add('tutorial-instant-scroll');
-  if (scrollParent) {
-    scrollParent.scrollTop = Math.max(0, scrollParent.scrollTop + delta);
-  } else {
-    window.scrollTo(0, Math.max(0, window.scrollY + delta));
-  }
-  void document.documentElement.offsetHeight;
-  document.documentElement.classList.remove('tutorial-instant-scroll');
-  rect = tutorialRectFor(tutorialFocusElements(step));
-  return Boolean(rect);
-}
-
-function positionTutorialFocus(step = currentTutorialStep()) {
-  const overlay = $('tutorialOverlay');
-  if (!state.tutorialActive || overlay.classList.contains('hidden')) return false;
-  const focus = $('tutorialFocus');
+function tutorialApplyCardLayout(step, side) {
   const card = $('tutorialCard');
   resetTutorialCardPosition();
-  focus.style.width = '0px';
-  focus.style.height = '0px';
-
-  step?.beforePosition?.();
-  let elements = tutorialFocusElements(step);
-  state.tutorialTarget = elements[0] || null;
-  const cardSide = tutorialChooseCardSide(step, elements);
-  card.classList.add(cardSide === 'top' ? 'tutorial-card-top-fixed' : 'tutorial-card-bottom-fixed');
+  card.classList.add(side === 'top' ? 'tutorial-card-top-fixed' : 'tutorial-card-bottom-fixed');
   card.classList.toggle('tutorial-card-compact', Boolean(step?.compact));
   card.classList.toggle('tutorial-card-reading', Boolean(step?.reading));
-
   const viewport = tutorialViewportMetrics();
-  const heightRatio = step?.compact ? 0.26 : 0.36;
-  const minHeight = step?.compact ? 150 : 190;
-  card.style.maxHeight = `${Math.max(minHeight, Math.floor(viewport.height * heightRatio))}px`;
+  const ratio = step?.reading ? 0.29 : step?.compact ? 0.27 : 0.37;
+  card.style.maxHeight = `${Math.max(step?.compact ? 148 : 180, Math.floor(viewport.height * ratio))}px`;
   card.style.overflowY = 'auto';
+}
 
-  // The freshly created playlist sits close to the lower edge on iPhone.
-  // Handle this step explicitly so the focus hole always follows the actual
-  // playlist card instead of a surrounding section or a shifted virtual box.
-  if (step?.id === 'open-playlist') {
-    const playlistCard = tutorialCreatedPlaylistCard();
-    if (playlistCard) {
-      state.tutorialTarget = playlistCard;
-      overlay.classList.remove('no-focus');
-      const rect = playlistCard.getBoundingClientRect();
-      const pad = Number(step?.focusPadding ?? 7);
-      const metrics = tutorialViewportMetrics();
-      const left = Math.max(8, rect.left - pad);
-      const right = Math.min(window.innerWidth - 8, rect.right + pad);
-      const top = Math.max(metrics.top + 8, rect.top - pad);
-      const bottom = Math.min(metrics.bottom - 90, rect.bottom + pad);
-      if (right > left && bottom > top + 24) {
-        focus.style.left = `${left}px`;
-        focus.style.top = `${top}px`;
-        focus.style.width = `${right - left}px`;
-        focus.style.height = `${bottom - top}px`;
-        state.tutorialLockedScrollY = window.scrollY;
-        return true;
-      }
-    }
+function tutorialVisibleBand(side) {
+  const viewport = tutorialViewportMetrics();
+  const cardRect = $('tutorialCard').getBoundingClientRect();
+  if (side === 'top') {
+    return { top: Math.max(viewport.safeTop, cardRect.bottom + 14), bottom: viewport.safeBottom };
   }
+  return { top: viewport.safeTop, bottom: Math.min(viewport.safeBottom, cardRect.top - 14) };
+}
 
-  if (!elements.length) {
-    overlay.classList.add('no-focus');
-    state.tutorialLockedScrollY = window.scrollY;
-    return step?.event === 'finish';
+async function tutorialWaitFrames(count = 2) {
+  for (let index = 0; index < count; index += 1) {
+    await new Promise((resolve) => requestAnimationFrame(resolve));
   }
+}
 
-  overlay.classList.remove('no-focus');
-  if (!step?.skipReveal) revealTutorialTarget(elements, cardSide, step);
-  elements = tutorialFocusElements(step);
+async function tutorialFindElements(step, attempts = 18) {
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    step?.beforePosition?.();
+    const elements = tutorialFocusElements(step).filter((element) => element?.isConnected && element.getClientRects().length);
+    if (elements.length && tutorialRectFor(elements)) return elements;
+    await tutorialWaitFrames(1);
+    await new Promise((resolve) => setTimeout(resolve, 45));
+  }
+  return [];
+}
+
+async function revealTutorialTarget(elements, side, step = {}) {
+  if (!elements.length || step.skipReveal) return;
+  const primary = elements[0];
+  if (tutorialHasFixedAncestor(primary)) return;
+  const scrollParent = tutorialScrollableAncestor(primary);
   let rect = tutorialRectFor(elements);
-  if (!rect) return false;
-
-  // One final hidden correction keeps the target inside the free stage on every
-  // screen size without any visible motion.
-  if (!step?.skipReveal) {
-    const band = tutorialVisibleBand(cardSide);
-    if (rect.top < band.top - 2 || rect.bottom > band.bottom + 2) {
-      revealTutorialTarget(elements, cardSide, step);
-      elements = tutorialFocusElements(step);
-      rect = tutorialRectFor(elements);
-      if (!rect) return false;
+  if (!rect) return;
+  const band = tutorialVisibleBand(side);
+  const sticky = document.querySelector('.sticky-tools');
+  if (sticky && sticky.offsetParent !== null && !sticky.contains(primary)) {
+    const stickyRect = sticky.getBoundingClientRect();
+    if (stickyRect.top <= band.top + 24 && stickyRect.bottom > band.top && stickyRect.bottom < band.bottom) {
+      band.top = stickyRect.bottom + 12;
     }
   }
+  const available = Math.max(90, band.bottom - band.top);
+  const height = rect.bottom - rect.top;
+  let desiredTop;
+  if (step.revealAlign === 'top' || height > available * 0.84) desiredTop = band.top;
+  else if (step.revealAlign === 'bottom') desiredTop = band.bottom - height;
+  else desiredTop = band.top + Math.max(0, (available - height) / 2);
+  desiredTop += Number(step.revealOffsetY || 0);
+  desiredTop = Math.max(band.top, Math.min(desiredTop, band.bottom - Math.min(height, available)));
+  const delta = rect.top - desiredTop;
+  if (Math.abs(delta) < 1) return;
+  state.tutorialProgrammaticScroll = true;
+  document.documentElement.classList.add('tutorial-instant-scroll');
+  if (scrollParent) scrollParent.scrollTop = Math.max(0, scrollParent.scrollTop + delta);
+  else window.scrollTo(0, Math.max(0, window.scrollY + delta));
+  await tutorialWaitFrames(2);
+  document.documentElement.classList.remove('tutorial-instant-scroll');
+  state.tutorialProgrammaticScroll = false;
+}
 
-  const viewportNow = tutorialViewportMetrics();
+function setTutorialFocusRect(step, elements) {
+  const overlay = $('tutorialOverlay');
+  const focus = $('tutorialFocus');
+  const rect = tutorialRectFor(elements);
+  if (!rect) {
+    overlay.classList.add('no-focus');
+    focus.style.width = '0px';
+    focus.style.height = '0px';
+    return false;
+  }
+  const viewport = tutorialViewportMetrics();
   const pad = Number(step?.focusPadding ?? 8);
-  const shiftY = Number(step?.focusShiftY || 0);
   const left = Math.max(6, rect.left - pad);
-  const top = Math.max(viewportNow.top + 6, rect.top - pad + shiftY);
+  const top = Math.max(viewport.top + 6, rect.top - pad);
   const right = Math.min(window.innerWidth - 6, rect.right + pad);
-  const bottom = Math.min(viewportNow.bottom - 6, rect.bottom + pad + shiftY);
+  const bottom = Math.min(viewport.bottom - 6, rect.bottom + pad);
   if (right <= left || bottom <= top) return false;
+  overlay.classList.remove('no-focus');
   focus.style.left = `${left}px`;
   focus.style.top = `${top}px`;
   focus.style.width = `${right - left}px`;
   focus.style.height = `${bottom - top}px`;
+  state.tutorialTarget = elements[0] || null;
   state.tutorialLockedScrollY = window.scrollY;
   return true;
 }
+
+async function positionTutorialFocus(step = currentTutorialStep()) {
+  const overlay = $('tutorialOverlay');
+  if (!state.tutorialActive || overlay.classList.contains('hidden')) return false;
+  let elements = await tutorialFindElements(step);
+  const side = tutorialChooseCardSide(step, elements);
+  tutorialApplyCardLayout(step, side);
+  await tutorialWaitFrames(2);
+  if (elements.length) {
+    await revealTutorialTarget(elements, side, step);
+    elements = await tutorialFindElements(step, 5);
+  }
+  return elements.length ? setTutorialFocusRect(step, elements) : step?.event === 'finish';
+}
 function clearTutorialStepClasses() {
-  document.body.classList.remove('tutorial-reading-detail', 'tutorial-reading-plan');
+  document.body.classList.remove('tutorial-reading-detail', 'tutorial-reading-plan', 'tutorial-search-step');
 }
 
 function prepareTutorialStep(step) {
@@ -2448,23 +2499,8 @@ function waitForTutorialViewportStable(maxWait = 950, stableFor = 170) {
 function refreshTutorialFocusRectOnly() {
   if (!state.tutorialActive) return;
   const step = currentTutorialStep();
-  const elements = tutorialFocusElements(step);
-  const rect = tutorialRectFor(elements);
-  if (!rect) return;
-  const focus = $('tutorialFocus');
-  const viewport = tutorialViewportMetrics();
-  const pad = Number(step?.focusPadding ?? 8);
-  const shiftY = Number(step?.focusShiftY || 0);
-  const left = Math.max(6, rect.left - pad);
-  const top = Math.max(viewport.top + 6, rect.top - pad + shiftY);
-  const right = Math.min(window.innerWidth - 6, rect.right + pad);
-  const bottom = Math.min(viewport.bottom - 6, rect.bottom + pad + shiftY);
-  if (right <= left || bottom <= top) return;
-  focus.style.left = `${left}px`;
-  focus.style.top = `${top}px`;
-  focus.style.width = `${right - left}px`;
-  focus.style.height = `${bottom - top}px`;
-  state.tutorialLockedScrollY = window.scrollY;
+  const elements = tutorialFocusElements(step).filter((element) => element?.isConnected && element.getClientRects().length);
+  if (elements.length) setTutorialFocusRect(step, elements);
 }
 
 function scheduleTutorialKeyboardRefresh(delay = 170) {
@@ -2486,25 +2522,32 @@ async function renderTutorialStep() {
   if (!step) return finishTutorial();
   state.tutorialAdvancing = false;
   state.tutorialPreparedStep = state.tutorialStep;
-
   const overlay = $('tutorialOverlay');
   const focus = $('tutorialFocus');
   const token = ++state.tutorialPositionFrame;
   overlay.classList.add('tutorial-positioning');
+  overlay.classList.remove('no-focus', 'tutorial-keyboard-active');
   focus.style.width = '0px';
   focus.style.height = '0px';
+  document.body.dataset.tutorialStep = step.id;
 
   if (step.waitForKeyboardClose) {
     tutorialBlurTextControls();
     state.tutorialKeyboardActive = false;
-    overlay.classList.remove('tutorial-keyboard-active');
     await waitForTutorialViewportStable();
     if (!state.tutorialActive || token !== state.tutorialPositionFrame || currentTutorialStep() !== step) return;
   }
 
-  prepareTutorialStep(step);
+  clearTutorialStepClasses();
+  if (step.contextPage && state.page !== step.contextPage) showPage(step.contextPage);
+  step.prepare?.();
+  await tutorialWaitFrames(2);
+  await new Promise((resolve) => setTimeout(resolve, Number(step.settle ?? 110)));
+  if (!state.tutorialActive || token !== state.tutorialPositionFrame || currentTutorialStep() !== step) return;
+
   if (step.prePositionAsync) {
     await step.prePositionAsync();
+    await tutorialWaitFrames(2);
     if (!state.tutorialActive || token !== state.tutorialPositionFrame || currentTutorialStep() !== step) return;
   }
 
@@ -2519,25 +2562,16 @@ async function renderTutorialStep() {
   $('tutorialBack').classList.add('hidden');
   const finishButton = $('tutorialNext');
   finishButton.classList.toggle('hidden', step.event !== 'finish');
-  finishButton.textContent = step.event === 'finish' ? 'App benutzen' : 'Weiter';
+  finishButton.textContent = 'App benutzen';
+  await tutorialWaitFrames(2);
 
-  await waitForTutorialSettle(Number(step.settle ?? 110));
+  const positioned = await positionTutorialFocus(step);
   if (!state.tutorialActive || token !== state.tutorialPositionFrame || currentTutorialStep() !== step) return;
-
-  let positioned = false;
-  const expectsTarget = Boolean(step.focus ?? step.target);
-  for (let attempt = 0; attempt < (expectsTarget ? 14 : 1) && !positioned; attempt += 1) {
-    positioned = positionTutorialFocus(step);
-    if (positioned) break;
-    await waitForTutorialSettle(55);
-    if (!state.tutorialActive || token !== state.tutorialPositionFrame || currentTutorialStep() !== step) return;
-  }
-
   if (!positioned) {
     overlay.classList.add('no-focus');
-    focus.style.width = '0px';
-    focus.style.height = '0px';
+    action.textContent = 'Der Bereich wird vorbereitet. Versuche die Aktion gleich noch einmal.';
   }
+  state.tutorialLockedScrollY = window.scrollY;
   overlay.classList.remove('tutorial-positioning');
 }
 
@@ -2742,6 +2776,7 @@ function restoreTutorialSession({ completed = true, message = '' } = {}) {
   state.tutorialPreparedStep = -1;
   state.tutorialPositionFrame += 1;
   document.body.classList.remove('tutorial-running');
+  delete document.body.dataset.tutorialStep;
   clearTimeout(persistTimer);
   closeTutorialSurfaces();
 
@@ -2805,6 +2840,7 @@ function tutorialBack() {
 function openHelp() {
   $('helpOverlay').classList.remove('hidden');
   $('helpOverlay').setAttribute('aria-hidden', 'false');
+  setTimeout(() => $('closeHelp')?.focus({ preventScroll: true }), 0);
 }
 
 function closeHelp() {
@@ -2825,6 +2861,7 @@ function closeHelp() {
     const spotifyLinks = state.catalog.filter((episode) => episode.spotifyUrl).length;
     const appleLinks = state.catalog.filter((episode) => episode.appleMusicUrl).length;
     $('storageInfo').textContent = `${state.catalog.length} Folgen · ${states} persönliche Einträge · ${(state.user.playlists||[]).length} Playlists · ${state.catalog.filter((episode) => episode.rockyRanking != null).length} Rocky-Wertungen`;
+    if ($('appVersionInfo')) $('appVersionInfo').textContent = `Version ${APP_VERSION.replace(/\.0$/, '')} · Offline-fähig`;
     $('metadataInfo').textContent = state.metadataUpdatedAt
       ? `${roles.toLocaleString('de-DE')} Rollen · ${spotifyLinks} Spotify- und ${appleLinks} Apple-Music-Direktlinks · aktualisiert ${new Date(state.metadataUpdatedAt).toLocaleDateString('de-DE')}`
       : `${spotifyLinks} Spotify- und ${appleLinks} Apple-Music-Direktlinks eingebaut; weiteres Folgenwissen wird online ergänzt.`;
@@ -2872,9 +2909,11 @@ function closeHelp() {
     detailOverlay.classList.remove('hidden');
     detailOverlay.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
+    setTimeout(() => $('closeDetail')?.focus({ preventScroll: true }), 0);
   }
 
   function closeDetail() {
+    flushPendingNote();
     state.detailNr = null;
     const detailOverlay = $('detailOverlay');
     detailOverlay.classList.add('hidden');
@@ -2885,9 +2924,9 @@ function closeHelp() {
   }
 
   function formatReleaseDate(value) {
-    if (!value) return '—';
+    if (!value) return 'noch nicht verfügbar';
     const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return Number.isNaN(date.getTime()) ? 'noch nicht verfügbar' : date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 
   function episodeFormats(episode) {
@@ -3021,13 +3060,13 @@ function closeHelp() {
     const moods = (episode.tags || []).slice(0, 4).join(' · ') || '—';
     const formats = episodeFormats(episode).join(' · ');
     $('detailKnowledgeGrid').innerHTML = [
-      knowledgeItem('Buchautor', episode.author || '—'),
-      knowledgeItem('Hörspielbearbeitung', episode.scriptAuthor || '—'),
+      knowledgeItem('Buchautor', episode.author || 'noch nicht verfügbar'),
+      knowledgeItem('Hörspielbearbeitung', episode.scriptAuthor || 'noch nicht verfügbar'),
       knowledgeItem('Ära', era.short, era.id !== era.short ? era.id : ''),
       knowledgeItem('Erstveröffentlichung', formatReleaseDate(episode.releaseDate)),
       knowledgeItem('Laufzeit', fmtDuration(episode.durationMin)),
       knowledgeItem('Format', formats),
-      knowledgeItem('Stimmung & Themen', moods),
+      knowledgeItem('Stimmung & Themen', moods === '—' ? 'noch nicht verfügbar' : moods),
       knowledgeItem('Rocky-Beach', episode.rockyRanking == null ? 'Keine Wertung' : fmtRocky(episode.rockyRanking), episode.rockyRanking == null ? '' : 'kleiner ist besser'),
     ].join('');
 
@@ -3063,7 +3102,7 @@ function closeHelp() {
     $('detailNumber').textContent = episodeLabel(episode);
     $('detailTitle').textContent = episode.titel;
     $('detailMatch').textContent = `${result.match}%`;
-    $('detailDescription').textContent = episode.longDescription || description || 'Für diese Folge ist noch keine Kurzbeschreibung lokal gespeichert. Unter Einstellungen kannst du das Folgenwissen aktualisieren.';
+    $('detailDescription').textContent = episode.longDescription || description || 'Für diese Folge ist derzeit keine Kurzbeschreibung verfügbar.';
     renderKnowledge(episode);
     $('detailStreamingButtons').innerHTML = ['spotify', 'appleMusic'].map((service) => streamingButtonMarkup(episode, service)).join('');
     $('detailMeta').innerHTML = `
@@ -3081,7 +3120,11 @@ function closeHelp() {
     $('detailThemes').innerHTML = episode.tags.slice(0, 10).map((tag) => `<span>${esc(tag)}</span>`).join('');
     $('detailPeopleSection').classList.toggle('hidden', !characters.length && !episode.tags.length);
 
-    document.querySelectorAll('#detailRating [data-rating]').forEach((button) => button.classList.toggle('active', button.dataset.rating === episode.rating));
+    document.querySelectorAll('#detailRating [data-rating]').forEach((button) => {
+      const active = button.dataset.rating === episode.rating;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
     $('clearRating').classList.toggle('hidden', !episode.rating);
     $('detailHeard').checked = episode.heard;
     $('detailHeardDate').textContent = episode.heardAt
@@ -3150,8 +3193,18 @@ function closeHelp() {
       const parsed = JSON.parse(await readFileText(file));
       const normalized = normalizeUser(parsed);
       const count = Object.keys(normalized.episodes).length;
-      if (!count && !confirm('Das Backup enthält keine Folgenstände. Trotzdem importieren?')) return;
-      if (!confirm(`${count} gespeicherte Folgenstände importieren und vorhandene Daten ersetzen?`)) return;
+      if (!count) {
+        const emptyAccepted = await appConfirm({ title: 'Leeres Backup importieren?', message: 'Das Backup enthält keine Folgenstände. Playlists und Einstellungen können trotzdem übernommen werden.', confirmText: 'Trotzdem importieren' });
+        if (!emptyAccepted) return;
+      }
+      const accepted = await appConfirm({
+        kicker: 'Backup importieren',
+        title: 'Vorhandene Daten ersetzen?',
+        message: `${count} gespeicherte Folgenstände sowie enthaltene Playlists und Einstellungen werden importiert. Deine aktuellen lokalen Daten werden ersetzt.`,
+        confirmText: 'Backup importieren',
+        danger: true,
+      });
+      if (!accepted) return;
       state.user = normalized;
       state.user.updatedAt = new Date().toISOString();
       invalidateDerived();
@@ -3275,8 +3328,10 @@ function closeHelp() {
         toast(`${state.catalog.filter((episode) => episode.durationMin).length} Folgen und ${roleCount} Rollen aktualisiert.`);
       }
     } catch (error) {
-      console.warn(error);
-      if (manual) toast('Folgenwissen konnte gerade nicht geladen werden. Die App bleibt offline nutzbar.');
+      if (manual) {
+        console.warn(error);
+        toast('Folgenwissen konnte gerade nicht geladen werden. Die App bleibt offline nutzbar.');
+      }
     }
   }
 
@@ -3329,7 +3384,17 @@ function closeHelp() {
     $('detailAddPlaylist').addEventListener('click',()=>{if(state.detailNr)openPlaylistPicker(state.detailNr);});
     $('playlistPlayFirst').addEventListener('click',()=>{const first=currentPlaylistEpisodes()[0];if(first)openStreaming(first.nr,preferredStreamingService());});
     $('playlistEditButton').addEventListener('click',()=>{const id=state.playlistDetailId;closePlaylistDetail();if(id&&!id.startsWith('curated:'))openPlaylistEditor(id);});
-    $('playlistDeleteButton').addEventListener('click',()=>{const id=state.playlistDetailId;if(!id||id.startsWith('curated:'))return;const pl=playlistById(id);if(pl&&confirm(`Playlist „${pl.title}“ löschen?`)){state.user.playlists=state.user.playlists.filter(x=>x.id!==id);closePlaylistDetail();persistPlaylists('Playlist gelöscht.');}});
+    $('playlistDeleteButton').addEventListener('click', async () => {
+      const id = state.playlistDetailId;
+      if (!id || id.startsWith('curated:')) return;
+      const playlist = playlistById(id);
+      if (!playlist) return;
+      const accepted = await appConfirm({ kicker: 'Playlist', title: `„${playlist.title}“ löschen?`, message: 'Die Playlist wird entfernt. Deine Bewertungen und Hörstände bleiben erhalten.', confirmText: 'Playlist löschen', danger: true });
+      if (!accepted) return;
+      state.user.playlists = state.user.playlists.filter((item) => item.id !== id);
+      closePlaylistDetail();
+      persistPlaylists('Playlist gelöscht.');
+    });
 
 
     $('searchInput').addEventListener('input', debounce((event) => {
@@ -3447,9 +3512,20 @@ function closeHelp() {
     $('cancelHeardReset').addEventListener('click', closeHeardReset);
     $('confirmUnheardAndClear').addEventListener('click', confirmUnheardAndClear);
     $('heardResetOverlay').addEventListener('click', (event) => { if (event.target === $('heardResetOverlay')) closeHeardReset(); });
+    $('closeConfirm').addEventListener('click', () => closeConfirmDialog(false));
+    $('confirmCancel').addEventListener('click', () => closeConfirmDialog(false));
+    $('confirmAccept').addEventListener('click', () => closeConfirmDialog(true));
+    $('confirmOverlay').addEventListener('click', (event) => { if (event.target === $('confirmOverlay')) closeConfirmDialog(false); });
 
     $('resetButton').addEventListener('click', async () => {
-      if (!confirm('Wirklich alle persönlichen Hörstände, Bewertungen, Notizen und Playlists löschen?')) return;
+      const accepted = await appConfirm({
+        kicker: 'Persönliche Daten',
+        title: 'Alle persönlichen Daten löschen?',
+        message: 'Hörstände, Bewertungen, Notizen und eigene Playlists werden unwiderruflich von diesem Gerät entfernt.',
+        confirmText: 'Alle Daten löschen',
+        danger: true,
+      });
+      if (!accepted) return;
       state.user = { version: APP_VERSION, episodes: {}, playlists: [], settings: { preferredService: preferredStreamingService(), tutorialCompleted: false, playlistTab: 'essentials' }, updatedAt: new Date().toISOString() };
       invalidateDerived();
       await dbSet(USER_KEY, state.user);
@@ -3470,12 +3546,10 @@ function closeHelp() {
     });
     $('detailNote').addEventListener('input', (event) => {
       clearTimeout(noteTimer);
-      const number = state.detailNr;
-      const value = event.target.value;
-      noteTimer = setTimeout(() => {
-        if (number) saveEpisode(number, { note: value });
-      }, 450);
+      pendingNote = { number: Number(state.detailNr), value: event.target.value };
+      noteTimer = setTimeout(flushPendingNote, 350);
     });
+    $('detailNote').addEventListener('blur', flushPendingNote);
     $('clearRating').addEventListener('click', () => {
       if (state.detailNr) { saveEpisode(state.detailNr, { rating: null }); toast('Bewertung entfernt.'); }
     });
@@ -3538,9 +3612,27 @@ function closeHelp() {
       if (openButton) openDetail(openButton.dataset.open);
     });
 
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') flushPendingNote();
+    });
+    window.addEventListener('pagehide', flushPendingNote);
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Tab') return;
+      const visibleDialog = [...document.querySelectorAll('.overlay:not(.hidden) [role="dialog"], .overlay:not(.hidden) [role="alertdialog"], #tutorialOverlay:not(.hidden) [role="dialog"]')].pop();
+      if (!visibleDialog) return;
+      const focusable = [...visibleDialog.querySelectorAll('button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [href], [tabindex]:not([tabindex="-1"])')].filter((element) => element.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    });
+
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
         if (!$('tutorialOverlay').classList.contains('hidden')) skipTutorial();
+        else if (!$('confirmOverlay').classList.contains('hidden')) closeConfirmDialog(false);
         else if (!$('heardResetOverlay').classList.contains('hidden')) closeHeardReset();
         else if (!$('helpOverlay').classList.contains('hidden')) closeHelp();
         else if (state.detailNr) closeDetail();
@@ -3586,7 +3678,17 @@ function closeHelp() {
       renderAll();
       if (!tutorialCompleted()) setTimeout(() => startTutorial(), 450);
       if (catalogStatus.needsUpdate) updateMetadata(false);
-      if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(console.warn);
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').then((registration) => {
+          registration.update?.().catch(() => {});
+          const info = $('appUpdateInfo');
+          if (info) info.textContent = navigator.onLine ? 'Offline bereit · App-Shell wird automatisch aktuell gehalten.' : 'Offline-Modus aktiv · lokale Daten verfügbar.';
+        }).catch((error) => {
+          console.warn(error);
+          const info = $('appUpdateInfo');
+          if (info) info.textContent = 'Lokale Daten verfügbar · Offline-Cache konnte nicht bestätigt werden.';
+        });
+      }
     } catch (error) {
       console.error(error);
       toast('App-Daten konnten nicht geladen werden.');
