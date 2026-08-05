@@ -1,21 +1,18 @@
-# Die drei ??? Folgen-Tracker – Version 13.0
+# Die drei ??? – Folgen-Tracker 15.0
 
-Mobile-first Progressive Web App ohne Server oder Benutzerkonto.
+Version 15 ordnet die App konsequent um die wichtigste Aufgabe: schnell eine gute, noch ungehörte Folge finden.
 
-## Enthalten
+## Geänderte Dateien
 
-- 254 reguläre und besondere Hörspiele im lokalen Katalog
-- Hörstatus sowie Super-, Plus-, Neutral- und Minus-Bewertungen
-- Suche nach Titel, Autor, Ära, Figuren, Handlung, Kapiteln und Stichwörtern
-- persönliche Empfehlungen und Rocky-Beach-Community-Ranking
-- Spotify- und Apple-Music-Direktlinks beziehungsweise Such-Fallbacks
-- frei benennbare Playlists, kuratierte Sammlungen und Smart-Playlists
-- IndexedDB-Speicherung, JSON-Import und JSON-Export
-- vollständiger Offline-Betrieb nach dem ersten Laden
-- interaktives Tutorial und Kurzanleitung
+- `index.html` – empfehlungsorientierte Startseite und Hörprofil-Sheet
+- `style.css` – neue Startseiten- und Profilgestaltung
+- `app.js` – stärkere Empfehlungsgewichtung, Profilnavigation und prägende Figuren
+- `sw.js` – Cache-Version 15
+- `episodes.json` – kuratierte prägende Figuren
+- `episodes-seed.js` – identischer Offline-Katalog
 
-## Installation über GitHub Pages
+Die vorhandenen Icon-Dateien bleiben unangetastet. Persönliche Daten liegen weiterhin lokal in IndexedDB und bleiben bei einer Aktualisierung unter derselben GitHub-Pages-Adresse erhalten.
 
-Alle Dateien liegen im selben Ordner. GitHub Pages aktivieren, die veröffentlichte Seite in Safari oder Chrome öffnen und zum Startbildschirm hinzufügen.
+## Leitidee
 
-Persönliche Daten bleiben lokal im jeweiligen Browserprofil. Das JSON-Backup ist nur für zusätzliche Sicherheit oder einen Gerätewechsel erforderlich.
+Öffnen → „Passende Folge finden“ → sofort einen starken, verfügbaren und standardmäßig ungehörten Vorschlag erhalten. Statistiken, Playlists, Ranking und Detailwissen bleiben vollständig vorhanden, stehen aber nicht mehr vor der Hauptfunktion.

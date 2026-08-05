@@ -24,90 +24,77 @@
       <img src="icon-192.png" class="brand-icon" alt="">
       <div><span class="eyebrow">Mein Hörspiel-Archiv</span><h1>Folgen-Tracker</h1></div>
     </div>
-    <button class="icon-button" id="quickSettings" aria-label="Einstellungen öffnen">⚙︎</button>
+    <button class="profile-button" id="openProfile" aria-label="Hörprofil öffnen"><span aria-hidden="true">◔</span><small>Profil</small></button>
   </header>
 
   <main>
     <section class="page active" data-page="home">
-      <section class="dashboard-card">
-        <div class="progress-ring" id="progressRing" style="--progress:0deg">
-          <div><strong id="progressPercent">0 %</strong><span id="progressFraction">0 / 0</span></div>
+      <section class="quick-recommendation-hero" aria-labelledby="quickRecommendationTitle">
+        <div class="quick-recommendation-copy">
+          <span class="eyebrow">Eine Folge. Sofort passend.</span>
+          <h2 id="quickRecommendationTitle">Welche Folge passt gerade?</h2>
+          <p>Ein Tipp auf Basis deiner Bewertungen – standardmäßig ungehört und direkt abspielbar.</p>
         </div>
-        <div class="dashboard-copy">
-          <span class="eyebrow">Dein Fortschritt</span>
-          <h2 id="progressHeadline">Dein Archiv wartet</h2>
-          <p id="progressText">Markiere Folgen als gehört und baue dein persönliches Geschmacksprofil auf.</p>
-          <div class="mini-insights">
-            <div><strong id="heardHours">—</strong><span>gehört</span></div>
-            <div><strong id="favoriteTheme">—</strong><span>Lieblingsthema</span></div>
-            <div><strong id="rockyAgreement">—</strong><span>Rocky-Match</span></div>
+
+        <div id="quickRecommendationEmpty" class="quick-recommendation-empty">
+          <button id="quickRecommendButton" class="hero-recommend-button" type="button">
+            <span class="hero-recommend-icon" aria-hidden="true">▶</span>
+            <span><strong>Passende Folge finden</strong><small>ohne weitere Auswahl</small></span>
+          </button>
+        </div>
+
+        <div id="quickRecommendationResult" class="quick-recommendation-result hidden" aria-live="polite">
+          <article id="todayCard" class="recommendation-card"></article>
+          <button id="quickRecommendAgain" class="secondary-button full" type="button">Andere passende Folge</button>
+        </div>
+
+        <button id="recommendationRefineToggle" class="refine-toggle" type="button" aria-expanded="false" aria-controls="recommendationRefinePanel">
+          <span>Empfehlung verfeinern</span><span aria-hidden="true">⌄</span>
+        </button>
+        <div id="recommendationRefinePanel" class="recommendation-refine-panel hidden">
+          <div class="refine-group">
+            <span class="field-label">Zeit</span>
+            <div class="choice-strip compact-choice-strip" id="timePicker" aria-label="Laufzeit auswählen">
+              <button data-time="any" class="active"><strong>Egal</strong><small>beste Wahl</small></button>
+              <button data-time="short"><strong>≤ 60</strong><small>Min.</small></button>
+              <button data-time="normal"><strong>60–90</strong><small>Min.</small></button>
+              <button data-time="long"><strong>90+</strong><small>Min.</small></button>
+              <button data-time="special"><strong>✦ Spezial</strong><small>lang</small></button>
+            </div>
+          </div>
+          <div class="refine-group">
+            <span class="field-label">Stimmung</span>
+            <div class="discover-grid compact-mood-grid" id="moodPicker" aria-label="Stimmung auswählen">
+              <button data-mood="any" class="active">Alles</button>
+              <button data-mood="grusel">Grusel</button>
+              <button data-mood="klassiker">Klassiker</button>
+              <button data-mood="familie">Familie</button>
+              <button data-mood="skinny">Skinny</button>
+              <button data-mood="hugenay">Hugenay</button>
+              <button data-mood="meer">Meer & Insel</button>
+              <button data-mood="kunst">Kunst</button>
+            </div>
+          </div>
+          <div class="refine-actions">
+            <button id="timeRecommendButton" class="primary-button full" type="button">Mit dieser Auswahl empfehlen</button>
+            <button id="exploreMoodButton" class="subtle-link" type="button">Auswahl in der Folgenliste öffnen</button>
           </div>
         </div>
       </section>
 
-      <section class="rating-stats" aria-label="Bewertungsübersicht">
-        <div class="stat super"><strong id="superCount">0</strong><span>★ Super</span></div>
-        <div class="stat plus"><strong id="plusCount">0</strong><span>Plus</span></div>
-        <div class="stat neutral"><strong id="neutralCount">0</strong><span>Neutral</span></div>
-        <div class="stat minus"><strong id="minusCount">0</strong><span>Minus</span></div>
-      </section>
-
       <section id="pinnedSection" class="section-block pinned-section hidden">
         <div class="section-heading">
-          <div><span class="eyebrow">Schnell erreichbar</span><h2>Angeheftet</h2></div>
+          <div><span class="eyebrow">Schnell wiederfinden</span><h2>Angeheftet</h2></div>
           <button class="text-button" data-filter-jump="pinned">Alle anzeigen</button>
         </div>
         <div id="pinnedList" class="compact-list pinned-list"></div>
       </section>
 
-      <section id="profileInsightsSection" class="section-block profile-insights">
-        <div class="section-heading"><div><span class="eyebrow">Dein Hörprofil</span><h2>Was dir besonders gefällt</h2></div></div>
-        <div class="profile-insight-grid">
-          <article><span>Ø Bewertung</span><strong id="averageRating">—</strong><small id="averageRatingText">Noch keine Wertung</small></article>
-          <article><span>Lieblingsautor</span><strong id="favoriteAuthor">—</strong><small>aus Plus & Super</small></article>
-          <article><span>Lieblingsära</span><strong id="favoriteEra">—</strong><small>aus Plus & Super</small></article>
-          <article><span>Angeheftet</span><strong id="pinnedCount">0</strong><small>schnell erreichbar</small></article>
-        </div>
-      </section>
-
-      <section class="section-block">
-        <div class="section-heading">
-          <div><span class="eyebrow">Heute hören</span><h2>Dein Fall des Tages</h2></div>
-          <button id="dailyRefreshButton" class="text-button">Anderer</button>
-        </div>
-        <article id="todayCard" class="recommendation-card loading-card">
-          <div class="skeleton wide"></div><div class="skeleton medium"></div><div class="skeleton short"></div>
-        </article>
-      </section>
-
-      <section class="section-block">
-        <div class="section-heading"><div><span class="eyebrow">Zeit & Stimmung</span><h2>Was passt gerade?</h2></div></div>
-        <div class="choice-strip" id="timePicker" aria-label="Laufzeit auswählen">
-          <button data-time="any" class="active"><strong>Egal</strong><small>beste Wahl</small></button>
-          <button data-time="short"><strong>≤ 60</strong><small>Minuten</small></button>
-          <button data-time="normal"><strong>60–90</strong><small>Minuten</small></button>
-          <button data-time="long"><strong>90+</strong><small>lang</small></button>
-          <button data-time="special"><strong>✦ Spezial</strong><small>extra lang</small></button>
-        </div>
-        <div class="discover-grid" id="moodPicker" aria-label="Stimmung auswählen">
-          <button data-mood="any" class="active">Alles</button>
-          <button data-mood="grusel">Grusel</button>
-          <button data-mood="klassiker">Klassiker</button>
-          <button data-mood="familie">Familie</button>
-          <button data-mood="skinny">Skinny</button>
-          <button data-mood="hugenay">Hugenay</button>
-          <button data-mood="meer">Meer & Insel</button>
-          <button data-mood="kunst">Kunst</button>
-        </div>
-        <button id="timeRecommendButton" class="primary-button full">Passende ungehörte Folge finden</button>
-        <button id="exploreMoodButton" class="subtle-link">Diese Auswahl in der Folgenliste öffnen</button>
-      </section>
-
-      <section class="section-block surprise-section">
-        <div class="section-heading"><div><span class="eyebrow">Schnellauswahl</span><h2>Direkt loshören</h2></div></div>
-        <div class="action-grid">
-          <button id="surpriseToggleButton" class="action-card featured" aria-expanded="false" aria-controls="surprisePanel"><span>🎲</span><strong>Überrasch mich</strong><small>mit eigenen Filtern</small></button>
-          <button id="randomNewButton" class="action-card"><span>✦</span><strong>Neue Folge</strong><small>zufällig ungehört</small></button>
+      <section class="section-block quick-tools-section">
+        <div class="section-heading"><div><span class="eyebrow">Alternativen</span><h2>Anders auswählen</h2></div></div>
+        <div class="action-grid compact-action-grid">
+          <button id="surpriseToggleButton" class="action-card featured" aria-expanded="false" aria-controls="surprisePanel"><span>🎲</span><strong>Mit Filtern</strong><small>gezielt auslosen</small></button>
+          <button id="randomNewButton" class="action-card"><span>✦</span><strong>Zufällig neu</strong><small>immer ungehört</small></button>
           <button id="randomHeardButton" class="action-card"><span>↻</span><strong>Wiederhören</strong><small>lange nicht gehört</small></button>
         </div>
         <div id="surprisePanel" class="surprise-panel hidden">
@@ -280,12 +267,12 @@
       <div class="settings-section-label"><span>Über die App</span></div>
       <div class="settings-group changelog-group">
         <details>
-          <summary><span><strong>Neu in Version 14</strong><small>Komfort, Verlauf, Zufallsauswahl und Feinschliff</small></span><b aria-hidden="true">›</b></summary>
+          <summary><span><strong>Neu in Version 15</strong><small>Sofortempfehlung, Hörprofil und prägende Figuren</small></span><b aria-hidden="true">›</b></summary>
           <div class="changelog-list">
-            <p><strong>Angeheftet:</strong> Lieblingsfolgen sind auf der Startseite sofort erreichbar.</p>
-            <p><strong>Hörverlauf:</strong> Die zuletzt gehörten Folgen werden getrennt von bloßen Änderungen angezeigt.</p>
-            <p><strong>Überrasch mich:</strong> Zufallsauswahl nach Hörstatus, Thema und Bewertung.</p>
-            <p><strong>Feinschliff:</strong> schnellere Listen, einheitlichere Abstände, bessere Rückmeldungen und robustere Bedienung.</p>
+            <p><strong>Sofortempfehlung:</strong> Die Startseite löst jetzt zuerst ihre wichtigste Aufgabe: mit einem Tipp eine starke, ungehörte Folge finden.</p>
+            <p><strong>Hörprofil:</strong> Statistiken und Geschmacksdaten liegen kompakt hinter dem Profil-Symbol und überladen die Startseite nicht mehr.</p>
+            <p><strong>Prägende Figuren:</strong> Karten zeigen den Gegenspieler oder die zentrale fallbezogene Figur statt beliebiger wiederkehrender Nebenrollen.</p>
+            <p><strong>Empfehlungslogik:</strong> positive und negative Bewertungen, Autoren, Themen, prägende Figuren, Verfügbarkeit und Community-Wertung greifen enger zusammen.</p>
           </div>
         </details>
       </div>
@@ -295,7 +282,7 @@
           <strong>Folgen-Tracker</strong>
           <small id="storageInfo">Lade Daten …</small>
           <small id="metadataInfo">Folgenwissen wird geprüft …</small>
-          <small id="appVersionInfo">Version 14.0 · Offline-fähig</small>
+          <small id="appVersionInfo">Version 15.0 · Offline-fähig</small>
           <small id="appUpdateInfo">App-Shell und persönliche Daten sind lokal verfügbar.</small>
           <small class="source-note">Folgenmetadaten & Streaming-Links: dreimetadaten.de · Community-Wertungen: rocky-beach.com</small>
         </div>
@@ -310,6 +297,52 @@
     <button data-nav="playlists"><span>≡</span><small>Listen</small></button>
     <button data-nav="settings"><span>⚙︎</span><small>Einstellungen</small></button>
   </nav>
+</div>
+
+<div id="profileOverlay" class="overlay overlay-front hidden" aria-hidden="true">
+  <article class="detail-sheet profile-sheet" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
+    <div class="sheet-handle"></div>
+    <header class="detail-header"><div><span class="eyebrow">Dein Hörprofil</span><h2 id="profileTitle">Was dir gefällt</h2></div><button id="closeProfile" class="icon-button" aria-label="Hörprofil schließen">×</button></header>
+    <p class="profile-intro">Diese Daten helfen der App, dir schneller eine passende ungehörte Folge vorzuschlagen.</p>
+
+    <section class="dashboard-card profile-dashboard">
+      <div class="progress-ring" id="progressRing" style="--progress:0deg">
+        <div><strong id="progressPercent">0 %</strong><span id="progressFraction">0 / 0</span></div>
+      </div>
+      <div class="dashboard-copy">
+        <span class="eyebrow">Dein Fortschritt</span>
+        <h3 id="progressHeadline">Dein Archiv wartet</h3>
+        <p id="progressText">Markiere Folgen als gehört und baue dein persönliches Geschmacksprofil auf.</p>
+        <div class="mini-insights">
+          <div><strong id="heardHours">—</strong><span>gehört</span></div>
+          <div><strong id="favoriteTheme">—</strong><span>Lieblingsthema</span></div>
+          <div><strong id="rockyAgreement">—</strong><span>Rocky-Match</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="rating-stats" aria-label="Bewertungsübersicht">
+      <div class="stat super"><strong id="superCount">0</strong><span>★ Super</span></div>
+      <div class="stat plus"><strong id="plusCount">0</strong><span>Plus</span></div>
+      <div class="stat neutral"><strong id="neutralCount">0</strong><span>Neutral</span></div>
+      <div class="stat minus"><strong id="minusCount">0</strong><span>Minus</span></div>
+    </section>
+
+    <section id="profileInsightsSection" class="profile-insights">
+      <div class="profile-insight-grid">
+        <article><span>Ø Bewertung</span><strong id="averageRating">—</strong><small id="averageRatingText">Noch keine Wertung</small></article>
+        <article><span>Lieblingsautor</span><strong id="favoriteAuthor">—</strong><small>aus Plus & Super</small></article>
+        <article><span>Lieblingsära</span><strong id="favoriteEra">—</strong><small>aus Plus & Super</small></article>
+        <article><span>Angeheftet</span><strong id="pinnedCount">0</strong><small>schnell erreichbar</small></article>
+      </div>
+    </section>
+
+    <section class="profile-explainer">
+      <span class="eyebrow">So entsteht dein Vorschlag</span>
+      <p>Bewertungen, Autoren, Themen, prägende Figuren, Laufzeit und Community-Wertung werden kombiniert. Minus-Bewertungen senken ähnliche Fälle deutlich ab.</p>
+    </section>
+    <div class="profile-actions"><button id="profileOpenRanking" class="secondary-button">Ranking ansehen</button><button id="profileOpenSettings" class="subtle-button">Einstellungen</button></div>
+  </article>
 </div>
 
 <div id="detailOverlay" class="overlay hidden" aria-hidden="true">
@@ -472,7 +505,7 @@
 <div id="tutorialOverlay" class="tutorial-overlay hidden" aria-hidden="true">
   <div id="tutorialFocus" class="tutorial-focus" aria-hidden="true"></div>
   <article id="tutorialCard" class="tutorial-card" role="dialog" aria-modal="true" aria-labelledby="tutorialTitle">
-    <div class="tutorial-card-top"><span id="tutorialProgress" class="eyebrow">1 von 27</span><button id="skipTutorial" class="tutorial-skip">Überspringen</button></div>
+    <div class="tutorial-card-top"><span id="tutorialProgress" class="eyebrow">1 von 28</span><button id="skipTutorial" class="tutorial-skip">Überspringen</button></div>
     <h2 id="tutorialTitle">Willkommen</h2>
     <p id="tutorialText"></p>
     <div id="tutorialAction" class="tutorial-action" role="status" aria-live="polite"></div>

@@ -5,10 +5,10 @@
   const DB_VERSION = 1;
   const STORE = 'kv';
   const USER_KEY = 'appState';
-  const CATALOG_KEY = 'enrichedCatalogV14';
-  const LEGACY_CATALOG_KEYS = ['enrichedCatalogV13', 'enrichedCatalogV10', 'enrichedCatalogV9', 'enrichedCatalogV8', 'enrichedCatalogV7', 'enrichedCatalogV6', 'enrichedCatalogV5', 'enrichedCatalogV4'];
+  const CATALOG_KEY = 'enrichedCatalogV15';
+  const LEGACY_CATALOG_KEYS = ['enrichedCatalogV14', 'enrichedCatalogV13', 'enrichedCatalogV10', 'enrichedCatalogV9', 'enrichedCatalogV8', 'enrichedCatalogV7', 'enrichedCatalogV6', 'enrichedCatalogV5', 'enrichedCatalogV4'];
   const LEGACY_USER_KEYS = ['user-state', 'userState', 'state'];
-  const APP_VERSION = '14.0.0';
+  const APP_VERSION = '15.0.0';
   const DEFAULT_STREAMING_SERVICE = 'spotify';
   const META_URL = 'https://dreimetadaten.de/data/Serie.json';
   const META_MAX_AGE = 1000 * 60 * 60 * 24 * 30;
@@ -59,6 +59,8 @@
     surpriseStatus: 'all',
     surpriseTheme: 'any',
     surpriseRating: 'any',
+    quickRecommendationNr: null,
+    quickRecommendationHistory: [],
   };
 
   const $ = (id) => document.getElementById(id);
@@ -368,6 +370,13 @@
     return uniqueStrings(selected).slice(0, limit);
   }
 
+  function featuredCharactersFor(episode, limit = 2) {
+    // Cards and recommendations use only deliberately curated case anchors.
+    // The full cast remains searchable and visible in the detail view, but generic
+    // recurring supporting roles must not become the mental label of a case.
+    return uniqueStrings(episode?.featuredCharacters || episode?.featuredCharacter || []).slice(0, limit);
+  }
+
   function buildHiddenKeywords(episode) {
     const keywords = [...(episode.searchKeywords || [])];
     for (const character of episode.characters || []) {
@@ -392,7 +401,7 @@
       title: normalizeText(`${episode.nr} ${episode.titel}`),
       description: normalizeText(episode.beschreibung),
       tags: normalizeText((episode.tags || []).join(' ')),
-      characters: normalizeText((episode.characters || []).filter((character) => !isMainRole(character)).join(' ')),
+      characters: normalizeText([...(episode.featuredCharacters || []), ...(episode.characters || []).filter((character) => !isMainRole(character))].join(' ')),
       speakers: normalizeText((episode.speakers || []).join(' ')),
       chapters: normalizeText((episode.chapters || []).join(' ')),
       hidden: normalizeText(hidden.join(' ')),
@@ -414,6 +423,7 @@
     const characters = uniqueStrings((raw.characters || raw.figuren || raw.sprechrollen || []).map(roleValue));
     const speakers = uniqueStrings((raw.speakers || raw.sprecher || raw.sprechrollen || []).map(speakerValue));
     const chapters = uniqueStrings((raw.chapters || raw.kapitel || []).map(chapterValue));
+    const featuredCharacters = uniqueStrings([raw.featuredCharacters || raw.featuredCharacter || raw.featured || []]);
     const source = [titel, beschreibung, chapters.join(' '), characters.join(' ')].join(' ');
     const episode = {
       nr,
@@ -428,6 +438,7 @@
       characters,
       speakers,
       chapters,
+      featuredCharacters,
       author: authorValue(raw.author || raw.buchautor || raw.buchautoren),
       scriptAuthor: authorValue(raw.scriptAuthor || raw.hörspielskriptautor || raw.hoerspielskriptautor),
       era: canonicalEra(raw.era, nr, raw.collection || 'main'),
@@ -918,30 +929,60 @@
     const key = Number(episode.nr);
     if (featureCache.has(key)) return featureCache.get(key);
     const features = [];
-    for (const tag of episode.tags || []) features.push({ key: `tag:${normalizeText(tag)}`, label: tag, type: 'tag' });
-    for (const character of importantCharacters(episode, 8)) features.push({ key: `character:${normalizeText(character)}`, label: character, type: 'character' });
+    for (const tag of episode.tags || []) features.push({ key: `tag:${normalizeText(tag)}`, label: tag, type: 'tag', strength: .72 });
+    for (const character of featuredCharactersFor(episode, 2)) features.push({ key: `character:${normalizeText(character)}`, label: character, type: 'character', strength: 1.55 });
+    if (episode.author) features.push({ key: `author:${normalizeText(episode.author)}`, label: episode.author, type: 'author', strength: .82 });
+    if (episode.era) features.push({ key: `era:${normalizeText(episode.era)}`, label: eraInfo(episode).short, type: 'era', strength: .34 });
+    if (episode.scriptAuthor && normalizeText(episode.scriptAuthor) !== normalizeText(episode.author)) {
+      features.push({ key: `script:${normalizeText(episode.scriptAuthor)}`, label: episode.scriptAuthor, type: 'script', strength: .28 });
+    }
     featureCache.set(key, features);
     return features;
   }
 
   function tasteProfile() {
     if (tasteCache.revision === dataRevision && tasteCache.value) return tasteCache.value;
-    const weights = new Map();
+    const aggregates = new Map();
     let rated = 0;
     for (const episode of state.catalog) {
       const user = userFor(episode.nr);
       if (!user.rating) continue;
       rated += 1;
-      const delta = user.rating === 'super' ? 2 : user.rating === 'plus' ? 1 : user.rating === 'neutral' ? 0 : -1.25;
+      const delta = user.rating === 'super' ? 2.15 : user.rating === 'plus' ? 1 : user.rating === 'neutral' ? 0 : -1.7;
       for (const feature of episodeFeatures(episode)) {
-        const current = weights.get(feature.key) || { ...feature, weight: 0 };
-        current.weight += delta;
-        weights.set(feature.key, current);
+        const current = aggregates.get(feature.key) || { ...feature, sum: 0, count: 0 };
+        current.sum += delta * (feature.strength || 1);
+        current.count += 1;
+        aggregates.set(feature.key, current);
       }
     }
-    const value = { weights, rated };
+    const weights = new Map();
+    for (const [key, aggregate] of aggregates) {
+      // A Bayesian-style shrinkage prevents broad tags such as “Mystery” from
+      // becoming overwhelmingly strong merely because they occur very often.
+      // Distinctive recurring figures and consistently liked authors stay useful.
+      const weight = Math.max(-2.6, Math.min(2.6, aggregate.sum / (1.25 + aggregate.count * .65)));
+      weights.set(key, { ...aggregate, weight });
+    }
+    const value = { weights, rated, confidence: Math.min(1, rated / 18) };
     tasteCache = { revision: dataRevision, value };
     return value;
+  }
+
+  function episodeIsReleased(episode) {
+    if (!episode?.releaseDate) return Boolean(episode?.spotifyUrl || episode?.appleMusicUrl || Number(episode?.nr) < 241);
+    const releasedAt = new Date(`${episode.releaseDate}T00:00:00`);
+    return !Number.isNaN(releasedAt.getTime()) && releasedAt.getTime() <= Date.now();
+  }
+
+  function recommendationEligible(episode) {
+    if (!episode || !episodeIsReleased(episode)) return false;
+    const description = normalizeText(episode.beschreibung);
+    const searchable = normalizeText([...(episode.tags || []), ...(episode.searchKeywords || [])].join(' '));
+    if (description.includes('metadaten werden beim ersten online start erganzt') || description.includes('stichwortsuche uber den titel moglich')) return false;
+    // Reine Musik- und Katalogeinträge sind auffindbar, aber keine sinnvollen Hörspiel-Empfehlungen.
+    if (Number(episode.nr) === 29 || searchable.includes('keine handlung') || description.includes('keine eigentliche detektivhandlung')) return false;
+    return Boolean(episode.spotifyUrl || episode.appleMusicUrl || Number(episode.nr) < 241);
   }
 
   function recommendationScore(episode) {
@@ -950,26 +991,36 @@
     if (cached?.revision === dataRevision) return cached.value;
     const profile = tasteProfile();
     const matching = [];
-    let similarity = 0;
+    let signedTotal = 0;
+    let negative = 0;
+    let matchedStrength = 0;
     for (const feature of episodeFeatures(episode)) {
       const profileFeature = profile.weights.get(feature.key);
       if (!profileFeature) continue;
-      similarity += profileFeature.weight;
-      if (profileFeature.weight > 0) matching.push(profileFeature);
+      const strength = feature.strength || 1;
+      const contribution = profileFeature.weight * strength;
+      signedTotal += contribution;
+      matchedStrength += strength;
+      if (contribution > .22) matching.push({ ...profileFeature, contribution });
+      if (contribution < 0) negative += Math.abs(contribution);
     }
-    const featureCount = Math.max(1, episodeFeatures(episode).length);
-    similarity /= Math.sqrt(featureCount);
-    const rockyBonus = episode.rockyRanking == null ? 0 : Math.max(0, (6 - episode.rockyRanking) / 5) * 1.35;
-    const score = similarity + rockyBonus;
+    const tasteFit = matchedStrength
+      ? signedTotal / Math.max(1, Math.sqrt(matchedStrength * 1.7))
+      : 0;
+    const rockyQuality = episode.rockyRanking == null
+      ? .3
+      : Math.max(0, Math.min(1, (5.25 - episode.rockyRanking) / 4.35));
+    const metadataBonus = (episode.tags?.length ? .08 : 0) + (featuredCharactersFor(episode, 1).length ? .12 : 0);
+    const score = tasteFit * 1.55 + rockyQuality * 1.65 + metadataBonus;
     const match = profile.rated
-      ? Math.max(18, Math.min(99, Math.round(58 + similarity * 11 + rockyBonus * 10)))
-      : Math.max(52, Math.min(88, Math.round(52 + rockyBonus * 22)));
+      ? Math.max(24, Math.min(96, Math.round(48 + tasteFit * 10 + rockyQuality * 18 + profile.confidence * 5)))
+      : Math.max(48, Math.min(86, Math.round(56 + rockyQuality * 25)));
     const reasons = matching
-      .sort((a, b) => b.weight - a.weight)
+      .sort((a, b) => b.contribution - a.contribution)
       .slice(0, 4)
       .map((item) => item.label);
-    if (!reasons.length && episode.rockyRanking != null && episode.rockyRanking <= 2.1) reasons.push('starkes Community-Ranking');
-    const value = { score, match, reasons };
+    if (!reasons.length && episode.rockyRanking != null && episode.rockyRanking <= 2.15) reasons.push('starkes Community-Ranking');
+    const value = { score, match, reasons, negative, tasteFit };
     recommendationCache.set(cacheKey, { revision: dataRevision, value });
     return value;
   }
@@ -1009,7 +1060,7 @@
   function recommendationPool(time = 'any', mood = 'any') {
     return state.catalog
       .map(merged)
-      .filter((episode) => !episode.heard && timeMatch(episode, time) && moodMatch(episode, mood))
+      .filter((episode) => recommendationEligible(episode) && !episode.heard && timeMatch(episode, time) && moodMatch(episode, mood))
       .map((episode) => ({ ...episode, ...recommendationScore(episode) }))
       .sort((a, b) => b.score - a.score || rockyCompare(a, b) || a.nr - b.nr);
   }
@@ -1033,9 +1084,16 @@
 
   function weightedPick(list) {
     if (!list.length) return null;
-    const top = list.slice(0, Math.min(22, list.length));
-    const minimum = Math.min(...top.map((item) => item.score || 0));
-    const weights = top.map((item) => Math.max(0.15, (item.score || 0) - minimum + 0.45));
+    // Keep the one-tap recommendation reliably strong while still allowing some
+    // variety. A softmax over only the best candidates avoids random mediocre picks.
+    const top = list.slice(0, Math.min(12, list.length));
+    const maximum = Math.max(...top.map((item) => item.score || 0));
+    const temperature = tasteProfile().rated >= 4 ? 1.15 : 0.85;
+    const weights = top.map((item, index) => {
+      const qualityWeight = Math.exp(((item.score || 0) - maximum) / temperature);
+      const rankGuard = Math.max(.22, 1 - index * .055);
+      return Math.max(.025, qualityWeight * rankGuard);
+    });
     let random = Math.random() * weights.reduce((sum, weight) => sum + weight, 0);
     for (let index = 0; index < top.length; index += 1) {
       random -= weights[index];
@@ -1072,7 +1130,7 @@
     state.surpriseStatus = status;
     state.surpriseTheme = theme;
     state.surpriseRating = rating;
-    let candidates = state.catalog.map(merged).filter((episode) => surpriseThemeMatch(episode, theme));
+    let candidates = state.catalog.map(merged).filter((episode) => recommendationEligible(episode) && surpriseThemeMatch(episode, theme));
     if (status === 'unheard') candidates = candidates.filter((episode) => !episode.heard);
     if (status === 'heard') candidates = candidates.filter((episode) => episode.heard);
     if (rating === 'liked') candidates = candidates.filter((episode) => ['super', 'plus'].includes(episode.rating));
@@ -1148,17 +1206,21 @@
   function recommendationMarkup(episode, options = {}) {
     if (!episode) return '<div class="empty-message">Keine passende Folge gefunden.</div>';
     const result = recommendationScore(episode);
-    const reasons = [...result.reasons];
+    const featured = featuredCharactersFor(episode, 2);
+    const reasons = uniqueStrings([featured, result.reasons]);
     if (episode.durationMin) reasons.push(fmtDuration(episode.durationMin));
     if (episode.rockyRanking != null) reasons.push(`Rocky ${fmtRocky(episode.rockyRanking)}`);
     const personal = tasteProfile().rated >= 2;
-    const kicker = options.kicker || (isSpecial(episode) ? 'Spezial-Empfehlung' : personal ? 'Persönliche Empfehlung' : 'Startempfehlung');
+    const kicker = options.kicker || (isSpecial(episode) ? 'Spezial-Empfehlung' : personal ? 'Für dich ausgewählt' : 'Starker Einstieg');
+    const explanation = personal && result.reasons.length
+      ? `Passt zu ${result.reasons.slice(0, 2).map((reason) => esc(reason)).join(' und ')} in deinen gut bewerteten Folgen.`
+      : 'Eine starke, verfügbare Folge aus den noch ungehörten Fällen.';
     return `
       <div class="recommendation-top">
         <div>
           <span class="eyebrow">${esc(kicker)}</span>
           <h3>${esc(episodeLabel(episode))} · ${esc(episode.titel)}</h3>
-          <p>${personal && result.reasons.length ? 'Passt zu Merkmalen deiner besonders gut bewerteten Folgen.' : 'Ausgewählt anhand von Community-Wertung, Laufzeit und verfügbaren Folgendaten.'}</p>
+          <p>${explanation}</p>
         </div>
         <div class="match-badge"><strong>${result.match}%</strong><span>${personal ? 'Match' : 'Tipp'}</span></div>
       </div>
@@ -1195,6 +1257,32 @@
       </div>`).join('');
   }
 
+  function renderQuickRecommendation() {
+    const base = state.catalog.find((episode) => episode.nr === Number(state.quickRecommendationNr));
+    const episode = base ? merged(base) : null;
+    const hasResult = Boolean(episode && recommendationEligible(episode) && !episode.heard);
+    $('quickRecommendationEmpty')?.classList.toggle('hidden', hasResult);
+    $('quickRecommendationResult')?.classList.toggle('hidden', !hasResult);
+    if (hasResult && $('todayCard')) $('todayCard').innerHTML = recommendationMarkup(episode, { kicker: 'Für dich ausgewählt' });
+  }
+
+  function quickRecommendationPick() {
+    const pool = recommendationPool(state.time, state.mood);
+    if (!pool.length) {
+      toast('Keine verfügbare ungehörte Folge passt zu dieser Auswahl.');
+      return null;
+    }
+    const recent = new Set((state.quickRecommendationHistory || []).slice(-10));
+    const fresh = pool.filter((episode) => !recent.has(episode.nr));
+    const candidatePool = fresh.length >= Math.min(6, pool.length) ? fresh : pool;
+    const pick = weightedPick(candidatePool);
+    if (!pick) return null;
+    state.quickRecommendationNr = pick.nr;
+    state.quickRecommendationHistory = [...(state.quickRecommendationHistory || []), pick.nr].slice(-16);
+    renderQuickRecommendation();
+    return pick;
+  }
+
   function renderHome() {
     const stats = calculateStats();
     const percent = stats.total ? Math.round((stats.heard / stats.total) * 100) : 0;
@@ -1217,10 +1305,7 @@
     $('favoriteEra').textContent = weightedFavorite('era');
     $('pinnedCount').textContent = String((state.user.pinned || []).length);
     renderPinnedHome();
-
-    const today = dailyPick();
-    $('todayCard').classList.remove('loading-card');
-    $('todayCard').innerHTML = recommendationMarkup(today, { kicker: 'Heute für dich' });
+    renderQuickRecommendation();
 
     const recent = (state.user.history || [])
       .map((entry) => {
@@ -1345,6 +1430,7 @@
   function episodeCard(episode) {
     const showMatch = tasteProfile().rated > 0 && !episode.heard;
     const result = showMatch ? recommendationScore(episode) : null;
+    const featured = featuredCharactersFor(episode, 2);
     return `
       <article class="episode-card rating-${episode.rating || 'none'}" data-open="${episode.nr}">
         <div class="episode-main">
@@ -1358,6 +1444,7 @@
             <button class="heard-button ${episode.heard ? 'on' : ''}" data-heard="${episode.nr}" aria-pressed="${episode.heard}" aria-label="${episode.heard ? 'Als ungehört markieren' : 'Als gehört markieren'}">${episode.heard ? '✓' : '○'}</button>
           </div>
         </div>
+        ${featured.length ? `<div class="episode-featured" aria-label="Prägende Figuren">${featured.map((character) => `<span>${esc(character)}</span>`).join('<b aria-hidden="true">·</b>')}</div>` : ''}
         <div class="episode-footer">
           <div class="badges">
             <span class="badge">${fmtDuration(episode.durationMin)}</span>
@@ -1421,7 +1508,7 @@
       mainValue = ratingSymbol(episode.rating);
       label = ratingLabel(episode.rating);
     }
-    const details = [fmtDuration(episode.durationMin), importantCharacters(episode, 2).join(' · ')].filter((item) => item && item !== '—').join(' · ');
+    const details = [fmtDuration(episode.durationMin), featuredCharactersFor(episode, 2).join(' · ')].filter((item) => item && item !== '—').join(' · ');
     return `
       <button class="ranking-card" data-open="${episode.nr}">
         <span class="rank-position">${position}</span>
@@ -1914,6 +2001,23 @@ function tutorialCreatedPlaylistCard() {
 }
 
 const TUTORIAL_STEPS = [
+  {
+    id: 'quick-recommendation',
+    contextPage: 'home',
+    focus: '#quickRecommendButton',
+    actionTarget: '#quickRecommendButton',
+    card: 'bottom',
+    title: 'Sofort eine passende Folge',
+    text: 'Das ist die Hauptfunktion: Die App wählt mit einem Tipp eine starke, ungehörte Folge passend zu deinen Bewertungen aus.',
+    action: 'Tippe auf „Passende Folge finden“.',
+    event: 'click',
+    prepare: () => {
+      state.quickRecommendationNr = null;
+      renderQuickRecommendation();
+    },
+    verify: () => !$('quickRecommendationResult').classList.contains('hidden') && Boolean(state.quickRecommendationNr),
+    settle: 180,
+  },
   {
     id: 'go-episodes',
     contextPage: 'home',
@@ -3099,13 +3203,34 @@ function closeHelp() {
     renderSettings();
   }
 
+  function openProfile() {
+    renderHome();
+    lastFocusedElement = document.activeElement;
+    $('profileOverlay').classList.remove('hidden');
+    $('profileOverlay').setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => $('closeProfile')?.focus({ preventScroll: true }), 0);
+  }
+
+  function closeProfile() {
+    $('profileOverlay').classList.add('hidden');
+    $('profileOverlay').setAttribute('aria-hidden', 'true');
+    const anotherOverlayOpen = [...document.querySelectorAll('.overlay:not(#profileOverlay)')].some((overlay) => !overlay.classList.contains('hidden'));
+    document.body.style.overflow = anotherOverlayOpen ? 'hidden' : '';
+    lastFocusedElement?.focus?.({ preventScroll: true });
+  }
+
   function showRecommendation(episode, kicker = '') {
     if (!episode) {
       toast('Keine passende Folge mit dieser Auswahl gefunden.');
       return;
     }
-    $('todayCard').innerHTML = recommendationMarkup(episode, { kicker: kicker || 'Für deine Auswahl' });
-    $('todayCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    state.quickRecommendationNr = Number(episode.nr);
+    state.quickRecommendationHistory = [...(state.quickRecommendationHistory || []), Number(episode.nr)].slice(-16);
+    $('quickRecommendationEmpty')?.classList.add('hidden');
+    $('quickRecommendationResult')?.classList.remove('hidden');
+    if ($('todayCard')) $('todayCard').innerHTML = recommendationMarkup(episode, { kicker: kicker || 'Für deine Auswahl' });
+    document.querySelector('.quick-recommendation-hero')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function openDetail(number) {
@@ -3503,6 +3628,7 @@ function closeHelp() {
       characters: characters.length ? characters : existing.characters || [],
       speakers: speakers.length ? speakers : existing.speakers || [],
       chapters: chapters.length ? chapters : existing.chapters || [],
+      featuredCharacters: existing.featuredCharacters || [],
       author: authorValue(meta.autor || meta.buchautor || meta.buchautoren) || existing.author || '',
       scriptAuthor: authorValue(meta.hörspielskriptautor || meta.hoerspielskriptautor) || existing.scriptAuthor || '',
       spotifyUrl: directStreamingUrl(meta, 'spotify') || existing.spotifyUrl || null,
@@ -3617,7 +3743,11 @@ function closeHelp() {
   function bind() {
     document.querySelectorAll('[data-nav]').forEach((button) => button.addEventListener('click', () => showPage(button.dataset.nav)));
     document.querySelectorAll('[data-go]').forEach((button) => button.addEventListener('click', () => showPage(button.dataset.go)));
-    $('quickSettings').addEventListener('click', () => showPage('settings'));
+    $('openProfile').addEventListener('click', openProfile);
+    $('closeProfile').addEventListener('click', closeProfile);
+    $('profileOverlay').addEventListener('click', (event) => { if (event.target === $('profileOverlay')) closeProfile(); });
+    $('profileOpenRanking').addEventListener('click', () => { closeProfile(); showPage('ranking'); });
+    $('profileOpenSettings').addEventListener('click', () => { closeProfile(); showPage('settings'); });
     $('newPlaylistButton').addEventListener('click',()=>openPlaylistEditor());
     $('newPlaylistTextButton').addEventListener('click',()=>openPlaylistEditor());
     $('playlistLibraryTabs').addEventListener('click',(event)=>{const button=event.target.closest('[data-playlist-tab]');if(button)setPlaylistTab(button.dataset.playlistTab);});
@@ -3694,6 +3824,18 @@ function closeHelp() {
       renderRanking();
     });
 
+    $('quickRecommendButton').addEventListener('click', () => {
+      const pick = quickRecommendationPick();
+      if (pick) $('quickRecommendationResult')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+    $('quickRecommendAgain').addEventListener('click', () => quickRecommendationPick());
+    $('recommendationRefineToggle').addEventListener('click', () => {
+      const panel = $('recommendationRefinePanel');
+      const opening = panel.classList.contains('hidden');
+      panel.classList.toggle('hidden', !opening);
+      $('recommendationRefineToggle').setAttribute('aria-expanded', String(opening));
+    });
+
     $('timePicker').addEventListener('click', (event) => {
       const button = event.target.closest('[data-time]');
       if (!button) return;
@@ -3706,10 +3848,6 @@ function closeHelp() {
     });
     $('timeRecommendButton').addEventListener('click', () => showRecommendation(weightedPick(recommendationPool(state.time, state.mood)), moodLabel(state.mood)));
     $('exploreMoodButton').addEventListener('click', openMoodCollection);
-    $('dailyRefreshButton').addEventListener('click', () => {
-      state.dailyOffset += 1;
-      $('todayCard').innerHTML = recommendationMarkup(dailyPick(), { kicker: 'Alternative für heute' });
-    });
     $('surpriseToggleButton').addEventListener('click', () => {
       const panel = $('surprisePanel');
       const opening = panel.classList.contains('hidden');
@@ -3719,7 +3857,7 @@ function closeHelp() {
     });
     $('surprisePickButton').addEventListener('click', surprisePick);
     $('randomNewButton').addEventListener('click', () => {
-      const candidates = state.catalog.map(merged).filter((episode) => !episode.heard);
+      const candidates = state.catalog.map(merged).filter((episode) => recommendationEligible(episode) && !episode.heard);
       showRecommendation(candidates[Math.floor(Math.random() * candidates.length)], 'Zufällige neue Folge');
     });
     $('randomHeardButton').addEventListener('click', () => showRecommendation(replayPick(), 'Zum Wiederhören'));
@@ -3922,6 +4060,7 @@ function closeHelp() {
         if (!$('tutorialOverlay').classList.contains('hidden')) skipTutorial();
         else if (!$('confirmOverlay').classList.contains('hidden')) closeConfirmDialog(false);
         else if (!$('heardResetOverlay').classList.contains('hidden')) closeHeardReset();
+        else if (!$('profileOverlay').classList.contains('hidden')) closeProfile();
         else if (!$('helpOverlay').classList.contains('hidden')) closeHelp();
         else if (state.detailNr) closeDetail();
         else if (state.playlistDetailId) closePlaylistDetail();

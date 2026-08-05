@@ -1,0 +1,258 @@
+# Prägende Figuren je Folge
+
+Die Übersicht zeigt bewusst die prägendste fallbezogene Figur bzw. den Gegenspieler, nicht automatisch wiederkehrende Nebenfiguren.
+
+- **1 · Der Super-Papagei** — Victor Hugenay
+- **2 · Der Phantomsee** — Java-Jim
+- **3 · Der Karpatenhund** — Sonny Elmquist
+- **4 · Die schwarze Katze** — Khan
+- **5 · Der Fluch des Rubins** — Mr. Rhandur
+- **6 · Der sprechende Totenkopf** — Gulliver
+- **7 · Der unheimliche Drache** — Jack Morgan
+- **8 · Der grüne Geist** — Chang
+- **9 · Die rätselhaften Bilder** — Skinny Norris
+- **10 · Die flüsternde Mumie** — Professor Yarborough
+- **11 · Das Gespensterschloß** — Stephen Terrill
+- **12 · Der seltsame Wecker** — Gerald Cramer
+- **13 · Der lachende Schatten** — Skinny Norris
+- **14 · Das Bergmonster** — Mr. Jensen
+- **15 · Der rasende Löwe** — Eastland
+- **16 · Der Zauberspiegel** — Juan Gomez
+- **17 · Die gefährliche Erbschaft** — Skinny Norris
+- **18 · Die Geisterinsel** — Farraday
+- **19 · Der Teufelsberg** — Wreston
+- **20 · Die flammende Spur** — Mihai Eftimin
+- **21 · Der tanzende Teufel** — Walter Quail
+- **22 · Der verschwundene Schatz** — Mr. Togati
+- **23 · Das Aztekenschwert** — Skinny Norris
+- **24 · Die silberne Spinne** — Forsborg
+- **25 · Die singende Schlange** — Dr. Shaitan
+- **26 · Die Silbermine** — Harrison Osborne
+- **27 · Der magische Kreis** — Marvin Gray
+- **28 · Der Doppelgänger** — Ian Carew
+- **29 · Die Originalmusik** — —
+- **30 · Das Riff der Haie** — Crowe
+- **31 · Das Narbengesicht** — Shelby Tuckerman
+- **32 · Der Ameisenmensch** — Dr. Woolley
+- **33 · Die bedrohte Ranch** — Hank Detweiler
+- **34 · Der rote Pirat** — Kapitän Joy
+- **35 · Der Höhlenmensch** — Birkensteen
+- **36 · Der Super-Wal** — Slater
+- **37 · Der heimliche Hehler** — Burton
+- **38 · Der unsichtbare Gegner** — Ed Snabel
+- **39 · Die Perlenvögel** — Miss Melody
+- **40 · Der Automarder** — Mr. Temple
+- **41 · Das Volk der Winde** — Brewster
+- **42 · Der weinende Sarg** — Grady Markels
+- **43 · Der höllische Werwolf** — McLain
+- **44 · Der gestohlene Preis** — Milton
+- **45 · Das Gold der Wikinger** — Karl Ragnarson
+- **46 · Der schrullige Millionär** — Millionär Pilcher
+- **47 · Der giftige Gockel** — Big Barney Crown
+- **48 · Die gefährlichen Fässer** — Mancarrow
+- **49 · Die Comic-Diebe** — Axel Griswold
+- **50 · Der verschwundene Filmstar** — Jon Travis
+- **51 · Der riskante Ritt** — Ascension
+- **52 · Die Musikpiraten** — Brick
+- **53 · Die Automafia** — Ty Cassey
+- **54 · Gefahr im Verzug** — Buzz Newman
+- **55 · Gekaufte Spieler** — Trainer Tong
+- **56 · Angriff der Computer-Viren** — Silas Ek
+- **57 · Tatort Zirkus** — Winkler
+- **58 · Der verrückte Maler** — William Ashley
+- **59 · Giftiges Wasser** — Van Well
+- **60 · Dopingmixer** — Glenn Miles
+- **61 · Die Rache des Tigers** — Milton Mitchell
+- **62 · Spuk im Hotel** — Amanda Black
+- **63 · Fußball-Gangster** — Mr. Bow
+- **64 · Geisterstadt** — Simon Oames
+- **65 · Diamantenschmuggel** — Alex Burlington
+- **66 · Die Schattenmänner** — Alberto Bergamelli
+- **67 · Geheimnis der Särge** — Bruder Benedikt
+- **68 · Schatz im Bergsee** — Jerzy
+- **69 · Späte Rache** — Dr. Ferguson
+- **70 · Schüsse aus dem Dunkel** — Alan
+- **71 · Die verschwundene Seglerin** — Jefferson
+- **72 · Dreckiger Deal** — Malcolm King
+- **73 · Poltergeist** — Victor Hugenay
+- **74 · Das brennende Schwert** — Mr. Whitehead
+- **75 · Die Spur des Raben** — Amanda Black
+- **76 · Stimmen aus dem Nichts** — Clarissa Franklin
+- **77 · Pistenteufel** — McMannoman
+- **78 · Das leere Grab** — Julius Jonas · Catherine Jonas
+- **79 · Im Bann des Voodoo** — Al Parker
+- **80 · Geheimakte UFO** — Vladimir Contreras
+- **81 · Verdeckte Fouls** — DaElba
+- **82 · Die Karten des Bösen** — Milva Summer
+- **83 · Meuterei auf hoher See** — Professor Clark
+- **84 · Die Musik des Teufels** — Jelena Charkova
+- **85 · Feuerturm** — Lady MacWeiden
+- **86 · Nacht in Angst** — Mr. Peacock
+- **87 · Wolfsgesicht** — Rodder
+- **88 · Vampir im Internet** — Doe Dungeon
+- **89 · Tödliche Spur** — Morton
+- **90 · Der Feuerteufel** — Aaron Moore
+- **91 · Labyrinth der Götter** — Stanley Truman
+- **92 · Todesflug** — Gregstone
+- **93 · Das Geisterschiff** — Conrad Farnham
+- **94 · Das schwarze Monster** — Alois Copper
+- **95 · Botschaft von Geisterhand** — Dr. Arroway
+- **96 · Der rote Rächer** — Dave Rawling
+- **97 · Insektenstachel** — Laura Stryker
+- **98 · Tal des Schreckens** — Ann Sullivan
+- **99 · Rufmord** — Clarissa Franklin
+- **100 · Toteninsel** — Professor Phoenix · Skinny Norris
+- **101 · Das Hexenhandy** — Giorgio Cade
+- **102 · Doppelte Täuschung** — King
+- **103 · Das Erbe des Meisterdiebs** — Victor Hugenay · Brittany
+- **104 · Gift per E-Mail** — Dick Perry
+- **105 · Der Nebelberg** — Harry Falkner
+- **106 · Der Mann ohne Kopf** — DJ Devil
+- **107 · Der Schatz der Mönche** — Lama Geshe
+- **108 · Die sieben Tore** — Caspar Carter
+- **109 · Gefährliches Quiz** — Nick Nobel
+- **110 · Panik im Park** — Professor Clark
+- **111 · Die Höhle des Grauens** — Lythia Waterstone
+- **112 · Schlucht der Dämonen** — Brad Fleming
+- **113 · Das Auge des Drachen** — Marcus Lake
+- **114 · Die Villa der Toten** — Bernadette O'Donnell
+- **115 · Auf tödlichem Kurs** — Escovedo
+- **116 · Codename: Cobra** — Rafter
+- **117 · Der finstere Rivale** — Skinny Norris
+- **118 · Das düstere Vermächtnis** — Scott Carrara
+- **119 · Der geheime Schlüssel** — Jeremy Kopperschmidt
+- **120 · Der schwarze Skorpion** — Ken Parker
+- **121 · Spur ins Nichts** — Shawn
+- **122 · Der Geisterzug** — Fred Jenkins
+- **123 · Fußballfieber** — Emiliano
+- **124 · Geister-Canyon** — Dick Perry
+- **125 · Feuermond** — Victor Hugenay · Brittany
+- **126 · Schrecken aus dem Moor** — Dr. Chandler
+- **127 · Schwarze Madonna** — José
+- **128 · Schatten über Hollywood** — Casey Wye
+- **129 · SMS aus dem Grab** — Rubbish George
+- **130 · Der Fluch des Drachen** — Skinny Norris
+- **131 · Haus des Schreckens** — Lloyd Scavenger
+- **132 · Spuk im Netz** — Miss Bennett
+- **133 · Fels der Dämonen** — Eddy Reardon
+- **134 · Der tote Mönch** — Christine
+- **135 · Fluch des Piraten** — Sarah Livingston
+- **136 · Das versunkene Dorf** — Cassandra Wilcox
+- **137 · Pfad der Angst** — Winston Granville
+- **138 · Die geheime Treppe** — Davy Swann
+- **139 · Das Geheimnis der Diva** — Helena Darraz
+- **140 · Stadt der Vampire** — Josy McDonaghough
+- **141 · Die Fußball-Falle** — Jeffrey Seaman
+- **142 · Tödliches Eis** — Carol Ford
+- **143 · Die Poker-Hölle** — Richie Hanson
+- **144 · Zwillinge der Finsternis** — Arthur Sinclair
+- **145 · Die Rache der Samurai** — Takasi Yukawa
+- **146 · Der Biss der Bestie** — Quentin Wadleigh
+- **147 · Grusel auf Campbell Castle** — Adam Campbell
+- **148 · Die feurige Flut** — Allie Jamison
+- **149 · Der namenlose Gegner** — Skinny Norris
+- **150 · Geisterbucht** — Harry Shreber
+- **151 · Schwarze Sonne** — Denzel Hopkins
+- **152 · Skateboardfieber** — Rubbish George
+- **153 · Das Fußballphantom** — Sean O'Donnell
+- **154 · Botschaft aus der Unterwelt** — Prof. Jane Heathcliff
+- **155 · Der Meister des Todes** — Zack Martin
+- **156 · Im Netz des Drachen** — Stephen Baron
+- **157 · Im Zeichen der Schlangen** — Skinny Norris
+- **158 · Der Feuergeist** — Moody Firthway
+- **159 · Nacht der Tiger** — Caroline Cotta
+- **160 · Geheimnisvolle Botschaften** — Professor Mathewson
+- **161 · Die blutenden Bilder** — Brock
+- **162 · Der schreiende Nebel** — Prof. Arnold Brewster
+- **163 · Der verschollene Pilot** — Fynch
+- **164 · Fußball-Teufel** — Lenni
+- **165 · Im Schatten des Giganten** — Randy
+- **166 · Die brennende Stadt** — Mr. Bennet
+- **167 · Das blaue Biest** — Gregory Katic
+- **168 · GPS-Gangster** — Deborah
+- **169 · Die Spur des Spielers** — Sam Chiccarelli
+- **170 · Straße des Grauens** — Mitch Palmer
+- **171 · Das Phantom aus dem Meer** — Jimmy Blue Eye
+- **172 · Der Eisenmann** — Drago Martinez
+- **173 · Dämon der Rache** — Luke
+- **174 · Das Tuch der Toten** — Guillermo
+- **175 · Schattenwelt** — Jeremy Bright
+- **176 · Der gestohlene Sieg** — Roger Wolf
+- **177 · Der Geist des Goldgräbers** — Dusty Kirkpatrick
+- **178 · Der gefiederte Schrecken** — Zacharias Faring
+- **179 · Die Rache des Untoten** — Evander Whiteside
+- **180 · Die flüsternden Puppen** — Skinny Norris
+- **181 · Das Kabinett des Zauberers** — Nightingale
+- **182 · Im Haus des Henkers** — Randy Carlisle
+- **183 · Der letzte Song** — Lenny The Rock
+- **184 · Der Hexengarten** — Jesse
+- **185 · Der Mann ohne Augen** — Adam Quinn
+- **186 · Insel des Vergessens** — Ben Peck
+- **187 · Das silberne Amulett** — Kramer
+- **188 · Signale aus dem Jenseits** — Clarissa Franklin
+- **189 · Der unsichtbare Passagier** — Mr. Whitty
+- **190 · Die Kammer der Rätsel** — Jeff Ranaldo
+- **191 · Verbrechen im Nichts** — Priscilla Sicktree
+- **192 · Im Bann des Drachen** — Zuko
+- **193 · Schrecken aus der Tiefe** — Mac Anderson
+- **194 · Die Zeitreisende** — Aurora
+- **195 · Im Reich der Ungeheuer** — Wally Robertson
+- **196 · Geheimnis des Bauchredners** — Patricia Osborne
+- **197 · Im Auge des Sturms** — Finnley Stenseth
+- **198 · Die Legende der Gaukler** — Elliot Littlehorn
+- **199 · Der grüne Kobold** — Mr. Aaron Grover
+- **200 · Feuriges Auge** — Rama Sidri Rhandur · Gabriel White
+- **201 · Höhenangst** — Ben Hustler
+- **202 · Das weiße Grab** — Laurenne Duffy
+- **203 · Tauchgang ins Ungewisse** — Jorunn
+- **204 · Der dunkle Wächter** — Mr. Pinches
+- **205 · Das rätselhafte Erbe** — Caroline
+- **206 · Der Mottenmann** — Mr. Mason Huntington
+- **207 · Die falschen Detektive** — Minh
+- **208 · Kelch des Schicksals** — Bootsie Washington
+- **209 · Kreaturen der Nacht** — Oisin Murphy
+- **210 · Die schweigende Grotte** — Zach Cannings
+- **211 · Der Jadekönig** — Marlow
+- **212 · Der weiße Leopard** — Larry Conklin
+- **213 · Der Fluch der Medusa** — Jojo
+- **214 · Der Geisterbunker** — Rubbish George
+- **215 · Die verlorene Zeit** — Arnold Grasso
+- **216 · Die Schwingen des Unheils** — Huxley
+- **217 · Der Kristallschädel** — Hunter Scott
+- **218 · Im Netz der Lügen** — Olivia
+- **219 · Die Teufelsklippe** — Paul Forsters
+- **220 · Im Wald der Gefahren** — Bill Greyfield
+- **221 · Manuskript des Satans** — Professor Douglas Bancroft
+- **222 · Die Gesetzlosen** — Amanda Blunt
+- **223 · Der Knochenmann** — Maya
+- **224 · Die Yacht des Verrats** — Ian Carew
+- **225 · Der Puppenmacher** — Chief Householder
+- **226 · Spur der Toten** — Clarissa Franklin
+- **227 · Melodie der Rache** — Liam
+- **228 · Der Ruf der Krähen** — Goldie June
+- **229 · Drehbuch der Täuschung** — Jayden Cummings
+- **230 · Der Tag der Toten** — Linus Wade
+- **231 · Der Dreiäugige Schakal** — Nina Radamus
+- **232 · Die Stadt aus Gold** — Barbara
+- **233 · Die Nacht der Gewitter** — Sarah Knight
+- **234 · Der lebende Tresor** — Lucy Apple
+- **235 · Das Fantasmofon** — Archibald Belltone
+- **236 · Im Bann des Barrakudas** — Alyssa
+- **237 · Der rote Büffel** — Victor Hugenay
+- **238 · Falsche Schuld** — Rubbish George
+- **239 · Das Geheimnis der sieben Palmen** — Dr. Paul Hayden
+- **240 · Die schwarze Rose** — Linh Huong
+- **241 · Meister des Lichts** — —
+- **242 · Das weiße Auge** — —
+- **243 · Das Lied der Knochenflöte** — —
+- **244 · Rätsel des Mondes** — —
+- **245 · Fußball-Skandal** — —
+- **246 · Spuk in Hollywood** — —
+- **247 · Unter Verdacht** — —
+- **248 · Im Griff der Sandgeister** — —
+- **10007 · Der 5. Advent** — Lydia Candle
+- **10008 · Stille Nacht, düstere Nacht** — Mr. Nostigon
+- **10009 · O du finstere** — Krampus
+- **10010 · Eine schreckliche Bescherung** — Luke Bigelow
+- **10011 · Böser die Glocken nie klingen** — Samuel Leech
+- **10012 · Gruselige Weihnacht überall** — Michael Watkins
