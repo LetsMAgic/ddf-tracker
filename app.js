@@ -8,7 +8,7 @@
   const CATALOG_KEY = 'enrichedCatalogV13';
   const LEGACY_CATALOG_KEYS = ['enrichedCatalogV10', 'enrichedCatalogV9', 'enrichedCatalogV8', 'enrichedCatalogV7', 'enrichedCatalogV6', 'enrichedCatalogV5', 'enrichedCatalogV4'];
   const LEGACY_USER_KEYS = ['user-state', 'userState', 'state'];
-  const APP_VERSION = '13.0.0';
+  const APP_VERSION = '13.2.0';
   const DEFAULT_STREAMING_SERVICE = 'spotify';
   const META_URL = 'https://dreimetadaten.de/data/Serie.json';
   const META_MAX_AGE = 1000 * 60 * 60 * 24 * 30;
@@ -55,6 +55,7 @@
     tutorialKeyboardTimer: 0,
     tutorialViewportTimer: 0,
     pendingUnheardNr: null,
+    episodeRenderLimit: 32,
   };
 
   const $ = (id) => document.getElementById(id);
@@ -1166,7 +1167,6 @@
           <div>
             <span class="episode-number">${esc(episodeLabel(episode).toUpperCase())}</span>
             <h3 class="episode-title"><button type="button" class="episode-title-button" data-open="${episode.nr}">${esc(episode.titel)}</button></h3>
-            ${description ? `<p class="episode-description">${esc(description)}</p>` : ''}
           </div>
           <div class="episode-card-actions">
             ${streamingButtonMarkup(episode, preferredStreamingService(), { compact: true })}
@@ -1191,15 +1191,25 @@
       </article>`;
   }
 
-  function renderEpisodes() {
+  function renderEpisodes({ preserveLimit = false } = {}) {
     const list = filteredEpisodes();
+    if (!preserveLimit) state.episodeRenderLimit = 32;
+    const visibleCount = Math.min(state.episodeRenderLimit, list.length);
+    const visible = list.slice(0, visibleCount);
     $('episodeResultCount').textContent = `${list.length} ${list.length === 1 ? 'Folge' : 'Folgen'}`;
     $('clearSearch').classList.toggle('hidden', !state.search);
     $('activeCollection').classList.toggle('hidden', !state.collectionLabel);
     if (state.collectionLabel) {
       $('activeCollection').innerHTML = `<span>Sammlung: <strong>${esc(state.collectionLabel)}</strong></span><button id="clearCollection" type="button">Aufheben</button>`;
     }
-    $('episodeList').innerHTML = list.length ? list.map(episodeCard).join('') : '<div class="empty-message">Keine Folge passt zu dieser Suche oder diesem Filter.</div>';
+    if (!list.length) {
+      $('episodeList').innerHTML = '<div class="empty-message">Keine Folge passt zu dieser Suche oder diesem Filter.</div>';
+    } else {
+      const more = visibleCount < list.length
+        ? `<div class="episode-load-more"><p>${visibleCount} von ${list.length} Folgen angezeigt</p><button type="button" class="secondary-button" data-load-more-episodes>Weitere Folgen laden</button></div>`
+        : '';
+      $('episodeList').innerHTML = visible.map(episodeCard).join('') + more;
+    }
     markRendered('episodes');
   }
 
@@ -3639,6 +3649,17 @@ function closeHelp() {
       const collectionClear = event.target.closest('#clearCollection');
       if (collectionClear) {
         clearCollection();
+        return;
+      }
+      const loadMoreEpisodes = event.target.closest('[data-load-more-episodes]');
+      if (loadMoreEpisodes) {
+        const previousBottom = loadMoreEpisodes.getBoundingClientRect().top;
+        state.episodeRenderLimit += 32;
+        renderEpisodes({ preserveLimit: true });
+        const nextButton = document.querySelector('[data-load-more-episodes]');
+        if (nextButton && Number.isFinite(previousBottom)) {
+          window.scrollBy({ top: nextButton.getBoundingClientRect().top - previousBottom, behavior: 'auto' });
+        }
         return;
       }
       const openButton = event.target.closest('[data-open]');

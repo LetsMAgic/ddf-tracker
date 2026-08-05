@@ -588,3 +588,8 @@ body.tutorial-running[data-tutorial-step="read-description-close"] #detailOverla
 .episode-list,.episode-card,.episode-card-main,.episode-header,.episode-footer,.episode-info{min-width:0;max-width:100%}
 .episode-card{overflow:hidden}
 .episode-title,.episode-description,.badges{min-width:0;max-width:100%}
+
+/* iOS memory-safe episode pagination */
+.episode-load-more { padding: 18px 8px 34px; text-align: center; }
+.episode-load-more p { margin: 0 0 10px; color: var(--muted, #9ca3af); font-size: .9rem; }
+.episode-load-more .secondary-button { min-width: 180px; }
