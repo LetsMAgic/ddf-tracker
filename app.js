@@ -1587,7 +1587,16 @@ function renderPlaylists() {
     setTimeout(() => $('closePlaylistDetail')?.focus({ preventScroll: true }), 0);
   }
 
-  function closePlaylistDetail(){ $('playlistDetailOverlay').classList.add('hidden');$('playlistDetailOverlay').setAttribute('aria-hidden','true');$('playlistAddPanel').classList.add('hidden');state.playlistDetailId=null; }
+  function closePlaylistDetail(){
+    $('playlistDetailOverlay').classList.add('hidden');
+    $('playlistDetailOverlay').setAttribute('aria-hidden','true');
+    $('playlistAddPanel').classList.add('hidden');
+    state.playlistDetailId=null;
+    // Beim Schließen einer verschachtelten Playlist darf der Scroll-Lock nur
+    // bestehen bleiben, wenn die Folgendetailansicht noch geöffnet ist.
+    const detailStillOpen = !$('detailOverlay').classList.contains('hidden');
+    document.body.style.overflow = detailStillOpen ? 'hidden' : '';
+  }
 
   function currentPlaylistEpisodes(){
     if(!state.playlistDetailId)return[];
