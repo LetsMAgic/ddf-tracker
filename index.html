@@ -3,517 +3,102 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#12110d">
-  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#08090c">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Folgen-Tracker">
-  <meta name="description" content="Persönlicher Offline-Hörspiel-Tracker mit Bewertungen, Empfehlungen, Playlists, Suche und Ranking.">
+  <meta name="apple-mobile-web-app-title" content="DDF Tracker">
+  <meta name="description" content="Die drei ??? Folgen-Tracker: gehört, bewertet, empfohlen und offline verfügbar.">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="icon" href="icon-192.png">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
   <title>Die drei ??? – Folgen-Tracker</title>
-  <script src="episodes-seed.js" defer></script>
-  <script src="app.js" defer></script>
 </head>
 <body>
-<div class="app-shell">
-  <header class="app-header">
-    <div class="brand">
-      <img src="icon-192.png" class="brand-icon" alt="">
-      <div><span class="eyebrow">Mein Hörspiel-Archiv</span><h1>Folgen-Tracker</h1></div>
-    </div>
-    <button class="profile-button" id="openProfile" aria-label="Hörprofil öffnen"><span aria-hidden="true">◔</span><small>Profil</small></button>
-  </header>
-
-  <main>
-    <section class="page active" data-page="home">
-      <section class="quick-recommendation-hero" aria-labelledby="quickRecommendationTitle">
-        <div class="quick-recommendation-copy">
-          <span class="eyebrow">Eine Folge. Sofort passend.</span>
-          <h2 id="quickRecommendationTitle">Welche Folge passt gerade?</h2>
-          <p>Ein Tipp auf Basis deiner Bewertungen – standardmäßig ungehört und direkt abspielbar.</p>
-        </div>
-
-        <div id="quickRecommendationEmpty" class="quick-recommendation-empty">
-          <button id="quickRecommendButton" class="hero-recommend-button" type="button">
-            <span class="hero-recommend-icon" aria-hidden="true">▶</span>
-            <span><strong>Passende Folge finden</strong><small>ohne weitere Auswahl</small></span>
-          </button>
-        </div>
-
-        <div id="quickRecommendationResult" class="quick-recommendation-result hidden" aria-live="polite">
-          <article id="todayCard" class="recommendation-card"></article>
-          <button id="quickRecommendAgain" class="secondary-button full" type="button">Andere passende Folge</button>
-        </div>
-
-        <button id="recommendationRefineToggle" class="refine-toggle" type="button" aria-expanded="false" aria-controls="recommendationRefinePanel">
-          <span>Empfehlung verfeinern</span><span aria-hidden="true">⌄</span>
-        </button>
-        <div id="recommendationRefinePanel" class="recommendation-refine-panel hidden">
-          <div class="refine-group">
-            <span class="field-label">Zeit</span>
-            <div class="choice-strip compact-choice-strip" id="timePicker" aria-label="Laufzeit auswählen">
-              <button data-time="any" class="active"><strong>Egal</strong><small>beste Wahl</small></button>
-              <button data-time="short"><strong>≤ 60</strong><small>Min.</small></button>
-              <button data-time="normal"><strong>60–90</strong><small>Min.</small></button>
-              <button data-time="long"><strong>90+</strong><small>Min.</small></button>
-              <button data-time="special"><strong>✦ Spezial</strong><small>lang</small></button>
-            </div>
-          </div>
-          <div class="refine-group">
-            <span class="field-label">Stimmung</span>
-            <div class="discover-grid compact-mood-grid" id="moodPicker" aria-label="Stimmung auswählen">
-              <button data-mood="any" class="active">Alles</button>
-              <button data-mood="grusel">Grusel</button>
-              <button data-mood="klassiker">Klassiker</button>
-              <button data-mood="familie">Familie</button>
-              <button data-mood="skinny">Skinny</button>
-              <button data-mood="hugenay">Hugenay</button>
-              <button data-mood="meer">Meer & Insel</button>
-              <button data-mood="kunst">Kunst</button>
-            </div>
-          </div>
-          <div class="refine-actions">
-            <button id="timeRecommendButton" class="primary-button full" type="button">Mit dieser Auswahl empfehlen</button>
-            <button id="exploreMoodButton" class="subtle-link" type="button">Auswahl in der Folgenliste öffnen</button>
-          </div>
-        </div>
-      </section>
-
-      <section id="pinnedSection" class="section-block pinned-section hidden">
-        <div class="section-heading">
-          <div><span class="eyebrow">Schnell wiederfinden</span><h2>Angeheftet</h2></div>
-          <button class="text-button" data-filter-jump="pinned">Alle anzeigen</button>
-        </div>
-        <div id="pinnedList" class="compact-list pinned-list"></div>
-      </section>
-
-      <section class="section-block quick-tools-section">
-        <div class="section-heading"><div><span class="eyebrow">Alternativen</span><h2>Anders auswählen</h2></div></div>
-        <div class="action-grid compact-action-grid">
-          <button id="surpriseToggleButton" class="action-card featured" aria-expanded="false" aria-controls="surprisePanel"><span>🎲</span><strong>Mit Filtern</strong><small>gezielt auslosen</small></button>
-          <button id="randomNewButton" class="action-card"><span>✦</span><strong>Zufällig neu</strong><small>immer ungehört</small></button>
-          <button id="randomHeardButton" class="action-card"><span>↻</span><strong>Wiederhören</strong><small>lange nicht gehört</small></button>
-        </div>
-        <div id="surprisePanel" class="surprise-panel hidden">
-          <div class="surprise-controls">
-            <label class="compact-select"><span>Hörstatus</span><select id="surpriseStatus"><option value="all">Alle Folgen</option><option value="unheard">Nur ungehört</option><option value="heard">Nur gehört</option></select></label>
-            <label class="compact-select"><span>Thema</span><select id="surpriseTheme"><option value="any">Egal</option><option value="grusel">Grusel & Mystery</option><option value="klassiker">Klassiker</option><option value="weihnachten">Weihnachten</option><option value="fussball">Fußball</option><option value="meer">Meer & Insel</option><option value="special">Spezialfolgen</option></select></label>
-            <label class="compact-select"><span>Bewertung</span><select id="surpriseRating"><option value="any">Egal</option><option value="liked">Plus oder Super</option><option value="super">Nur Super</option><option value="unrated">Unbewertet</option></select></label>
-          </div>
-          <button id="surprisePickButton" class="primary-button full">Folge auslosen</button>
-        </div>
-      </section>
-
-      <section class="section-block">
-        <div class="section-heading">
-          <div><span class="eyebrow">Hörverlauf</span><h2>Zuletzt gehört</h2></div>
-          <button class="text-button" data-go="episodes">Alle Folgen</button>
-        </div>
-        <div id="recentList" class="compact-list"></div>
-      </section>
-    </section>
-
-    <section class="page" data-page="episodes">
-      <div class="page-title">
-        <span class="eyebrow">Katalog</span><h2>Alle Folgen</h2><p id="episodeResultCount">0 Folgen</p>
-      </div>
-      <div class="sticky-tools">
-        <label class="search-box">
-          <span aria-hidden="true">⌕</span>
-          <input id="searchInput" type="search" enterkeyhint="search" placeholder="Titel, Autor, Figur, Handlung oder Kapitel" autocomplete="off" autocapitalize="none">
-          <button id="clearSearch" class="clear-search hidden" type="button" aria-label="Suche löschen">×</button>
-        </label>
-        <p class="search-hint">Zum Beispiel „André Marx“, „Crimebusters“, „Peters Opa“, „Skinny“, „Zirkus“ oder „böser Franzose“.</p>
-        <div id="filterChips" class="chips-scroll">
-          <button class="chip active" data-filter="all">Alle</button>
-          <button class="chip" data-filter="unheard">Offen</button>
-          <button class="chip" data-filter="heard">Gehört</button>
-          <button class="chip" data-filter="super">★ Super</button>
-          <button class="chip" data-filter="plus">Plus</button>
-          <button class="chip" data-filter="neutral">Neutral</button>
-          <button class="chip" data-filter="minus">Minus</button>
-          <button class="chip" data-filter="unrated">Unbewertet</button>
-          <button class="chip" data-filter="pinned">📌 Angeheftet</button>
-          <button class="chip" data-filter="long">90+ Min.</button>
-          <button class="chip" data-filter="special">Spezial</button>
-        </div>
-        <div class="catalog-control-bar" aria-label="Katalog filtern und sortieren">
-          <label class="compact-select"><span>Autor</span><select id="authorFilter" aria-label="Nach Autor filtern"><option value="all">Alle</option></select></label>
-          <label class="compact-select"><span>Ära</span><select id="eraFilter" aria-label="Nach Ära filtern">
-            <option value="all">Alle</option>
-            <option value="Originalserie / Klassiker">Originalserie / Klassiker</option>
-            <option value="Crimebusters-Ära">Crimebusters-Ära</option>
-            <option value="Henkel-Waidhofer-Ära">Henkel-Waidhofer-Ära</option>
-            <option value="Triumvirats-Ära">Triumvirats-Ära</option>
-            <option value="Neue Ära (Fälle nach 2005)">Neue Ära</option>
-            <option value="Spezialfolgen">Spezialfolgen</option>
-          </select></label>
-          <label class="compact-select compact-sort"><span>Sortierung</span><select id="episodeSort" aria-label="Folgen sortieren">
-            <option value="nr">Nummer ↑</option>
-            <option value="nr-desc">Nummer ↓</option>
-            <option value="title">Titel A–Z</option>
-            <option value="author">Autor A–Z</option>
-            <option value="duration-desc">Längste</option>
-            <option value="duration-asc">Kürzeste</option>
-            <option value="rocky-best">Rocky beste</option>
-            <option value="rocky-worst">Rocky schlechteste</option>
-            <option value="recommendation">Empfehlung</option>
-            <option value="own">Eigene Wertung</option>
-          </select></label>
-        </div>
-      </div>
-      <div id="activeCollection" class="active-collection hidden"></div>
-      <div id="episodeList" class="episode-list"></div>
-    </section>
-
-    <section class="page" data-page="ranking">
-      <div class="page-title">
-        <span class="eyebrow">Vergleichen</span><h2>Ranking</h2><p>Community-Wertungen, deine Favoriten und persönliche Treffer.</p>
-      </div>
-      <div class="segmented" id="rankingMode">
-        <button class="active" data-ranking="rocky">Rocky-Beach</button>
-        <button data-ranking="mine">Mein Ranking</button>
-        <button data-ranking="match">Empfehlungen</button>
-      </div>
-      <div id="rankingInfo" class="info-card"></div>
-      <div id="rankingList" class="ranking-list"></div>
-    </section>
-
-    <section class="page" data-page="playlists">
-      <div class="page-title">
-        <span class="eyebrow">Hörpläne</span><h2>Listen</h2><p>Eigene Playlists, kuratierte Reihenfolgen und automatisch geplante Hörsessions.</p>
-      </div>
-
-      <section class="playlist-hero">
-        <div><span class="eyebrow">Deine Sammlung</span><h3>Was möchtest du hören?</h3><p>Erstelle freie Listen oder lasse eine Fahrt, einen Abend oder ein Wochenende automatisch füllen.</p></div>
-        <button id="newPlaylistButton" class="primary-button">＋ Neue Playlist</button>
-      </section>
-
-      <section class="section-block smart-planner">
-        <div class="section-heading"><div><span class="eyebrow">Smart Playlist</span><h2>Hörzeit automatisch planen</h2></div></div>
-        <div class="planner-form">
-          <label><span>Name</span><input id="planName" value="Autofahrt" maxlength="50"></label>
-          <label><span>Dauer</span><div class="duration-input"><input id="planHours" type="number" min="0" max="12" value="5"><b>Std.</b><input id="planMinutes" type="number" min="0" max="59" step="5" value="0"><b>Min.</b></div></label>
-          <label><span>Stimmung</span><select id="planMood"><option value="any">Bunte Mischung</option><option value="grusel">Grusel & Mystery</option><option value="klassiker">Klassiker</option><option value="meer">Meer & Insel</option><option value="familie">Familie</option><option value="skinny">Skinny Norris</option><option value="hugenay">Victor Hugenay</option><option value="kunst">Kunst & Rätsel</option></select></label>
-          <label><span>Hörstatus</span><select id="planStatus"><option value="mixed">Gemischt</option><option value="unheard">Nur ungehört</option><option value="heard">Nur bekannt</option></select></label>
-          <label><span>Autor</span><select id="planAuthor"><option value="all">Alle Autoren</option></select></label>
-        </div>
-        <label class="planner-toggle"><input id="planContinuity" type="checkbox" checked><span><strong>Zusammenhänge beachten</strong><small>Mehrteiler, Vorgeschichten und Rückbezüge bleiben in sinnvoller Reihenfolge zusammen.</small></span></label>
-        <button id="generatePlanButton" class="primary-button full">Smart Playlist erstellen</button>
-        <div id="planPreview" class="plan-preview hidden"></div>
-        <div id="planSavedStatus" class="plan-saved-status hidden" role="status" aria-live="polite"></div>
-      </section>
-
-      <section class="section-block playlist-library">
-        <div class="section-heading"><div><span class="eyebrow">Deine Hörbibliothek</span><h2>Playlists entdecken</h2></div><button id="newPlaylistTextButton" class="text-button">Neu</button></div>
-        <div id="playlistLibraryTabs" class="segmented playlist-tabs" role="tablist" aria-label="Playlist-Kategorien">
-          <button class="active" data-playlist-tab="essentials" role="tab" aria-selected="true">★ Essentials</button>
-          <button data-playlist-tab="themes" role="tab" aria-selected="false">Themen</button>
-          <button data-playlist-tab="mine" role="tab" aria-selected="false">Meine</button>
-        </div>
-        <div id="playlistTabIntro" class="playlist-tab-intro"></div>
-        <div id="essentialPlaylists" class="curated-grid playlist-tab-panel"></div>
-        <div id="themePlaylists" class="curated-grid playlist-tab-panel hidden"></div>
-        <div id="userPlaylists" class="playlist-grid playlist-tab-panel hidden"></div>
-      </section>
-    </section>
-
-    <section class="page" data-page="settings">
-      <div class="page-title">
-        <span class="eyebrow">Verwaltung</span><h2>Einstellungen</h2><p>Streaming, Daten, Hilfe und App-Informationen.</p>
-      </div>
-      <div class="settings-section-label"><span>Allgemein</span></div>
-      <div class="settings-group streaming-settings">
-        <h3>Bevorzugter Streamingdienst</h3>
-        <div class="stream-preference" id="streamingPreference" role="group" aria-label="Bevorzugten Streamingdienst auswählen">
-          <button type="button" data-service="spotify" aria-pressed="true">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M6.8 9.1c3.8-1.1 7.9-.8 11.2.8M7.5 12.3c3.2-.8 6.7-.5 9.5.7M8.2 15.2c2.6-.6 5.4-.3 7.6.6"></path></svg>
-            <span><strong>Spotify</strong><small>Als Standard öffnen</small></span>
-          </button>
-          <button type="button" data-service="appleMusic" aria-pressed="false">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><path d="M15.5 7.2v8.1a2.2 2.2 0 1 1-1.2-2V9.1l-5.8 1.2v6.1a2.2 2.2 0 1 1-1.2-2V8.8l8.2-1.6Z"></path></svg>
-            <span><strong>Apple Music</strong><small>Als Standard öffnen</small></span>
-          </button>
-        </div>
-        <p class="stream-setting-note" id="streamingPreferenceInfo">Schnellbuttons öffnen Spotify. In den Folgendetails bleiben beide Dienste sichtbar.</p>
-      </div>
-      <div class="settings-section-label"><span>Daten</span></div>
-      <div class="settings-group">
-        <h3>Backup & Übertragung</h3>
-        <button id="exportButton" class="settings-row"><span><strong>JSON exportieren</strong><small>Hörstatus, Bewertungen, Playlists, Verlauf und Anheftungen sichern</small></span><b>›</b></button>
-        <button id="importButton" class="settings-row"><span><strong>JSON importieren</strong><small>Vorhandenes Backup einlesen</small></span><b>›</b></button>
-        <input id="importFile" type="file" accept="application/json,.json" hidden>
-      </div>
-      <div class="settings-section-label"><span>Inhalte</span></div>
-      <div class="settings-group">
-        <h3>Folgenwissen</h3>
-        <button id="updateMetadataButton" class="settings-row"><span><strong>Folgenwissen aktualisieren</strong><small>Laufzeiten, Beschreibungen, Figuren und Streaming-Links laden</small></span><b>↓</b></button>
-        <button id="reloadCatalogButton" class="settings-row"><span><strong>Eingebauten Katalog neu laden</strong><small>Rocky-Ranking und Grunddaten zurücksetzen</small></span><b>↻</b></button>
-      </div>
-      <div class="settings-section-label"><span>Hilfe</span></div>
-      <div class="settings-group">
-        <h3>Hilfe & Einführung</h3>
-        <button id="startTutorialButton" class="settings-row"><span><strong>Interaktives Tutorial starten</strong><small>Schritt für Schritt durch Bewertungen, Folgen und Playlists</small></span><b>›</b></button>
-        <button id="openHelpButton" class="settings-row"><span><strong>Kurzanleitung öffnen</strong><small>Bewertungen, Smart-Playlists, Speicherung und Backups nachlesen</small></span><b>›</b></button>
-      </div>
-      <div class="settings-section-label"><span>Zurücksetzen</span></div>
-      <div class="settings-group">
-        <h3>Persönliche Daten</h3>
-        <button id="resetButton" class="settings-row danger"><span><strong>Persönliche Daten zurücksetzen</strong><small>Hörstatus, Bewertungen, Playlists, Verlauf und Anheftungen löschen</small></span><b>›</b></button>
-      </div>
-      <div class="settings-section-label"><span>Über die App</span></div>
-      <div class="settings-group changelog-group">
-        <details>
-          <summary><span><strong>Neu in Version 15</strong><small>Sofortempfehlung, Hörprofil und prägende Figuren</small></span><b aria-hidden="true">›</b></summary>
-          <div class="changelog-list">
-            <p><strong>Sofortempfehlung:</strong> Die Startseite löst jetzt zuerst ihre wichtigste Aufgabe: mit einem Tipp eine starke, ungehörte Folge finden.</p>
-            <p><strong>Hörprofil:</strong> Statistiken und Geschmacksdaten liegen kompakt hinter dem Profil-Symbol und überladen die Startseite nicht mehr.</p>
-            <p><strong>Prägende Figuren:</strong> Karten zeigen den Gegenspieler oder die zentrale fallbezogene Figur statt beliebiger wiederkehrender Nebenrollen.</p>
-            <p><strong>Empfehlungslogik:</strong> positive und negative Bewertungen, Autoren, Themen, prägende Figuren, Verfügbarkeit und Community-Wertung greifen enger zusammen.</p>
-          </div>
-        </details>
-      </div>
-      <div class="settings-group app-info">
-        <img src="icon-192.png" alt="App-Icon">
-        <div>
-          <strong>Folgen-Tracker</strong>
-          <small id="storageInfo">Lade Daten …</small>
-          <small id="metadataInfo">Folgenwissen wird geprüft …</small>
-          <small id="appVersionInfo">Version 15.0 · Offline-fähig</small>
-          <small id="appUpdateInfo">App-Shell und persönliche Daten sind lokal verfügbar.</small>
-          <small class="source-note">Folgenmetadaten & Streaming-Links: dreimetadaten.de · Community-Wertungen: rocky-beach.com</small>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <nav class="bottom-nav" aria-label="Hauptnavigation">
-    <button class="active" data-nav="home"><span>⌂</span><small>Start</small></button>
-    <button data-nav="episodes"><span>☷</span><small>Folgen</small></button>
-    <button data-nav="ranking"><span>♕</span><small>Ranking</small></button>
-    <button data-nav="playlists"><span>≡</span><small>Listen</small></button>
-    <button data-nav="settings"><span>⚙︎</span><small>Einstellungen</small></button>
-  </nav>
-</div>
-
-<div id="profileOverlay" class="overlay overlay-front hidden" aria-hidden="true">
-  <article class="detail-sheet profile-sheet" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
-    <div class="sheet-handle"></div>
-    <header class="detail-header"><div><span class="eyebrow">Dein Hörprofil</span><h2 id="profileTitle">Was dir gefällt</h2></div><button id="closeProfile" class="icon-button" aria-label="Hörprofil schließen">×</button></header>
-    <p class="profile-intro">Diese Daten helfen der App, dir schneller eine passende ungehörte Folge vorzuschlagen.</p>
-
-    <section class="dashboard-card profile-dashboard">
-      <div class="progress-ring" id="progressRing" style="--progress:0deg">
-        <div><strong id="progressPercent">0 %</strong><span id="progressFraction">0 / 0</span></div>
-      </div>
-      <div class="dashboard-copy">
-        <span class="eyebrow">Dein Fortschritt</span>
-        <h3 id="progressHeadline">Dein Archiv wartet</h3>
-        <p id="progressText">Markiere Folgen als gehört und baue dein persönliches Geschmacksprofil auf.</p>
-        <div class="mini-insights">
-          <div><strong id="heardHours">—</strong><span>gehört</span></div>
-          <div><strong id="favoriteTheme">—</strong><span>Lieblingsthema</span></div>
-          <div><strong id="rockyAgreement">—</strong><span>Rocky-Match</span></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="rating-stats" aria-label="Bewertungsübersicht">
-      <div class="stat super"><strong id="superCount">0</strong><span>★ Super</span></div>
-      <div class="stat plus"><strong id="plusCount">0</strong><span>Plus</span></div>
-      <div class="stat neutral"><strong id="neutralCount">0</strong><span>Neutral</span></div>
-      <div class="stat minus"><strong id="minusCount">0</strong><span>Minus</span></div>
-    </section>
-
-    <section id="profileInsightsSection" class="profile-insights">
-      <div class="profile-insight-grid">
-        <article><span>Ø Bewertung</span><strong id="averageRating">—</strong><small id="averageRatingText">Noch keine Wertung</small></article>
-        <article><span>Lieblingsautor</span><strong id="favoriteAuthor">—</strong><small>aus Plus & Super</small></article>
-        <article><span>Lieblingsära</span><strong id="favoriteEra">—</strong><small>aus Plus & Super</small></article>
-        <article><span>Angeheftet</span><strong id="pinnedCount">0</strong><small>schnell erreichbar</small></article>
-      </div>
-    </section>
-
-    <section class="profile-explainer">
-      <span class="eyebrow">So entsteht dein Vorschlag</span>
-      <p>Bewertungen, Autoren, Themen, prägende Figuren, Laufzeit und Community-Wertung werden kombiniert. Minus-Bewertungen senken ähnliche Fälle deutlich ab.</p>
-    </section>
-    <div class="profile-actions"><button id="profileOpenRanking" class="secondary-button">Ranking ansehen</button><button id="profileOpenSettings" class="subtle-button">Einstellungen</button></div>
-  </article>
-</div>
-
-<div id="detailOverlay" class="overlay hidden" aria-hidden="true">
-  <article class="detail-sheet" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
-    <div class="sheet-handle"></div>
-    <header class="detail-header">
-      <div><span id="detailNumber" class="eyebrow">Folge</span><h2 id="detailTitle"></h2></div>
-      <button id="closeDetail" class="icon-button" aria-label="Details schließen">×</button>
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <button class="brand" data-go="home" aria-label="Startseite"><img src="icon-192.png" alt=""><span><strong>Die drei ???</strong><small>Folgen-Tracker</small></span></button>
+      <button id="profileButton" class="profile-button" aria-label="Hörprofil öffnen"><span id="profileProgress">0 %</span><small>Profil</small></button>
     </header>
-    <div class="detail-score-row">
-      <div class="match-orb"><strong id="detailMatch">—</strong><span>Match</span></div>
-      <div id="detailMeta" class="detail-meta"></div>
-    </div>
-    <p id="detailDescription" class="detail-description"></p>
 
-    <section class="detail-section detail-primary-actions">
-      <span class="field-label">Deine Bewertung</span>
-      <div id="detailRating" class="rating-control">
-        <button data-rating="minus"><span>−</span>Minus</button>
-        <button data-rating="neutral"><span>●</span>Neutral</button>
-        <button data-rating="plus"><span>＋</span>Plus</button>
-        <button data-rating="super"><span>★</span>Super</button>
-      </div>
-      <button id="clearRating" class="clear-rating">Bewertung entfernen</button>
-    </section>
+    <div id="updateBanner" class="update-banner hidden"><span><strong>Version 16 ist verfügbar.</strong><small>Deine Daten bleiben erhalten.</small></span><button id="applyUpdate">Jetzt aktualisieren</button></div>
 
-    <label class="heard-control detail-heard-control">
-      <input id="detailHeard" type="checkbox">
-      <span><strong>Schon gehört</strong><small id="detailHeardDate">Wird automatisch gespeichert</small></span>
-    </label>
+    <main>
+      <section class="page active" data-page="home">
+        <section class="hero">
+          <span class="eyebrow">Eine Folge. Sofort passend.</span>
+          <h1>Was hörst du als Nächstes?</h1>
+          <p>Persönlich, verfügbar und standardmäßig noch ungehört.</p>
+          <button id="findRecommendation" class="button primary hero-button">Passende Folge finden</button>
+          <button id="quickRateHome" class="text-button">Profil schnell verbessern</button>
+        </section>
 
-    <section class="detail-section detail-streaming-section">
-      <span class="field-label">Anhören</span>
-      <div id="detailStreamingButtons" class="streaming-buttons"></div>
-      <small class="streaming-note">Direktlinks öffnen nach Möglichkeit die installierte App. Bei noch nicht veröffentlichten Folgen öffnet sich die Suche.</small>
-    </section>
+        <section id="recommendationResult" class="recommendation-wrap hidden"><article id="recommendationCard" class="recommendation-card"></article><div class="button-row"><button id="anotherRecommendation" class="button secondary full">Andere passende Folge</button><button id="recommendationFeedback" class="button ghost">Mehr / weniger davon</button></div></section>
 
-    <section class="detail-section detail-organize-actions">
-      <button id="detailPinButton" class="playlist-add-button pin-detail-button" aria-pressed="false"><span>📌</span><span><strong>Folge anheften</strong><small>Auf der Startseite schnell wiederfinden</small></span><b>›</b></button>
-      <button id="detailAddPlaylist" class="playlist-add-button"><span>＋</span><span><strong>Zu Playlist hinzufügen</strong><small>Eigene Liste auswählen oder neu erstellen</small></span><b>›</b></button>
-    </section>
+        <details class="section-card preference-panel"><summary><span><strong>Empfehlung verfeinern</strong><small>Laufzeit und Stimmung</small></span><b>＋</b></summary><div class="preference-grid"><label><span>Laufzeit</span><select id="recommendationTime"><option value="any">Egal</option><option value="short">Bis 50 Minuten</option><option value="medium">51–75 Minuten</option><option value="long">Über 75 Minuten</option></select></label><label><span>Stimmung</span><select id="recommendationMood"><option value="any">Egal</option><option value="grusel">Grusel</option><option value="klassiker">Klassiker</option><option value="familie">Familie</option><option value="hugenay">Hugenay</option><option value="meer">Meer & Insel</option><option value="kunst">Kunst</option></select></label></div></details>
 
-    <div class="detail-accordion-stack">
-      <details id="detailKnowledgeSection" class="detail-accordion">
-        <summary><span><strong>Wissenskarte</strong><small>Autor, Ära, Laufzeit und Einordnung</small></span><b aria-hidden="true"></b></summary>
-        <div class="detail-accordion-content"><div id="detailKnowledgeGrid" class="knowledge-grid"></div></div>
-      </details>
+        <section id="backupReminder" class="backup-reminder hidden"><div><span class="eyebrow">Lokale Daten sichern</span><strong>Zeit für ein Backup</strong><p id="backupReminderText"></p></div><div class="button-row"><button id="backupNow" class="button primary">Jetzt sichern</button><button id="dismissBackupReminder" class="text-button">Später</button></div></section>
 
-      <details id="detailConnectionsSection" class="detail-accordion hidden">
-        <summary><span><strong>Reihen & Rückbezüge</strong><small>Chronologien und wichtige Vorgeschichten</small></span><b aria-hidden="true"></b></summary>
-        <div class="detail-accordion-content"><div id="detailConnections" class="connection-list"></div></div>
-      </details>
+        <section class="section-card"><div class="section-heading"><div><span class="eyebrow">Als Nächstes</span><h2>Hörwarteschlange</h2></div><button class="text-button" data-go="playlists">Verwalten</button></div><div id="homeQueue" class="mini-list"></div></section>
+        <section class="section-card"><div class="section-heading"><div><span class="eyebrow">Schnellzugriff</span><h2>Angeheftet</h2></div><button class="text-button" data-go="episodes">Alle Folgen</button></div><div id="homePinned" class="mini-list"></div></section>
+        <section class="section-card"><div class="section-heading"><div><span class="eyebrow">Zuletzt gehört</span><h2>Hörverlauf</h2></div></div><div id="homeHistory" class="mini-list"></div></section>
+      </section>
 
-      <details id="detailPeopleSection" class="detail-accordion hidden">
-        <summary><span><strong>Figuren & Themen</strong><small>Wichtige Personen und Motive der Folge</small></span><b aria-hidden="true"></b></summary>
-        <div class="detail-accordion-content detail-subsections">
-          <section id="detailCharactersSection" class="detail-subsection hidden"><span class="field-label">Mit dabei</span><div id="detailCharacters" class="tag-cloud character-cloud"></div></section>
-          <section id="detailThemesSection" class="detail-subsection hidden"><span class="field-label">Themen</span><div id="detailThemes" class="tag-cloud"></div></section>
-        </div>
-      </details>
+      <section class="page" data-page="episodes">
+        <div class="page-title"><span class="eyebrow">254+ Fälle durchsuchen</span><h1>Folgen</h1><p>Suche auch nach Figuren, Kapiteln, Handlung, Autor oder Erinnerung.</p></div>
+        <label class="search-box"><span>⌕</span><input id="episodeSearch" type="search" placeholder="z. B. Hugenay, Peters Opa, Insel …" autocomplete="off"><button id="clearSearch" class="hidden" aria-label="Suche leeren">×</button></label>
+        <div class="filter-scroll" id="statusFilters"><button data-filter="all" class="active">Alle</button><button data-filter="unheard">Offen</button><button data-filter="heard">Gehört</button><button data-filter="super">★ Super</button><button data-filter="plus">Plus</button><button data-filter="neutral">Neutral</button><button data-filter="minus">Minus</button><button data-filter="notes">Mit Notiz</button><button data-filter="reheard">Mehrfach gehört</button></div>
+        <div class="filter-selects"><label><span>Autor</span><select id="authorFilter"><option value="all">Alle</option></select></label><label><span>Ära</span><select id="eraFilter"><option value="all">Alle</option></select></label><label><span>Jahr</span><select id="yearFilter"><option value="all">Alle</option></select></label><label><span>Sortierung</span><select id="episodeSort"><option value="nr">Nummer aufsteigend</option><option value="nr-desc">Nummer absteigend</option><option value="title">Titel</option><option value="author">Autor</option><option value="duration-asc">Kurz zuerst</option><option value="duration-desc">Lang zuerst</option><option value="rocky-best">Rocky-Beach: beste</option><option value="recommendation">Persönliche Passung</option><option value="own">Eigene Bewertung</option></select></label></div>
+        <div id="activeFilters" class="active-filters hidden"></div>
+        <div class="catalog-toolbar"><strong id="episodeCount">0 Folgen</strong><div class="segmented compact" id="episodeViewToggle"><button data-episode-view="compact">Kompakt</button><button data-episode-view="detailed">Details</button></div></div>
+        <div id="episodeList" class="episode-list"></div><button id="loadMoreEpisodes" class="button secondary full hidden">Mehr laden</button>
+      </section>
 
-      <details id="detailSimilarSection" class="detail-accordion hidden">
-        <summary><span><strong>Passende Folgen</strong><small>Ähnliche Fälle zum Weiterhören</small></span><b aria-hidden="true"></b></summary>
-        <div class="detail-accordion-content"><div id="detailSimilar" class="similar-list"></div></div>
-      </details>
+      <section class="page" data-page="ranking">
+        <div class="page-title"><span class="eyebrow">Vergleichen</span><h1>Rankings</h1><p>Community-Rangliste, deine Bewertungen und persönliche Empfehlungen.</p></div>
+        <div class="segmented" id="rankingMode"><button data-ranking="rocky" class="active">Rocky-Beach</button><button data-ranking="mine">Meine Bewertungen</button><button data-ranking="match">Empfehlungen</button></div>
+        <div id="rankingInfo" class="info-card"></div><div id="rankingList" class="ranking-list"></div>
+      </section>
 
-      <details id="detailReasonsSection" class="detail-accordion hidden">
-        <summary><span><strong>Warum passt sie?</strong><small>Grund für die persönliche Empfehlung</small></span><b aria-hidden="true"></b></summary>
-        <div class="detail-accordion-content"><div id="detailReasons" class="tag-cloud"></div></div>
-      </details>
+      <section class="page" data-page="playlists">
+        <div class="page-title"><span class="eyebrow">Hörpläne</span><h1>Listen</h1><p>Eigene Playlists, kuratierte Reihenfolgen und deine Warteschlange.</p></div>
+        <section class="section-card"><div class="section-heading"><div><span class="eyebrow">Als Nächstes</span><h2>Hörwarteschlange</h2></div><button id="clearQueue" class="text-button danger">Leeren</button></div><div id="queueList" class="playlist-items"></div></section>
+        <section class="playlist-hero"><div><span class="eyebrow">Deine Sammlung</span><h2>Was möchtest du hören?</h2><p>Erstelle freie Listen oder lasse eine Fahrt, einen Abend oder ein Wochenende automatisch füllen.</p></div><button id="newPlaylistButton" class="button primary">＋ Neue Playlist</button></section>
+        <section class="section-card smart-planner"><div class="section-heading"><div><span class="eyebrow">Smart Playlist</span><h2>Hörzeit automatisch planen</h2></div></div><div class="planner-grid"><label><span>Name</span><input id="smartName" value="Meine Hörsession" maxlength="60"></label><label><span>Stunden</span><input id="smartHours" type="number" min="0" max="30" value="2"></label><label><span>Minuten</span><input id="smartMinutes" type="number" min="0" max="59" value="0"></label><label><span>Stimmung</span><select id="smartMood"><option value="any">Egal</option><option value="grusel">Grusel</option><option value="klassiker">Klassiker</option><option value="familie">Familie</option><option value="hugenay">Hugenay</option><option value="meer">Meer & Insel</option><option value="kunst">Kunst</option></select></label><label><span>Hörstatus</span><select id="smartStatus"><option value="unheard">Nur ungehört</option><option value="mixed">Gemischt</option><option value="heard">Nur gehört</option></select></label><label><span>Autor</span><select id="smartAuthor"><option value="all">Alle</option></select></label></div><label class="check-row"><input id="smartContinuity" type="checkbox" checked><span><strong>Zusammenhänge beachten</strong><small>Mehrteiler und Chronologien bleiben in sinnvoller Reihenfolge zusammen.</small></span></label><button id="createSmartPlaylist" class="button primary full">Smart Playlist erstellen</button></section>
+        <div class="segmented" id="playlistTabs"><button data-playlist-tab="essentials" class="active">★ Essentials</button><button data-playlist-tab="themes">Themen</button><button data-playlist-tab="mine">Meine</button></div><div id="playlistGrid" class="playlist-grid"></div>
+      </section>
 
-      <details id="detailTriviaSection" class="detail-accordion hidden">
-        <summary><span><strong>Gut zu wissen</strong><small>Einordnung und Besonderheiten</small></span><b aria-hidden="true"></b></summary>
-        <div class="detail-accordion-content"><div id="detailTrivia" class="fact-note"></div></div>
-      </details>
+      <section class="page" data-page="settings">
+        <div class="page-title"><span class="eyebrow">Verwaltung</span><h1>Einstellungen</h1><p>Streaming, Daten, Darstellung, Hilfe und Diagnose.</p></div>
+        <section class="settings-group"><span class="eyebrow">Allgemein</span><article class="settings-card"><div><h2>Bevorzugter Streamingdienst</h2><p>Schnellbuttons öffnen diesen Dienst.</p></div><div class="segmented compact" id="streamingService"><button data-service="spotify">Spotify</button><button data-service="appleMusic">Apple Music</button></div></article><article class="settings-card"><div><h2>Katalogdarstellung</h2><p>Kompakt zeigt mehr Folgen, Details zeigt Schnellaktionen.</p></div><div class="segmented compact" id="episodeViewSetting"><button data-episode-view="compact">Kompakt</button><button data-episode-view="detailed">Details</button></div></article></section>
+        <section class="settings-group"><span class="eyebrow">Daten</span><article class="settings-list"><button id="exportBackup"><span><strong>JSON exportieren</strong><small>Alle persönlichen Daten sichern</small></span><b>↓</b></button><button id="importBackup"><span><strong>JSON importieren</strong><small>Prüfen, zusammenführen oder ersetzen</small></span><b>›</b></button><input id="backupFile" type="file" accept="application/json,.json" hidden></article></section>
+        <section class="settings-group"><span class="eyebrow">Empfehlungen</span><article class="settings-list"><button id="restoreRecommendations"><span><strong>Ausgeblendete Empfehlungen zurücksetzen</strong><small>„Heute nicht“ und dauerhaft ausgeblendete Folgen wieder zulassen</small></span><b>↻</b></button></article></section>
+        <section class="settings-group"><span class="eyebrow">Inhalte</span><article class="settings-list"><button id="refreshMetadata"><span><strong>Folgenwissen aktualisieren</strong><small>Laufzeiten, Beschreibungen und Streaming-Links prüfen</small></span><b>↻</b></button><button id="resetCatalog"><span><strong>Eingebauten Katalog neu laden</strong><small>Lokalen Metadaten-Cache verwerfen</small></span><b>↻</b></button></article></section>
+        <section class="settings-group"><span class="eyebrow">Hilfe</span><article class="settings-list"><button id="startTutorial"><span><strong>Kurze Einführung starten</strong><small>Drei Schritte statt eines langen Rundgangs</small></span><b>›</b></button><button id="openHelp"><span><strong>Kurzanleitung öffnen</strong><small>Bewertungen, Empfehlungen, Warteschlange und Backups</small></span><b>›</b></button></article></section>
+        <section class="settings-group"><span class="eyebrow">Diagnose</span><article id="diagnosticsCard" class="diagnostics-card"></article><div class="button-row"><button id="copyDiagnostics" class="button secondary">Diagnose kopieren</button><button id="validateCatalog" class="button secondary">Katalog prüfen</button></div></section>
+        <section class="settings-group"><span class="eyebrow">Zurücksetzen</span><article class="settings-list danger-list"><button id="resetPersonalData"><span><strong>Persönliche Daten zurücksetzen</strong><small>Hörstatus, Bewertungen, Listen und Verlauf löschen</small></span><b>›</b></button></article></section>
+        <section class="about-card"><img src="icon-192.png" alt="App-Icon"><div><strong>Folgen-Tracker</strong><span>Version 16.0 · Offline-fähig</span><small>Persönliche Daten bleiben lokal auf diesem Gerät.</small></div></section>
+      </section>
+    </main>
 
-      <details id="detailNoteSection" class="detail-accordion note-accordion">
-        <summary><span><strong>Persönliche Notiz</strong><small>Deine Gedanken zu dieser Folge</small></span><b aria-hidden="true"></b></summary>
-        <div class="detail-accordion-content"><label class="note-field compact-note"><textarea id="detailNote" maxlength="600" placeholder="Was ist dir an der Folge aufgefallen?"></textarea></label><button id="resetEpisodeData" class="episode-reset-button">Persönliche Daten dieser Folge zurücksetzen</button></div>
-      </details>
-    </div>
-  </article>
-</div>
+    <nav class="bottom-nav" aria-label="Hauptnavigation"><button data-go="home" class="active"><span>⌂</span><small>Start</small></button><button data-go="episodes"><span>⌕</span><small>Folgen</small></button><button data-go="ranking"><span>≋</span><small>Ranking</small></button><button data-go="playlists"><span>☷</span><small>Listen</small></button><button data-go="settings"><span>⚙</span><small>Mehr</small></button></nav>
+  </div>
 
-<div id="playlistEditorOverlay" class="overlay hidden" aria-hidden="true">
-  <article class="mini-sheet" role="dialog" aria-modal="true" aria-labelledby="playlistEditorTitle">
-    <div class="sheet-handle"></div>
-    <header class="detail-header"><div><span class="eyebrow">Persönliche Liste</span><h2 id="playlistEditorTitle">Neue Playlist</h2></div><button id="closePlaylistEditor" class="icon-button" aria-label="Playlist-Editor schließen">×</button></header>
-    <label class="note-field"><span class="field-label">Name</span><input id="playlistNameInput" maxlength="60" placeholder="z. B. 5-Stunden-Autofahrt"></label>
-    <label class="note-field"><span class="field-label">Beschreibung</span><textarea id="playlistDescriptionInput" maxlength="300" placeholder="Wofür ist diese Liste gedacht?"></textarea></label>
-    <button id="savePlaylistButton" class="primary-button full">Playlist erstellen</button>
-  </article>
-</div>
+  <div id="loadingScreen" class="loading-screen"><img src="icon-192.png" alt=""><strong>Folgen-Tracker</strong><span id="loadingText">Lade Daten …</span></div>
+  <div id="toast" class="toast hidden" role="status"></div>
 
-<div id="playlistPickerOverlay" class="overlay hidden" aria-hidden="true">
-  <article class="mini-sheet" role="dialog" aria-modal="true" aria-labelledby="playlistPickerTitle">
-    <div class="sheet-handle"></div>
-    <header class="detail-header"><div><span class="eyebrow">Merken</span><h2 id="playlistPickerTitle">Zu Playlist hinzufügen</h2></div><button id="closePlaylistPicker" class="icon-button" aria-label="Playlist-Auswahl schließen">×</button></header>
-    <div id="playlistPickerList" class="picker-list"></div>
-    <button id="pickerNewPlaylist" class="subtle-button full">＋ Neue Playlist erstellen</button>
-  </article>
-</div>
+  <dialog id="profileDialog" class="sheet-dialog"><div class="dialog-handle"></div><header><div><span class="eyebrow">Dein Hörprofil</span><h2>So hörst du Die drei ???</h2></div><button class="icon-button" data-close-dialog="profileDialog">×</button></header><div id="profileContent" class="dialog-body"></div></dialog>
+  <dialog id="episodeDialog" class="sheet-dialog episode-dialog"><div class="dialog-handle"></div><header><div id="episodeDialogTitle"></div><button class="icon-button" data-close-dialog="episodeDialog">×</button></header><div id="episodeDialogBody" class="dialog-body"></div><div id="episodeStickyActions" class="sticky-dialog-actions"></div></dialog>
+  <dialog id="quickRateDialog" class="sheet-dialog compact-dialog"><div class="dialog-handle"></div><header><div><span class="eyebrow">Profil verbessern</span><h2>Bekannte Folgen bewerten</h2></div><button class="icon-button" data-close-dialog="quickRateDialog">×</button></header><div id="quickRateContent" class="dialog-body"></div></dialog>
+  <dialog id="feedbackDialog" class="sheet-dialog compact-dialog"><div class="dialog-handle"></div><header><div><span class="eyebrow">Empfehlung steuern</span><h2>Was möchtest du ändern?</h2></div><button class="icon-button" data-close-dialog="feedbackDialog">×</button></header><div id="feedbackContent" class="dialog-body"></div></dialog>
+  <dialog id="playlistDialog" class="sheet-dialog"><div class="dialog-handle"></div><header><div id="playlistDialogTitle"></div><button class="icon-button" data-close-dialog="playlistDialog">×</button></header><div id="playlistDialogBody" class="dialog-body"></div></dialog>
+  <dialog id="playlistEditorDialog" class="sheet-dialog compact-dialog"><div class="dialog-handle"></div><header><div><span class="eyebrow">Eigene Liste</span><h2 id="playlistEditorTitle">Playlist erstellen</h2></div><button class="icon-button" data-close-dialog="playlistEditorDialog">×</button></header><form id="playlistEditorForm" class="dialog-body form-stack"><input id="playlistEditorId" type="hidden"><input id="playlistEditorSeedNr" type="hidden"><label><span>Name</span><input id="playlistName" maxlength="60" required></label><label><span>Beschreibung</span><textarea id="playlistDescription" maxlength="240" rows="4"></textarea></label><button class="button primary full" type="submit">Speichern</button></form></dialog>
+  <dialog id="importDialog" class="sheet-dialog compact-dialog"><div class="dialog-handle"></div><header><div><span class="eyebrow">Backup prüfen</span><h2>Importvorschau</h2></div><button class="icon-button" data-close-dialog="importDialog">×</button></header><div id="importPreview" class="dialog-body"></div></dialog>
+  <dialog id="tutorialDialog" class="sheet-dialog compact-dialog"><div class="dialog-handle"></div><header><div><span class="eyebrow">Kurze Einführung</span><h2 id="tutorialTitle"></h2></div><button class="icon-button" data-close-dialog="tutorialDialog">×</button></header><div id="tutorialContent" class="dialog-body"></div></dialog>
+  <dialog id="helpDialog" class="sheet-dialog"><div class="dialog-handle"></div><header><div><span class="eyebrow">Kurzanleitung</span><h2>So funktioniert der Tracker</h2></div><button class="icon-button" data-close-dialog="helpDialog">×</button></header><div class="dialog-body help-content"><h3>Bewertungen</h3><p>Eine Bewertung markiert die Folge automatisch als gehört. Beim Zurücksetzen auf ungehört wird die Bewertung nach Bestätigung entfernt.</p><h3>Empfehlungen</h3><p>Der Tracker kombiniert deinen Geschmack mit Community-Wertung, Verfügbarkeit und Abwechslung. Der Match-Score ist eine Orientierung, keine Wahrscheinlichkeit.</p><h3>Als Nächstes</h3><p>Die Warteschlange ist dein aktueller Hörplan. Playlists bleiben davon unabhängig.</p><h3>Backups</h3><p>Deine Daten liegen lokal im Browser. Exportiere regelmäßig eine JSON-Datei, besonders vor einem Gerätewechsel.</p></div></dialog>
+  <dialog id="confirmDialog" class="confirm-dialog"><div><span id="confirmEyebrow" class="eyebrow">Bestätigen</span><h2 id="confirmTitle"></h2><p id="confirmText"></p><div class="button-row"><button id="confirmCancel" class="button secondary">Abbrechen</button><button id="confirmAccept" class="button danger">Bestätigen</button></div></div></dialog>
 
-<div id="playlistDetailOverlay" class="overlay hidden" aria-hidden="true">
-  <article class="detail-sheet playlist-sheet" role="dialog" aria-modal="true" aria-labelledby="playlistDetailTitle">
-    <div class="sheet-handle"></div>
-    <header class="detail-header"><div><span id="playlistDetailKicker" class="eyebrow">Playlist</span><h2 id="playlistDetailTitle"></h2></div><button id="closePlaylistDetail" class="icon-button" aria-label="Playlist schließen">×</button></header>
-    <p id="playlistDetailDescription" class="detail-description"></p>
-    <div id="playlistDetailStats" class="playlist-detail-stats"></div>
-    <div class="playlist-detail-actions"><button id="playlistPlayFirst" class="primary-button">▶ Erste Folge öffnen</button><button id="playlistAddEpisodeButton" class="subtle-button">＋ Folge hinzufügen</button><button id="playlistEditButton" class="subtle-button">Bearbeiten</button><button id="playlistDeleteButton" class="danger-button">Löschen</button></div>
-    <section id="playlistAddPanel" class="playlist-add-panel hidden">
-      <div id="playlistInlineStatus" class="playlist-inline-status hidden" role="status" aria-live="polite"></div>
-      <div class="playlist-add-search"><input id="playlistAddSearch" type="search" placeholder="Folge suchen …" autocomplete="off"><button id="playlistAddClose" class="icon-button" aria-label="Suche schließen">×</button></div>
-      <div id="playlistAddResults" class="playlist-add-results"></div>
-    </section>
-    <div id="playlistEpisodeList" class="playlist-episode-list"></div>
-    <section id="playlistSuggestionsSection" class="playlist-suggestions hidden">
-      <div class="section-heading compact"><div><span class="eyebrow">Automatisch passend</span><h3>Passt zu dieser Playlist</h3></div><div class="suggestion-controls"><button id="playlistSuggestionMode" class="mini-toggle" data-mode="similar">Ähnlich</button><button id="playlistSuggestionRefresh" class="icon-button" aria-label="Neue Vorschläge">↻</button></div></div>
-      <p id="playlistSuggestionSummary" class="playlist-suggestion-summary"></p>
-      <div id="playlistSuggestions" class="playlist-suggestion-list"></div>
-    </section>
-  </article>
-</div>
-
-<div id="heardResetOverlay" class="overlay action-overlay hidden" aria-hidden="true">
-  <article class="mini-sheet action-sheet" role="dialog" aria-modal="true" aria-labelledby="heardResetTitle">
-    <div class="sheet-handle"></div>
-    <header class="detail-header"><div><span class="eyebrow">Hörstatus ändern</span><h2 id="heardResetTitle">Als ungehört markieren?</h2></div><button id="closeHeardReset" class="icon-button" aria-label="Abbrechen">×</button></header>
-    <p>Eine bewertete Folge gilt als gehört. Um sie wieder als ungehört zu markieren, wird deshalb auch deine Bewertung entfernt.</p>
-    <button id="confirmUnheardAndClear" class="danger-button full">Bewertung entfernen & als ungehört markieren</button>
-    <button id="cancelHeardReset" class="subtle-button full">Abbrechen</button>
-  </article>
-</div>
-
-<div id="confirmOverlay" class="overlay action-overlay overlay-front hidden" aria-hidden="true">
-  <article class="mini-sheet action-sheet confirm-sheet" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMessage">
-    <div class="sheet-handle"></div>
-    <header class="detail-header"><div><span id="confirmKicker" class="eyebrow">Bestätigen</span><h2 id="confirmTitle">Aktion bestätigen</h2></div><button id="closeConfirm" class="icon-button" aria-label="Dialog schließen">×</button></header>
-    <p id="confirmMessage"></p>
-    <div class="confirm-actions"><button id="confirmCancel" class="subtle-button full">Abbrechen</button><button id="confirmAccept" class="primary-button full">Bestätigen</button></div>
-  </article>
-</div>
-
-<div id="helpOverlay" class="overlay overlay-front hidden" aria-hidden="true">
-  <article class="detail-sheet help-sheet" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
-    <div class="sheet-handle"></div>
-    <header class="detail-header"><div><span class="eyebrow">Hilfe</span><h2 id="helpTitle">So funktioniert die App</h2></div><button id="closeHelp" class="icon-button" aria-label="Hilfe schließen">×</button></header>
-    <div class="help-list">
-      <details open><summary>Bewertungen & Hörstatus</summary><p>Minus, Neutral, Plus und Super sind gegenseitig exklusiv. Tippe erneut auf die aktive Bewertung, um sie zu entfernen. Jede Bewertung markiert die Folge automatisch als gehört. Beim Zurücksetzen auf ungehört kannst du die Bewertung direkt mit entfernen.</p></details>
-      <details><summary>Folgen finden</summary><p>Die Suche berücksichtigt Titel, Autor, Ära, Figuren, Handlung, Kapitel und Synonyme. Filter und Sortierung lassen sich kombinieren. Häufig genutzte Folgen kannst du zusätzlich anheften.</p></details>
-      <details><summary>Playlists</summary><p>Unter Listen findest du goldene Essentials, Themenlisten und deine eigenen Playlists. Eigene Listen kannst du frei benennen, beschreiben, sortieren und mit automatischen Vorschlägen erweitern.</p></details>
-      <details><summary>Smart-Playlists</summary><p>Lege Dauer, Stimmung, Hörstatus und optional einen Autor fest. Zusammenhängende Fälle bleiben auf Wunsch in der richtigen Reihenfolge.</p></details>
-      <details><summary>Überrasch mich & Hörverlauf</summary><p>Auf der Startseite kannst du eine Folge nach Hörstatus, Thema und eigener Bewertung auslosen. Unter „Zuletzt gehört“ findest du deinen lokalen Hörverlauf.</p></details>
-      <details><summary>Speicherung & Backup</summary><p>Alle Änderungen, angehefteten Folgen, der Hörverlauf und deine Playlists werden automatisch lokal auf diesem Gerät gespeichert. Das JSON-Backup brauchst du nur als zusätzliche Sicherung oder für einen Gerätewechsel.</p></details>
-    </div>
-    <button id="helpStartTutorial" class="primary-button full">Interaktives Tutorial starten</button>
-  </article>
-</div>
-
-<div id="tutorialOverlay" class="tutorial-overlay hidden" aria-hidden="true">
-  <div id="tutorialFocus" class="tutorial-focus" aria-hidden="true"></div>
-  <article id="tutorialCard" class="tutorial-card" role="dialog" aria-modal="true" aria-labelledby="tutorialTitle">
-    <div class="tutorial-card-top"><span id="tutorialProgress" class="eyebrow">1 von 28</span><button id="skipTutorial" class="tutorial-skip">Überspringen</button></div>
-    <h2 id="tutorialTitle">Willkommen</h2>
-    <p id="tutorialText"></p>
-    <div id="tutorialAction" class="tutorial-action" role="status" aria-live="polite"></div>
-    <div id="tutorialDemo" class="tutorial-demo hidden"></div>
-    <div class="tutorial-actions"><button id="tutorialBack" class="subtle-button hidden">Zurück</button><button id="tutorialNext" class="primary-button hidden">App benutzen</button></div>
-  </article>
-</div>
-
-<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+  <script src="episodes-seed.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

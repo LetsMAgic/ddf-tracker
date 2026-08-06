@@ -1,0 +1,34 @@
+DIE DREI ??? TRACKER V16 – OHNE ORDNER
+
+1. Vorher in der alten App unter Einstellungen ein JSON-Backup exportieren.
+2. Diese ZIP entpacken.
+3. Auf GitHub im Repository: Add file -> Upload files.
+4. Alle Dateien aus diesem entpackten Ordner auswählen und hochladen.
+5. Vorhandene Dateien mit gleichem Namen werden ersetzt.
+6. Die folgenden bestehenden Dateien NICHT löschen:
+   episodes.json
+   episodes-seed.js
+   FEATURED_CHARACTERS.md
+   icon.svg
+   icon-192.png
+   icon-512.png
+   apple-touch-icon.png
+7. Commit direkt auf main.
+
+Neue Dateien, die danach direkt im Hauptverzeichnis liegen müssen:
+core.js
+catalog.js
+recommendations.js
+playlists.js
+backup.js
+app-controller.js
+
+Ersetzte Dateien:
+index.html
+style.css
+app.js
+sw.js
+manifest.json
+
+Die Ordner .github, js, scripts und tests werden bei dieser Variante nicht benötigt.
+Die App funktioniert trotzdem vollständig. Es fehlen nur automatische Entwickler-Tests auf GitHub.
