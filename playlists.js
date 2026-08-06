@@ -68,7 +68,15 @@ export function generateSmartPlaylist({name,targetMinutes,mood='any',status='unh
     const score = -Math.abs(duration-target) + quality * 7 + Math.min(episodes.length,8) * .5;
     if (!best || score > best.score) best = {episodes,duration,score};
   }
-  if (!best) return null; const playlist = createPlaylist({name:name || 'Meine Hörsession',description:`Automatisch geplant für ungefähr ${target} Minuten.`,episodeNrs:best.episodes.map((episode) => episode.nr),generated:true}); return {playlist,...best};
+  if (!best) return null;
+  return {
+    name:String(name || 'Meine Hörsession').trim().slice(0,60) || 'Meine Hörsession',
+    description:`Automatisch geplant für ungefähr ${target} Minuten.`,
+    targetMinutes:target,
+    options:{mood,status,author,continuity},
+    episodeNrs:best.episodes.map((episode) => episode.nr),
+    ...best,
+  };
 }
 export function playlistSuggestions(id,limit=6) {
   const playlist = getPlaylist(id); if (!playlist?.episodes?.length || String(id).startsWith('curated:')) return [];
