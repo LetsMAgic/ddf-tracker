@@ -1,19 +1,22 @@
 {
-  "name": "Die drei ??? – Folgen-Tracker",
-  "short_name": "DDF Tracker",
-  "description": "Folgen verwalten, bewerten, empfehlen lassen und offline nutzen.",
+  "name": "Die Fallkartei – App umgezogen",
+  "short_name": "Umgezogen",
+  "description": "Der bisherige DDF-Tracker ist zu Die Fallkartei umgezogen.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "any",
-  "background_color": "#08090c",
-  "theme_color": "#08090c",
+  "background_color": "#07090d",
+  "theme_color": "#0b0d12",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
-  ],
-  "shortcuts": [
-    { "name": "Folgen suchen", "short_name": "Folgen", "url": "./#episodes", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
-    { "name": "Playlists öffnen", "short_name": "Listen", "url": "./#playlists", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ]
 }

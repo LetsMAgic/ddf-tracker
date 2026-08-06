@@ -1,100 +1,47 @@
-# Die drei ??? – Folgen-Tracker
+<div align="center">
+  <img src="./icon-192.png" width="96" alt="Logo von Die Fallkartei">
 
-Eine installierbare, offline-fähige Progressive Web App zum Tracken, Bewerten und Entdecken der Hörspielfolgen von **Die drei ???**.
+# DDF-Tracker ist umgezogen
 
-**Aktuelle Version: 16.2**
+Dieses Repository enthält nur noch die Umzugsseite des früheren **DDF-Trackers**.
 
-## Leitidee
+Die aktuelle App heißt **Die Fallkartei** und wird im neuen Repository weiterentwickelt.
 
-Der Tracker beantwortet nicht nur die Frage „Welche Folgen habe ich gehört?“, sondern vor allem:
+[**Die Fallkartei öffnen**](https://letsmagic.github.io/fallkartei/) ·
+[**Neues Repository ansehen**](https://github.com/LetsMAgic/fallkartei)
 
-> Welche Folge passt gerade zu mir – und warum?
+</div>
 
-Aus deinen Bewertungen entsteht lokal auf deinem Gerät ein persönliches Geschmacksprofil. Daraus werden nachvollziehbare Empfehlungen, ähnliche Folgen und Hörpläne erzeugt.
+---
 
-## Funktionen
+## Neue App installieren
 
-- Hörstatus, Hörverlauf, Notizen und vierstufige Bewertung
-- persönliche Empfehlungen mit Begründung und Profilstärke
-- Suche nach Titel, Nummer, Figuren, Handlung, Kapiteln, Themen und Autoren
-- Community-Ranking und persönliche Bewertungsübersicht
-- Schnellbewertung mit echter Rückgängig-Funktion
-- eigene und kuratierte Playlists
-- Smart-Playlist-Vorschau vor dem Speichern
-- „Als Nächstes“-Warteschlange
-- Backup-Export und sicherer Import mit Vorschau, Zusammenführen oder Ersetzen
-- drei Katalogansichten: **Kompakt**, **Details** und **Cover**
-- Streaminglinks für Spotify, Apple Music, BookBeat, Amazon Music, YouTube Music, Deezer und Amazon
-- teilbares Hörprofil als PNG-Grafik
-- installierbar und nach dem ersten Laden weitgehend offline nutzbar
+### iPhone und iPad
 
-## Cover-Modus
+1. [Die Fallkartei in Safari öffnen](https://letsmagic.github.io/fallkartei/)
+2. Auf das Teilen-Symbol tippen
+3. **Zum Home-Bildschirm** auswählen
+4. Mit **Hinzufügen** bestätigen
+5. Das alte DDF-Tracker-Symbol anschließend entfernen
 
-Die Coverbilder werden nicht in diesem Repository gespeichert. Die App übernimmt ausschließlich offizielle Cover-URLs, die in den Metadaten von [dreimetadaten.de](https://dreimetadaten.de/) hinterlegt sind. Bevorzugt wird die offizielle Quelle von dreifragezeichen.de, ersatzweise das offizielle Apple-Music-Cover.
+### Android
 
-Dadurch bleibt das Repository klein. Ohne Internetverbindung oder bei nicht erreichbaren Bildquellen zeigt die App automatisch einen ruhigen Platzhalter. Die Ansichten **Kompakt** und **Details** funktionieren unabhängig von den Covern.
+1. [Die Fallkartei öffnen](https://letsmagic.github.io/fallkartei/)
+2. Das Browsermenü öffnen
+3. **App installieren** oder **Zum Startbildschirm hinzufügen** wählen
+4. Das alte DDF-Tracker-Symbol anschließend entfernen
 
-## Streaming
+## Persönliche Daten
 
-Unter **Einstellungen → Bevorzugter Streamingdienst** wird festgelegt, welcher Anbieter als Hauptaktion erscheint. In der Folgendetailansicht werden weitere für die jeweilige Folge vorhandene Anbieter platzsparend unter **Weitere Anbieter** zusammengefasst.
+Lokal gespeicherte Bewertungen, Playlists und Notizen sollten in der neuen App weiterhin verfügbar sein.
+Ein vorhandenes JSON-Backup sollte dennoch aufbewahrt werden.
 
-## Teilbare Statistik
+## Projektstatus
 
-Im persönlichen Hörprofil erzeugt **Statistik als Bild teilen** eine 1080 × 1350 Pixel große PNG-Grafik mit:
+Der DDF-Tracker wird nicht mehr weiterentwickelt. Dieses Repository bleibt ausschließlich als
+dauerhafter Hinweis für bisherige Nutzer bestehen.
 
-- Gesamtfortschritt
-- Anzahl der Bewertungen
-- Hörstunden und Wiederholungen
-- Bewertungsverteilung
-- bevorzugtem Thema, Autor und prägender Figur
-- persönlichen Favoriten
+---
 
-Private Notizen und einzelne Hörzeitpunkte erscheinen nicht im Bild.
-
-## Installation
-
-Die App läuft direkt über GitHub Pages. Auf iPhone und iPad lässt sie sich in Safari über **Teilen → Zum Home-Bildschirm** installieren. Auf unterstützten Desktop- und Android-Browsern erscheint eine entsprechende Installationsoption.
-
-## Daten und Datenschutz
-
-Es gibt kein Benutzerkonto und kein eigenes Backend. Persönliche Daten liegen ausschließlich lokal in IndexedDB:
-
-- Bewertungen und Hörstatus
-- persönliche Notizen
-- Playlists und Warteschlange
-- Hörverlauf
-- Einstellungen und Empfehlungsfeedback
-
-Regelmäßige JSON-Backups werden empfohlen, insbesondere vor einem Gerätewechsel oder dem Löschen von Browserdaten.
-
-## Technischer Aufbau
-
-Die App verwendet bewusst Vanilla JavaScript ohne Framework und ohne Build-Schritt. Alle Laufzeitdateien liegen direkt im Hauptverzeichnis des Repositorys:
-
-```text
-index.html
-style.css
-app.js
-app-controller.js
-core.js
-catalog.js
-recommendations.js
-playlists.js
-backup.js
-sw.js
-manifest.json
-episodes-seed.js
-episodes.json
-```
-
-Der lokale Seed ermöglicht den Offline-Start. Ergänzende Metadaten werden höchstens monatlich von dreimetadaten.de aktualisiert und anschließend lokal zwischengespeichert.
-
-## Datenquellen und Hinweise
-
-Metadaten wie Beschreibungen, Laufzeiten, Kapitel, Sprecherrollen, Cover- und Streaminglinks werden mit freundlicher Unterstützung der öffentlich bereitgestellten Datensammlung von [dreimetadaten.de](https://dreimetadaten.de/) ergänzt. Die kuratierten Bewertungen, Empfehlungen, Tags, prägenden Figuren und Playlists sind Bestandteil dieses Projekts.
-
-## Rechtlicher Hinweis
-
-Dies ist ein **inoffizielles, nicht-kommerzielles Fanprojekt** und steht in keiner Verbindung zu Sony Music Entertainment, EUROPA, dem KOSMOS Verlag oder den beteiligten Autorinnen, Autoren und Illustratorinnen bzw. Illustratoren.
-
-„Die drei ???“, zugehörige Marken, Titel, Cover und Illustrationen gehören den jeweiligen Rechteinhabern. Dieses Repository enthält keine Kopien der Coverdateien; die App zeigt lediglich externe, in den Metadaten hinterlegte offizielle Bildquellen an.
+> Inoffizielles, nicht kommerzielles Fanprojekt. „Die drei ???“ sowie zugehörige Marken,
+> Titel, Cover, Illustrationen und andere geschützte Inhalte gehören den jeweiligen Rechteinhabern.
