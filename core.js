@@ -1,11 +1,20 @@
-export const APP_VERSION = '16.1.0';
+export const APP_VERSION = '16.2.0';
 export const DB_NAME = 'ddf-tracker';
 export const DB_VERSION = 1;
 export const STORE_NAME = 'kv';
 export const USER_KEY = 'appState';
-export const CATALOG_KEY = 'enrichedCatalogV16';
-export const LEGACY_CATALOG_KEYS = ['enrichedCatalogV15','enrichedCatalogV14','enrichedCatalogV13','enrichedCatalogV10','enrichedCatalogV9','enrichedCatalogV8','enrichedCatalogV7','enrichedCatalogV6','enrichedCatalogV5','enrichedCatalogV4'];
+export const CATALOG_KEY = 'enrichedCatalogV16_2';
+export const LEGACY_CATALOG_KEYS = ['enrichedCatalogV16','enrichedCatalogV15','enrichedCatalogV14','enrichedCatalogV13','enrichedCatalogV10','enrichedCatalogV9','enrichedCatalogV8','enrichedCatalogV7','enrichedCatalogV6','enrichedCatalogV5','enrichedCatalogV4'];
 export const LEGACY_USER_KEYS = ['user-state','userState','state'];
+export const STREAMING_SERVICES = [
+  { id:'spotify', label:'Spotify' },
+  { id:'appleMusic', label:'Apple Music' },
+  { id:'bookbeat', label:'BookBeat' },
+  { id:'amazonMusic', label:'Amazon Music' },
+  { id:'youtubeMusic', label:'YouTube Music' },
+  { id:'deezer', label:'Deezer' },
+  { id:'amazon', label:'Amazon' },
+];
 export const DEFAULT_STREAMING_SERVICE = 'spotify';
 export const RATING_ORDER = ['super','plus','neutral','minus'];
 export const RATING_LABELS = { minus: 'Minus', neutral: 'Neutral', plus: 'Plus', super: 'Super' };
@@ -157,8 +166,8 @@ export function normalizeUser(raw = {}) {
     history: normalizeHistory(source.history || source.listenHistory, episodes),
     settings: {
       ...base.settings, ...rawSettings,
-      preferredService: rawSettings.preferredService === 'appleMusic' ? 'appleMusic' : 'spotify',
-      episodeView: rawSettings.episodeView === 'detailed' ? 'detailed' : 'compact',
+      preferredService: STREAMING_SERVICES.some((service) => service.id === rawSettings.preferredService) ? rawSettings.preferredService : DEFAULT_STREAMING_SERVICE,
+      episodeView: ['compact','detailed','cover'].includes(rawSettings.episodeView) ? rawSettings.episodeView : 'compact',
       recommendationHistory: asArray(rawSettings.recommendationHistory).map(Number).filter(Number.isFinite).slice(-30),
       snoozedRecommendations: snoozed, hiddenRecommendations: [...new Set(hidden)], featureFeedback: feedback,
       queue: [...new Set(queue)], filters: { ...base.settings.filters, ...(rawSettings.filters || {}) },

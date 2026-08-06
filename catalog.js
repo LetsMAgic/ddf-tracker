@@ -27,15 +27,22 @@ const ALIASES = new Map([
 
 const number = (value) => { const n = Number(value); return Number.isFinite(n) ? n : null; };
 const text = (value) => value == null ? '' : String(value).trim();
+const link = (value) => {
+  const url = text(value);
+  return url ? url.replace(/^http:\/\//i,'https://') : '';
+};
 function deriveTags(raw) {
   const haystack = normalizeText([raw.titel,raw.beschreibung,asArray(raw.tags).join(' '),asArray(raw.characters).join(' '),asArray(raw.featuredCharacters).join(' ')].join(' '));
   const tags = unique(asArray(raw.tags).map((tag) => String(tag).replace(/(^|\s)\S/g,(char) => char.toUpperCase())));
   for (const [label,keywords] of TAG_RULES) if (keywords.some((keyword) => haystack.includes(normalizeText(keyword)))) tags.push(label);
   return unique(tags);
 }
-function normalizeEpisode(raw = {}) {
+export function normalizeEpisode(raw = {}) {
   const nr = number(raw.nr ?? raw.number ?? raw.nummer ?? raw.folge ?? raw.episode); if (!Number.isFinite(nr)) return null;
   const releaseDate = text(raw.releaseDate ?? raw.release_date ?? raw['veröffentlichungsdatum'] ?? raw.datum ?? raw.date) || null;
+  const links = raw.links || {};
+  const officialDdfCover = link(raw.coverDdfUrl ?? raw.cover_dreifragezeichen ?? links.cover_dreifragezeichen);
+  const officialAppleCover = link(raw.coverItunesUrl ?? raw.cover_itunes ?? links.cover_itunes);
   const episode = {
     ...raw, nr, titel: text(raw.titel ?? raw.title ?? raw.name) || `Folge ${nr}`,
     beschreibung: text(raw.beschreibung ?? raw.gesamtbeschreibung ?? raw.description ?? raw.summary),
@@ -43,10 +50,28 @@ function normalizeEpisode(raw = {}) {
     collection: text(raw.collection ?? raw.type) || (nr >= 10000 ? 'special' : 'main'),
     author: text(raw.author ?? raw.autor), scriptAuthor: text(raw.scriptAuthor ?? raw['hörspielskriptautor'] ?? raw.hoerspielskript ?? raw.script),
     era: text(raw.era ?? raw.aera), releaseDate, durationMin: raw.gesamtdauer ? Math.round(Number(raw.gesamtdauer) / 60000) : number(raw.durationMin ?? raw.duration ?? raw.laufzeit),
-    spotifyUrl: text(raw.spotifyUrl ?? raw.spotify ?? raw.links?.spotify), appleMusicUrl: text(raw.appleMusicUrl ?? raw.appleMusic ?? raw.apple ?? raw.links?.appleMusic),
+    spotifyUrl: link(raw.spotifyUrl ?? raw.spotify ?? links.spotify),
+    appleMusicUrl: link(raw.appleMusicUrl ?? raw.appleMusic ?? raw.apple ?? links.appleMusic),
+    bookbeatUrl: link(raw.bookbeatUrl ?? raw.bookbeat ?? links.bookbeat),
+    amazonMusicUrl: link(raw.amazonMusicUrl ?? raw.amazonMusic ?? links.amazonMusic),
+    youtubeMusicUrl: link(raw.youtubeMusicUrl ?? raw.youTubeMusic ?? raw.youtubeMusic ?? links.youTubeMusic ?? links.youtubeMusic),
+    deezerUrl: link(raw.deezerUrl ?? raw.deezer ?? links.deezer),
+    amazonUrl: link(raw.amazonUrl ?? raw.amazon ?? links.amazon),
+    coverUrl: link(raw.coverUrl) || officialDdfCover || officialAppleCover,
+    coverSource: text(raw.coverSource) || (officialDdfCover ? 'dreifragezeichen.de' : officialAppleCover ? 'Apple Music' : ''),
+    coverSourceUrl: link(raw.coverSourceUrl) || (officialDdfCover ? link(links.dreifragezeichen) : officialAppleCover ? link(raw.appleMusicUrl ?? raw.appleMusic ?? raw.apple ?? links.appleMusic) : ''),
     characters: unique(asArray(raw.characters ?? raw.figuren ?? raw.roles ?? raw.sprechrollen).map((item) => typeof item === 'object' ? item.rolle || item.name || '' : item)), chapters: unique(asArray(raw.chapters ?? raw.kapitel).map((item) => typeof item === 'object' ? item.titel || item.title || '' : item)),
     featuredCharacters: unique(asArray(raw.featuredCharacters ?? raw.featured ?? raw.praegendeFiguren)),
     searchKeywords: unique(asArray(raw.searchKeywords ?? raw.keywords)),
+  };
+  episode.streamingLinks = {
+    spotify: episode.spotifyUrl,
+    appleMusic: episode.appleMusicUrl,
+    bookbeat: episode.bookbeatUrl,
+    amazonMusic: episode.amazonMusicUrl,
+    youtubeMusic: episode.youtubeMusicUrl,
+    deezer: episode.deezerUrl,
+    amazon: episode.amazonUrl,
   };
   episode.tags = deriveTags(episode);
   episode.year = releaseDate && !Number.isNaN(new Date(releaseDate).getTime()) ? new Date(releaseDate).getFullYear() : null;
@@ -69,6 +94,14 @@ function mergeEpisode(base,extra) {
     durationMin: extra.durationMin || base.durationMin,
     spotifyUrl: extra.spotifyUrl || base.spotifyUrl,
     appleMusicUrl: extra.appleMusicUrl || base.appleMusicUrl,
+    bookbeatUrl: extra.bookbeatUrl || base.bookbeatUrl,
+    amazonMusicUrl: extra.amazonMusicUrl || base.amazonMusicUrl,
+    youtubeMusicUrl: extra.youtubeMusicUrl || base.youtubeMusicUrl,
+    deezerUrl: extra.deezerUrl || base.deezerUrl,
+    amazonUrl: extra.amazonUrl || base.amazonUrl,
+    coverUrl: extra.coverUrl || base.coverUrl,
+    coverSource: extra.coverSource || base.coverSource,
+    coverSourceUrl: extra.coverSourceUrl || base.coverSourceUrl,
     characters: extra.characters?.length ? extra.characters : base.characters,
     chapters: extra.chapters?.length ? extra.chapters : base.chapters,
     featuredCharacters: base.featuredCharacters?.length ? base.featuredCharacters : extra.featuredCharacters,

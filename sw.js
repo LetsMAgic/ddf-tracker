@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ddf-tracker-16.1.0';
+const CACHE_NAME = 'ddf-tracker-16.2.0';
 const APP_SHELL = [
   './','./index.html','./style.css','./app.js','./manifest.json','./episodes-seed.js','./episodes.json',
   './core.js','./catalog.js','./recommendations.js','./playlists.js','./backup.js','./app-controller.js',

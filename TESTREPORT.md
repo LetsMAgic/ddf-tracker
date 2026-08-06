@@ -1,53 +1,69 @@
-# Testprotokoll – Folgen-Tracker 15.0
+# Testbericht – Version 16.2
 
-## Schwerpunkt
+Prüfdatum: 6. August 2026
 
-Version 15 wurde auf den schnellsten Kernablauf geprüft:
+## Ergebnis
 
-1. App öffnen
-2. ohne Scrollen „Passende Folge finden“ antippen
-3. eine verfügbare, standardmäßig ungehörte Empfehlung erhalten
-4. Folge direkt beim bevorzugten Musikdienst öffnen oder Details ansehen
+Die für Version 16.2 geänderten Dateien haben die durchgeführten statischen, Daten- und Browserprüfungen bestanden.
 
-## Automatisierte Prüfungen
+## Durchgeführte Prüfungen
 
-- JavaScript-Syntax von `app.js` und `sw.js`
-- 254 eindeutige Katalogeinträge
-- identischer Inhalt in `episodes.json` und `episodes-seed.js`
-- keine doppelten HTML-IDs
-- Startseiten-CTA im ersten sichtbaren Bereich bei 320 × 568, 390 × 844, 430 × 932 und 1024 × 900 Pixeln
-- kein horizontaler Seitenüberlauf auf den geprüften Breiten
-- Empfehlung ohne vorhandene Bewertungen
-- Empfehlung nach Import des echten Backups vom 05.08.2026
-- Übernahme von Apple Music als bevorzugtem Dienst aus dem Backup
-- Öffnen und Schließen der Empfehlungsdetails
-- Öffnen und Schließen des Hörprofils mit anschließender Scrollfreigabe
-- Folgen-Tab mit maximal 32 zunächst gerenderten Karten
-- Suche nach „Feuriges Auge“
-- Anzeige „Rama Sidri Rhandur · Gabriel White“ statt Tante Mathilda und Onkel Titus
-- Ranking-, Listen- und Einstellungsansicht nach Backup-Import
-- verschachtelter Ablauf Playlist → Folge → Folge schließen → Playlist schließen ohne verbleibenden Scroll-Lock
-- erster Tutorialschritt führt direkt über den Hauptbutton zur Empfehlung
-- keine JavaScript-Seitenfehler oder Konsolenwarnungen im Testablauf
+### JavaScript und Module
 
-## Empfehlungslogik
+- Syntaxprüfung aller JavaScript-Dateien mit Node.js
+- erfolgreicher Import des vollständigen Modulgraphen aus `core.js`, `catalog.js`, `recommendations.js`, `playlists.js`, `backup.js` und `app-controller.js`
+- Prüfung der neuen Einstellungen `cover` und aller sieben Streaminganbieter
+- Prüfung der Rückfallwerte bei ungültigen alten Einstellungen
 
-Geprüft wurden:
+### Katalog und Metadaten
 
-- Ausschluss nicht verfügbarer beziehungsweise noch unvollständiger Katalogeinträge
-- ungehörte Folgen als Standardpool
-- positive Gewichtung von Super- und Plus-Bewertungen
-- deutliche Abwertung ähnlicher Folgen bei Minus-Bewertungen
-- Berücksichtigung von Autor, Ära, Themen, Laufzeit, Community-Wertung und prägender Figur
-- Normalisierung sehr häufiger Merkmale, damit allgemeine Begriffe nicht jede Empfehlung dominieren
-- leichte Zufallsvariation innerhalb der besten Kandidaten statt immer derselben Folge
+- `episodes.json` und `episodes-seed.js` enthalten beide 254 identische, eindeutige Einträge
+- Normalisierung eines repräsentativen dreimetadaten-Datensatzes geprüft:
+  - deutsche Feldnamen
+  - Laufzeit in Millisekunden
+  - Kapitelobjekte
+  - Sprechrollen
+  - offizielle Cover-URLs
+  - Spotify, Apple Music, BookBeat, Amazon Music, Amazon, YouTube Music und Deezer
+- vorhandene kuratierte Titel und Rocky-Beach-Wertungen werden beim Zusammenführen nicht überschrieben
 
-## Prägende Figuren
+### HTML-Verknüpfungen
 
-Für alle 245 derzeit veröffentlichten Story-Einträge wurde mindestens eine fallprägende Figur hinterlegt. Allgemeine Standardrollen wie Justus, Peter, Bob, Erzähler, Tante Mathilda oder Onkel Titus werden nicht automatisch als Kartenlabel benutzt. Sie bleiben weiterhin über die vollständige Besetzung auffindbar und in der Detailansicht erhalten.
+- statische Element-IDs und die aus JavaScript angesprochenen Oberflächenelemente wurden gegengeprüft
+- neue Bedienelemente für Cover-Modus, Streamingauswahl und Statistikfreigabe sind vorhanden
 
-Die reine Musikveröffentlichung „Die Originalmusik“ besitzt bewusst keine Figurenangabe und wird nicht als Hörspiel empfohlen. Bei den noch unveröffentlichten Folgen 241–248 wurde kein Name erfunden.
+### Browser-Integration
 
-## Grenzen der Testumgebung
+Automatisierter Chromium-Test in einem mobilen Viewport von 390 × 844 Pixeln mit einem isolierten Testkatalog:
 
-Die Oberfläche wurde in Chromium mit simulierten mobilen Viewports und lokaler IndexedDB geprüft. Die endgültige Installation, der echte Speicherverbrauch und die Übergabe an die nativen Apple-Music-/Spotify-Apps müssen nach dem GitHub-Update einmal direkt in der iOS-PWA geprüft werden.
+- App startet ohne JavaScript- oder Konsolenfehler
+- Cover-Raster rendert zweispaltig
+- externe Cover werden lazy geladen
+- fehlende Cover behalten einen sichtbaren Platzhalter
+- Folgendetailansicht bündelt sechs alternative Anbieter unter „Weitere Anbieter“
+- bevorzugter Streamingdienst erscheint als Hauptaktion
+- Profilgrafik wird als gültige PNG-Datei erzeugt
+- erzeugte Testgrafik: 1080 × 1350 Pixel, rund 1,18 MB
+
+Der Browsertest verwendet absichtlich Mock-Metadaten und einen temporären In-Memory-Speicher, damit keine persönlichen Daten oder externen Dienste verändert werden.
+
+## Unverändert regressionsrelevant
+
+Die folgenden bereits in Version 16.1 vorhandenen Abläufe wurden durch die Änderungen nicht umgebaut:
+
+- Empfehlungslogik und Bewertungsmodell
+- Schnellbewertung samt Zurück-Funktion
+- Smart-Playlist-Vorschau vor Speichern oder Übernahme
+- Backup-Vorschau, Zusammenführen und Ersetzen
+- Warteschlange und persönliche Playlists
+- PWA-Updatebanner und Datenmigration
+
+## Grenzen der Prüfung
+
+Die Verfügbarkeit einzelner Cover- und Streaminglinks hängt von externen Anbietern ab und kann sich ändern. Nach der Veröffentlichung sollte deshalb zusätzlich ein kurzer Test auf dem tatsächlich genutzten iPhone erfolgen:
+
+1. Metadaten aktualisieren.
+2. Cover-Ansicht öffnen.
+3. eine Folge mit mehreren Anbietern öffnen.
+4. Statistikbild über das iOS-Teilen-Menü teilen.
+5. App einmal vollständig schließen und erneut offline öffnen.
